@@ -1,0 +1,96 @@
+{
+	"pages": [
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"enablePullDownRefresh":true
+			}
+		},{
+		"path": "pages/my/my",
+		"style": {
+			"navigationBarTitleText": "我的"
+		}
+		},{
+		"path": "pages/get_rice/get_rice",
+		"style": {
+			"navigationBarTitleText": "赚米粒"
+		}
+	},{
+		"path": "pages/bills/bills",
+		"style": {
+			"navigationBarTitleText": "订单",
+			"enablePullDownRefresh": true
+		}
+	}
+	,{
+            "path" : "pages/navigation/navigation_all",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+        },{
+			"path": "pages/current_book_page/current_book_page"
+		}
+        ,{
+            "path" : "components/searchPage/searchPage",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        },		{
+		    "path" : "pages/feedback/feedback",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false
+		    }
+		    
+		}
+        ,{
+            "path" : "pages/category_book/category_book",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        },
+		{
+		    "path" : "pages/service_stop_page/service_stop_page",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false
+		    }
+		}
+    ],
+	"tabBar":{
+		"list":[{
+			"pagePath":"pages/home/home",
+			"text":"首页",
+			"iconPath":"./static/icons/home.png",
+			"selectedIconPath":"static/icons/home_active.jpg"
+		},{
+			"pagePath":"pages/bills/bills",
+			"text":"书架",
+			"iconPath":"./static/icons/bills.png",
+			"selectedIconPath":"./static/icons/bills_active.jpg"
+		},{
+			"pagePath":"pages/my/my",
+			"text":"我的",
+			"iconPath":"static/icons/my.png",
+			"selectedIconPath":"static/icons/my_active.jpg"
+		}]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8",
+		"navigationStyle":"custom"
+	}
+}
