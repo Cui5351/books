@@ -76,7 +76,7 @@
 			"selectedIconPath":"static/icons/home_active.jpg"
 		},{
 			"pagePath":"pages/bills/bills",
-			"text":"书架",
+			"text":"收藏",
 			"iconPath":"./static/icons/bills.png",
 			"selectedIconPath":"./static/icons/bills_active.jpg"
 		},{

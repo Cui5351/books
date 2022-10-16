@@ -22,7 +22,8 @@
 			</swiper>
 			<view class="advertisement" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}">
 <uni-notice-bar show-icon scrollable style="width: 100%"
-				text="最近唐家三少的<斗罗大陆>非常火爆" />
+		
+				text="小 程 序 2.0 终 于 跟 大 家 见 面 啦 ! 大 家 若 在 使 用 小 程 序 中 途 遇 到 问 题 ,  可 以 在 我的 -> 小程序 反 馈 进 行 反 馈 哟 !" />
 			</view>
 		</view>
 		<view class="fixed" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}">
@@ -34,7 +35,15 @@
 			<uni-icons type="bars" size="25"></uni-icons>
 			</view>
 		</view>
-		<view class="bill" :style="{height:bill_height+'rpx'}">
+		<view class="bill" v-if='to_hid!==1'>
+			<view v-for="(item,index) in to_hid!=1?10:0" :key="index" style="justify-content: center;height:80px;display: flex;margin-top: 10px;background-color: white;" @click="show_dog_info(item)">
+				<view style="width:70px;height:70px;">
+					<image :src="'https://www.mynameisczy.asia/dog_collection/'+'dog'+item+'.jpeg'" style="width: 100%;height: 100%;"></image>
+				</view>
+				<view style="display: flex;flex-grow: 1;justify-content: center;align-items: center;">查看狗子{{item}}的介绍</view>
+			</view>
+		</view>
+		<view class="bill" :style="{height:bill_height+'rpx'}" v-if='to_hid==1'>
 			<view class="store_infos" :style="{height:goods_category/4+50+'px'}" v-for="(item,index) in store_infos" :key="index"  >
 				<view  @click.stop="toggle(item)" :style="{maxWidth:goods_category/4+'px',minWidth:goods_category/4+'px',maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
 					<image :src="'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
@@ -102,9 +111,46 @@
 		},
 		mounted() {
 			uni.current_this2=this
+			uni.request({
+				url:'https://www.mynameisczy.asia:5000/small_program_state',
+				method:'POST',
+				data:{
+					small_program_name:'book_small_program'
+				},success(value) {
+					if(value.data.value==0){
+						uni.reLaunch({
+							url:'/pages/service_stop_page/service_stop_page',
+						})
+					}else if(value.data.value==2){
+						uni.current_this2.to_hid=2
+						return
+					}
+				},fail(e) {
+					// 加载失败
+					if(!value.data.value){
+						uni.reLaunch({
+							url:'/pages/service_stop_page/service_stop_page',
+							fail(e) {
+								console.log('fail',e)
+							}
+						})
+					}
+				}
+			})
 			uni.showLoading({
 				title:'数据加载中'
 			})			
+			uni.request({
+				method:'POST',
+				url:'https://www.mynameisczy.asia:5351/getCategory',
+				success(value) {
+					let arr=value.data.value.map(item=>item.book_type)
+					uni.current_this2.list_btn.push(...arr)
+				},fail() {
+					uni.current_this2.list_btn.push(...['语文','数学','英语','计算机基础','c语言','计算机网络基础'])
+				}
+			})
+			// list_btn.push()
 			const store=useStore()
 			// 查看用户是否登录
 			if(store.getters.login_state){
@@ -126,7 +172,6 @@
 			}
 			// 拿到用户的收藏(后会触发watch的监听)
 			if(store.getters.login_state){
-				console.log('登录了');
 				store.dispatch("getBookshelf")
 			}
 		},
@@ -165,6 +210,7 @@
 			let old=reactive({
 				scrollTop:0
 			})
+			let to_hid=ref(1)
 			let load_state=ref(0)
 			const store=useStore()
 			let skip=ref(0)
@@ -199,7 +245,10 @@
 			let refresh_info=ref('上拉显示更多')
 			
 		function getBookList(){
-			if(this.skip>=50){
+			if(this.to_hid.value==2){
+				return
+			}
+			if(skip.value>=50){
 				uni.current_this2.refresh_info="已经加载不了更多了"
 				uni.current_this2.refresh_state_info=''
 				return
@@ -259,6 +308,7 @@
 						uni.current_this2.refresh_state_info=''
 					}
 				},fail(e) {
+					uni.current_this2.to_hid=0
 					uni.hideLoading()
 					load_state.value=0
 					uni.current_this2.refresh_info=e
@@ -350,7 +400,7 @@
 			let goods_category=ref(info.screenHeight/1.6)
 			// 每获取一次数据，然后就让其增加
 			let bill_height=ref(0)
-			let list_btn=reactive(['仙侠','玄幻','修真','科幻','言情','都市'])
+			let list_btn=reactive([])
 			let fixed=ref(header_height.value*0.9)
 			let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			
@@ -377,12 +427,25 @@
 				}
 				
 				function category_list(item){
+					if(to_hid.value==0){
+						uni.showToast({
+							title:"同学,要加油哦！"
+						})
+						return
+					}
 					uni.navigateTo({
 						url:'/pages/category_book/category_book?title='+item+'&book_wh='+goods_category.value/4
 					})
 				}
-			
-			return {...toRefs(store.state),load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
+			function show_dog_info(item){
+				// uni.showToast({
+					// title:'这是狗子'+item+',嗷嗷嗷',
+					// icon:'none'
+				// })
+				let arr=['柴犬是体型中等并且又最古老的日本犬。柴犬能够应付陡峭的丘陵和山脉的斜坡，拥有灵敏的感官','它们是非常古老的犬种,基因和狼非常相近,相貌也酷似狼,','西伯利亚雪橇犬是原始的古老犬种,主要生活在在西伯利亚东北部、格陵兰南部。哈士奇名字是源自其独特的嘶哑叫声。','外貌：脚步轻快自如，动作优美。犬身适度紧凑，毛量丰，竖耳，尾如毛刷，其典型步态特征为平稳、轻松','性情:友好、温和但不失机警,性格开朗。既不会表现出护卫犬的强烈占有欲,也不会对陌生人产生过度怀疑或攻击其它犬只']
+				uni.current_this2.toggle({book_introduce:'这是狗子'+item+'号'+arr[Math.round(Math.random()*5)]})
+			}
+			return {...toRefs(store.state),show_dog_info,to_hid,load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
 		}
 	}
 </script>

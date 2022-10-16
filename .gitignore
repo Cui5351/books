@@ -1,6 +1,6 @@
-# nodejs环境
+# node_modules
 node_modules/
 
-# uni组件
+# uni-app
+unpackage/
 uni_modules/
-unpackage

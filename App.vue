@@ -11,9 +11,13 @@
 					small_program_name:'book_small_program'
 				},success(value) {
 					// 登录失败
-					if(!value.data.value){
+					if(value.data.value==0){
 						uni.reLaunch({
 							url:'/pages/service_stop_page/service_stop_page',
+						})
+						uni.showToast({
+							title:'bug修复当中,请耐心等待',
+							icon:'none'
 						})
 					}
 				},fail(e) {
@@ -42,7 +46,7 @@
 				withShareTicket:true,
 				//设置下方的Menus菜单，才能够让发送给朋友与分享到朋友圈两个按钮可以点击
 				menus:["shareAppMessage","shareTimeline"]
-			})
+			});
 			
 		},
 	}

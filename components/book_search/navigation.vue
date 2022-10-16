@@ -9,7 +9,7 @@
 			
 		<view class="content" v-if="head_toggle" :style="{height:head_height*1.2+'px'}">
 			<view>
-				<uni-icons size="25" type="location-filled"></uni-icons><text style="font-size: 18px;">源暮书城</text>
+				<uni-icons size="25" type="location-filled"></uni-icons><text style="font-size: 18px;">梦之源暮</text>
 			</view>
 		</view>
 		

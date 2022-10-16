@@ -1,9 +1,11 @@
 <template>
 		<navigation>
-			我的书架
+			我的收藏
 		</navigation>
 	<view class="container" :style="{marginTop:container_margin+10+'px'}">
-		<book_list :store_infos="store_infos" :store='store' v-if="store_infos.length"></book_list>
+		<scroll-view  v-if="store_infos.length" scroll-y="true" :style="{height:screenHeight-(container_margin+30)+'px'}">
+			<book_list :store_infos="store_infos" :store='store'></book_list>
+		</scroll-view>
 		<h1 v-if="!store_infos.length" style="text-align: center;color:gray;font-size: 18px;">暂无</h1>
 	</view>
 </template>
@@ -33,7 +35,7 @@
 					search(item)
 				})
 			},{deep:true,immediate:true})
-			// 拿到收藏
+			// 拿到收藏x
 			const {request_book_info}=hooks()
 			
 			function search(t){
@@ -66,9 +68,9 @@
 					}
 				})
 			}
-			
+			let screenHeight=reactive(uni.getSystemInfoSync().windowHeight)
 			let container_margin=ref(uni.getMenuButtonBoundingClientRect().height*1.7);
-			return {user_bookshelf,search,store,store_infos,container_margin}
+			return {user_bookshelf,search,store,store_infos,container_margin,screenHeight}
 		},
 		methods: {
 		}
