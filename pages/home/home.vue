@@ -1,8 +1,9 @@
 <template>
+	<link rel="preload" href="AaWangCaiZhaoPaiTi.woff2" as="font" type="font/woff2" crossorigin>
 	<!-- head高度：100rpx -->
 		<navigation-header  :book_wh="goods_category/4" :head_height='header_height*0.4' :head_height_child='head_height_child' :state='header_state'></navigation-header>
 		<view @click.stop="goto1" class="gotoback" :style="{left:left_distance+'%'}">
-			<uni-icons type="arrow-up" size="30"></uni-icons>
+			<uni-icons type="arrow-up" color="white" size="30"></uni-icons>
 		</view>
 		<uni-popup ref="popup" background-color="#fff">
 			<view class="popup-content" >
@@ -10,25 +11,25 @@
 				<text>{{content}}</text>
 			</view>
 		</uni-popup>
-	<scroll-view class="container" scroll-y='true' :style="{minHeight:container-70+'px',marginTop:head_height_child+18+'px'}" @scrolltolower='scroll_fun2' @scroll='scroll_fun' :scroll-top="scroll_top">
+	<scroll-view class="container" scroll-y='true' :style="{minHeight:container-70+'px',marginTop:head_height_child*1.4+'px'}" @scrolltolower='scroll_fun2' @scroll='scroll_fun' :scroll-top="scroll_top">
 		<view class="header" :style="{minHeight:header_height+'rpx',maxHeight:header_height+'rpx'}">
 			<search head_width='100' :book_wh="goods_category/4" style="flex-grow: 1;" :head_height_child="head_height_child" :head_height='header_height*0.4'></search>
 		</view>
 		<view class="goods_category" :style="{minHeight:goods_category+'rpx',maxHeight:goods_category+'rpx'}">
 			<swiper class="list" autoplay indicator-dots circular interval="2000" previous-margin="40px" next-margin="40px">
-				<swiper-item v-for="a in 8" :key='a' @click.stop="no_develop" style="max-height: 100%;min-height:100%;display: flex;justify-content: center;align-items: center">
+				<swiper-item v-for="a in 8" :key='a' @click.stop="toggle_wallpaper_page" style="max-height: 100%;min-height:100%;display: flex;justify-content: center;align-items: center">
 					<image :src="'http://mynameisczy.asia/play_loop/'+a+'.jpg'" mode='aspectFill'  lazy-load="true"></image>
 				</swiper-item>
 			</swiper>
-			<view class="advertisement" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}">
-<uni-notice-bar show-icon scrollable style="width: 100%"
+			<!-- <view class="advertisement" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}"> -->
+<uni-notice-bar show-icon scrollable style="width: 100%;"
 		
 				text="小 程 序 2.0 终 于 跟 大 家 见 面 啦 ! 大 家 若 在 使 用 小 程 序 中 途 遇 到 问 题 ,  可 以 在 我的 -> 小程序 反 馈 进 行 反 馈 哟 !" />
-			</view>
+			<!-- </view> -->
 		</view>
 		<view class="fixed" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}">
 			<scroll-view scroll-x="true" class="other">
-				<view type="default" @click.stop="category_list(a)" v-for="a in list_btn" :key='a' class="fixed_btn" :style="{minHeight:fixed*0.7+'rpx',lineHeight:fixed*0.7+'rpx',backgroundColor: 'white',display: 'inline-block',width:info.windowWidth/4+'px', marginRight:10+'px',borderRadius:10+'px',textAlign: 'center',color:'rgb(77,78,79)'}">{{a}}
+				<view type="default" @click.stop="category_list(a)" v-for="a in list_btn" :key='a' :style="{minHeight:fixed*0.7+'rpx',lineHeight:fixed*0.7+'rpx',backgroundColor: 'white',display: 'inline-block',width:info.windowWidth/4+'px', marginRight:10+'px',borderRadius:10+'px',textAlign: 'center',color:'rgb(77,78,79)'}">{{a}}
 				</view>
 			</scroll-view>
 			<view class="flex_config" style="min-width:30px;">
@@ -323,7 +324,7 @@
 				if(store.getters.login_state<=0){
 					uni.showToast({
 						icon:'error',
-						title:'清先登录'
+						title:'请先登录'
 					})
 					return
 				}
@@ -410,6 +411,11 @@
 					title:'此功能暂时未开放'
 				})
 			}
+			function toggle_wallpaper_page(){
+				uni.navigateTo({
+					url:"/pages/wallpaper/wallpaper"
+				});
+			}
 				function fav_book(book){
 					console.log('收藏',book.book_name)
 					// 等加载
@@ -422,7 +428,7 @@
 					else
 						uni.showToast({
 							icon:'error',
-							title:'清先登录'
+							title:'请先登录'
 						})
 				}
 				
@@ -445,12 +451,13 @@
 				let arr=['柴犬是体型中等并且又最古老的日本犬。柴犬能够应付陡峭的丘陵和山脉的斜坡，拥有灵敏的感官','它们是非常古老的犬种,基因和狼非常相近,相貌也酷似狼,','西伯利亚雪橇犬是原始的古老犬种,主要生活在在西伯利亚东北部、格陵兰南部。哈士奇名字是源自其独特的嘶哑叫声。','外貌：脚步轻快自如，动作优美。犬身适度紧凑，毛量丰，竖耳，尾如毛刷，其典型步态特征为平稳、轻松','性情:友好、温和但不失机警,性格开朗。既不会表现出护卫犬的强烈占有欲,也不会对陌生人产生过度怀疑或攻击其它犬只']
 				uni.current_this2.toggle({book_introduce:'这是狗子'+item+'号'+arr[Math.round(Math.random()*5)]})
 			}
-			return {...toRefs(store.state),show_dog_info,to_hid,load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
+			return {...toRefs(store.state),toggle_wallpaper_page,show_dog_info,to_hid,load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
 		}
 	}
 </script>
 
 <style lang="less" scoped>
+@import url('@/general.less');
 	.gotoback{
 		display:flex;
 		flex-direction:column;
@@ -461,7 +468,7 @@
 		z-index:999;
 		transition: 0.5s ease;
 		transform: translateX(-100%);
-		background-color: rgb(248,216,102);
+		background-color: @btn_color;
 		border-radius:10px;
 		font-weight:bold;
 	}
@@ -513,7 +520,7 @@
 				align-items: center;
 		}
 		.payment:active{
-			background: rgb(248,216,102);
+			background: @background;
 			color:white;
 		}
 		.bill{

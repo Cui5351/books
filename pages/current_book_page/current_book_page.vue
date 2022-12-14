@@ -1,7 +1,7 @@
 <template>
 	<books-page-navigation :head_height_child="head_height_child" :current_book_passage_name="current_book.passage_name"
 		:book_storage_array="book_storage_array" :color="background_color"></books-page-navigation>
-	<book_page_edit_bar :total_passage='total_passage' :background_color="background_color" :font_size="font_size"
+	<book_page_edit_bar :timer='timer' :auto_scroll_fn='auto_scroll_fn' :total_passage='total_passage' :background_color="background_color" :font_size="font_size"
 		:toggle_passage="toggle_passage" :set_index="set_index" :show_e="show_e" :current_book="current_book"
 		:goTop="goTop" :book_storage_array="book_storage_array" :book_name="book_name"></book_page_edit_bar>
 	<scroll-view @touchend="touchend" @touchstart='touchstart' @touchmove='touch'
@@ -75,7 +75,7 @@
 					// 默认为1
 				} else {
 					uni.hideLoading()
-					uni.current_this7.content = "暂时未开放"
+					uni.current_this7.content = "暂时未开放";
 				}
 			}).catch(e => {
 				uni.hideLoading()
@@ -133,8 +133,12 @@
 		},
 		methods: {
 			scroll: function(e) {
-				this.show_e = 0
+				this.scrollHeight=e.detail.scrollHeight
+				if(this.show_e){
+					this.show_e = 0
+				}
 				this.old.scrollTop = e.detail.scrollTop
+				this.scrollTop = this.old.scrollTop
 			},
 			goto_after: function() {
 				console.log('goto_after');
@@ -152,7 +156,6 @@
 			},
 			//章节信息
 			toggle_passage: function(book) {
-				console.log(book,'book');
 				uni.showLoading({
 					title: '加载中'
 				})
@@ -256,8 +259,12 @@
 			}
 		},
 		setup() {
+			let scrollHeight=ref(0)
 			let total_passage = reactive({
 				count: 0
+			})
+			let timer=reactive({
+				id:0
 			})
 			let show_e = ref(0)
 			let background_color = reactive({
@@ -284,11 +291,28 @@
 			let hid = ref(true)
 			let touch_start = ref(0)
 
-
 			function hidden_header_bar() {
 				show_e.value = show_e.value ? 0 : 1
 			}
-
+			function auto_scroll_fn(flag,speed){
+				if(flag){
+					timer.id=setInterval(()=>{
+						scrollTop.value+=1;
+						console.log('定时器还在执行!!');
+						console.log(scrollTop.value,scrollHeight.value-1000);
+						if(scrollTop.value>=scrollHeight.value-1000){
+							console.log('close 定时器!');
+							clearInterval(timer.id)
+							timer.id=0
+							return;
+						}
+					},speed)
+				}else{
+					clearInterval(timer.id)
+					timer.id=0
+				}
+			}
+			
 			function set_index(value) {
 				if (value != -1) {
 					current_book.passage_value += 1
@@ -299,7 +323,7 @@
 				}
 			}
 			let touch_state = ref(1)
-			let after_touch = ref(0)
+			let after_touch = ref(0);
 
 			function touch(e) {
 				if (!touch_state.value) {
@@ -328,13 +352,16 @@
 			}
 
 			function touchend() {
-				console.log('end');
+				// 每次触摸后结束	
+				clearInterval(timer.id)
+				timer.id=0
 				touch_state.value = 1
 			}
 
 
 			return {
 				after_touch,
+				scrollHeight,
 				total_passage,
 				after_scrollTop,
 				touchend,
@@ -352,7 +379,9 @@
 				head_height_child,
 				show_e,
 				book_name,
-				set_index
+				set_index,
+				timer,
+				auto_scroll_fn
 			}
 		}
 	}

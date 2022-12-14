@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'AaWangCaiZhaoPaiTi';
+    src: url('@/static/font/AaWangCaiZhaoPaiTi.woff2') format('woff2'),
+        url('@/static/font/AaWangCaiZhaoPaiTi.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+

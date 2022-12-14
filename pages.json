@@ -6,15 +6,42 @@
 				"navigationBarTitleText": "首页",
 				"enablePullDownRefresh":true
 			}
-		},{
+		},
+		{
+					"path" : "pages/base_info/base_info",
+					"style" :                                                                                    
+					{
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+					
+				}
+		    ,
+		{
+		    "path" : "pages/sign_in_today/sign_in_today",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false
+		    }
+		},
+		{
+		    "path" : "pages/other_page/other_page",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false
+		    }
+		},
+		{
 		"path": "pages/my/my",
 		"style": {
 			"navigationBarTitleText": "我的"
 		}
 		},{
-		"path": "pages/get_rice/get_rice",
+		"path": "pages/wallpaper/wallpaper",
 		"style": {
-			"navigationBarTitleText": "赚米粒"
+			"navigationBarTitleText": "精美壁纸"
 		}
 	},{
 		"path": "pages/bills/bills",
@@ -67,6 +94,15 @@
 		        "enablePullDownRefresh": false
 		    }
 		}
+        ,{
+            "path" : "pages/inner_page/inner_page",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"tabBar":{
 		"list":[{
@@ -74,7 +110,8 @@
 			"text":"首页",
 			"iconPath":"./static/icons/home.png",
 			"selectedIconPath":"static/icons/home_active.jpg"
-		},{
+		},
+		{
 			"pagePath":"pages/bills/bills",
 			"text":"收藏",
 			"iconPath":"./static/icons/bills.png",

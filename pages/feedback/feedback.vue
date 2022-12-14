@@ -14,7 +14,7 @@
 						</text>
 						({{item.maxL-item.content.length}}字)
 					</view>
-					<view class="btn" @click="submit(item)">
+					<view class="btn2" @click="submit(item)">
 						提交
 					</view>
 				</view>
@@ -29,7 +29,8 @@
 </template>
 
 <script>
-	import {ref,reactive} from 'vue'
+	import {ref,reactive,computed} from 'vue'
+	import {useStore} from 'vuex'
 	import navigation_all from '../navigation/navigation_all.vue'
 	export default {
 		name:'feedback',
@@ -39,71 +40,58 @@
 		mounted() {
 			this.audio.play()
 			// 这里的this是我打算在页面关闭后停止播放，但是页面虽然切换了(Beforedestroy)，但好像不会摧毁
-			uni.current_this6=this
-			uni.getStorage({
-				key:'answer',
-				success(e) {
-					if(!e.data.author_answer)
-						uni.current_this6.person[0].after_answer='暂无消息'
-					else
-						uni.current_this6.person[0].after_answer=e.data.author_answer
-					
-					if(!e.data.data_provide_answer)
-						uni.current_this6.person[1].after_answer='暂无消息'						
-					else
-						uni.current_this6.person[1].after_answer=e.data.data_provide_answer
-					
-				}
-			})
 		},
 		beforeUnmount() {
 			this.audio.stop()
 		},
 		setup() {
+			let store=useStore()
 			let audio=reactive(uni.getBackgroundAudioManager())
 			audio.src="https://www.mynameisczy.asia/audio/小糊涂.mp3"
 			audio.title="《熊出没》小糊涂"
 			let head_height=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
-			console.log(head_height.value);
 			let body_height=ref(uni.getSystemInfoSync().windowHeight/1.4)
 			let person=reactive([{
 				name:'author',
 				maxL:35,
 				content:'',
 				type:0,
-				after_answer:''
+				after_answer:computed(()=>store.getters.author_answer)
 			},{
 				name:'小说提供猿',
 				maxL:35,
-				content:'',
+				content:'',	
 				type:0,
-				after_answer:''
+				after_answer:computed(()=>store.getters.data_provide_answer)
 			}])
 			function submit(item){
 				if(!item.content.length||item.content.length<3){
 					uni.showToast({
 						icon:'error',
-						title:'内容不能小于3'
+						title:'内容不小于3'
 					})
 					return
 				}
 					
 				// 拿到用户信息
-				let data=uni.getStorageSync('user_info')
-				if(!data){
+				let login_state=store.getters.login_state
+				if(!login_state){
+					uni.showToast({
+						icon:'error',
+						title:'请重新登录'
+					})
 					return
 				}
-					let {nickName,avatarUrl,gender,openid}=data
 						uni.request({
 							url:'https://www.mynameisczy.asia:5351/updateFeedback',
 							method:'POST',
 							data:{
-								nickName:nickName,
-								avatarUrl:avatarUrl,
-								gender:gender,
+								nickName:store.getters.user_name,
+								avatarUrl:store.getters.user_avatar,
+								gender:store.getters.user_gender,
 								feedback_to:item.name,
 								content:item.content,
-								openid:openid
+								openid:store.getters.user_openid
 							},
 						}).then(e=>{
 							uni.showToast({
@@ -116,7 +104,6 @@
 								icon:'error',
 								title:'发送失败~'
 							})	
-							item.content=''
 						})
 					
 					return
@@ -139,6 +126,7 @@
 </script>
 
 <style scoped lang="less">
+@import url('@/general.less');
 	.container {
 		margin-top:0;
 		font-size: 14px;
@@ -181,18 +169,19 @@
 				&>.title{
 					font-size:21px;
 					display: flex;
+					align-items: center;
 					justify-content:space-between;
-				&>.btn{
-					&:active{
-						color: rgb(26,193,25);
-					}
-						font-size:18px;
-						padding:2px 10px;
-						box-sizing: border-box;
-						background-color: rgb(26,193,25);
-						color:white;
-						border-radius: 10px;
-				}
+				// &>.btn{
+				// 	&:active{
+				// 		color: rgb(26,193,25);
+				// 	}
+				// 		font-size:18px;
+				// 		padding:2px 10px;
+				// 		box-sizing: border-box;
+				// 		background-color: rgb(26,193,25);
+				// 		color:white;
+				// 		border-radius: 10px;
+				// }
 				}
 			}
 		}

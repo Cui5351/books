@@ -1,9 +1,15 @@
 import {createStore} from 'vuex'
-
 const state={
 	login_state:0,
 	openid:'',
-	fav_book:'[]'
+	fav_book:'[]',
+	name:'',
+	gender:'暂无',
+	portraitUrl:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+	score:'0',
+	telephone:'无',
+	author_answer:'',
+	data_provide_answer:''
 }
 	// 查看用户是否登录
 	uni.getStorage({
@@ -11,6 +17,19 @@ const state={
 	success(e){
 		state.login_state=1
 		state.openid=e.data.openid
+		state.name=e.data.name
+		state.gender=e.data.gender
+		state.portraitUrl=e.data.portraitUrl
+		state.score=e.data.score
+		console.log(e.data,'data');
+		uni.getStorage({
+			key:'answer',
+			success(e) {
+				state.author_answer=e.data.author_answer
+				state.data_provide_answer=e.data.data_provide_answer
+				console.log(e.data,'answer');
+			}
+		})
 	},fail(){
 		state.login_state=0
 	}})
@@ -84,6 +103,11 @@ const mutations={
 		if(value==0){
 			state.openid=''
 			state.fav_book='[]'
+			state.name=''
+			state.portraitUrl="https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+			state.telephone='暂无'
+			state.score='0'
+			state.gender='未知'
 		}
 		state.login_state=value
 	}
@@ -116,6 +140,30 @@ const getters={
 	},
 	login_state(state){
 		return state.login_state
+	},
+	user_name(state){
+		return state.name
+	},
+	user_avatar(state){
+		return state.portraitUrl
+	},
+	user_gender(state){
+		return state.gender
+	},
+	user_score(state){
+		return state.score
+	},
+	user_telephone(state){
+		return state.telephone
+	},
+	user_openid(state){
+		return state.openid
+	},
+	author_answer(state){
+		return state.author_answer
+	},
+	data_provide_answer(state){
+		return state.data_provide_answer
 	}
 }
 

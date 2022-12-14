@@ -8,15 +8,12 @@
 </template>
 
 <script>
+	import {ref,reactive,watch} from 'vue';
 	export default {
-		props:['font_size','passage_height','slider_change'],
-		data() {
-			return {
-				
+		props:['font_size','timer','passage_height','slider_change','auto_scroll_fn','timer'],
+		setup(props) {
+			return{
 			}
-		},
-		methods: {
-			
 		}
 	}
 </script>
@@ -31,11 +28,27 @@
 			flex-grow: 1;
 		}
 		box-sizing: border-box;
+	&>.auto_scroll{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		&>slider{
+			width: 100%;
+			padding:0 10px;
+			box-sizing: border-box;
+		}
+	}
 	&>.font_size{
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		&>slider{
+			width: 100%;
+			padding:0 10px;
+			box-sizing: border-box;
+		}
 		&>view{
 			display: flex;
 			max-height:50%;

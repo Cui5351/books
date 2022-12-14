@@ -14,7 +14,7 @@
 				<!-- transform:`translateY(${choose!==0?'-100%':'100%'})`, -->
 				<view class="copmonent" :style="{background:background_color.color?'rgb(241,229,201)':'#1A1A1A',color:background_color.color?'black':'white'}">
 					<book_directory :total_p='total_passage' :background_color='background_color' v-show='choose==1' :window_height="window_height" :book_name='book_name' :passage_height="passage_height" :directory_list="directory_list" :toggle_passage='toggle_passage'></book_directory>
-					<book_setup :font_size='font_size' :slider_change='slider_change' :passage_height='passage_height' v-show="choose==2"></book_setup>
+					<book_setup :timer='timer' :auto_scroll_fn="auto_scroll_fn" :font_size='font_size' :slider_change='slider_change' :passage_height='passage_height' v-show="choose==2"></book_setup>
 				</view>
 				<view @click="set_index(-1)" v-show='choose==0'>上一章</view>
 				<view @click="set_index(1)" v-show='choose==0'>下一章</view>
@@ -22,7 +22,7 @@
 			<view class="choose">
 				<view @click="show_choose(1)">目录</view>
 				<view @click="toggle_background">{{background_color.color?'黑夜':'白天'}}</view>
-				<view @click="show_choose(2)">设置</view>
+				<view @click="show_choose(2)" >设置</view>
 			</view>
 			
 <!-- 			<view class="color">
@@ -47,7 +47,7 @@
 		components:{
 			book_directory,book_setup
 		},
-		props:['show_e','total_passage',"current_book","book_storage_array","book_name",'toggle_passage','set_index','font_size','background_color'],
+		props:['timer','show_e','auto_scroll_fn','total_passage',"current_book","book_storage_array","book_name",'toggle_passage','set_index','font_size','background_color'],
 		mounted() {
 			uni.current_this=this
 			// 查看本地目录

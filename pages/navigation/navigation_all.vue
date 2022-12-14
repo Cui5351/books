@@ -36,6 +36,7 @@
 </script>
 
 <style lang="less" scoped>
+@import url('@/general.less');
 .head{
 	position: fixed;
 	top:0;
@@ -43,7 +44,7 @@
 	left:0;
 	width:100%;
 	transition:0.5s ease;
-	background-color: rgb(248,216,102);
+	background-color: @background;
 }
 .status_bar{
 	height:var(--status-bar-height);

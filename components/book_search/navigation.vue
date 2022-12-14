@@ -1,15 +1,15 @@
 <template>
-	<view class="head" :style="{background:head_toggle?'rgb(248,216,102)':'white',height:head_height*1.2+25+'px'}">
+	<view class="head" :style="{background:head_toggle?'':'white',height:head_height*1.2+25+'px'}">
 		<view class="status_bar">
 		</view>
 		
 		<view v-if="!head_toggle" :style="{height:head_height*1.2+'px',boxSizing:'border-box'}" class="search_container">
 			<search head_width="70" :head_height_child="head_height_child" :book_wh="book_wh" :head_height="head_height" height="70%"></search>
 		</view>
-			
 		<view class="content" v-if="head_toggle" :style="{height:head_height*1.2+'px'}">
 			<view>
-				<uni-icons size="25" type="location-filled"></uni-icons><text style="font-size: 18px;">梦之源暮</text>
+				<image style="position: absolute;width: 100%;height: 100%;opacity: 0.9;top:0;left: 0;z-index:1;" mode="bottom right" src="https://img95.699pic.com/photo/40007/8651.jpg_wh300.jpg"></image>
+				<uni-icons size="25" type="location-filled" style='position: relative;z-index: 2;'></uni-icons><text style="font-size: 18px;position: relative;z-index: 2;">梦之源暮</text>
 			</view>
 		</view>
 		
@@ -35,6 +35,7 @@
 </script>
 
 <style scoped lang="less">
+@import url('@/general.less');
 .head{
 	position: fixed;
 	top:0;

@@ -3,7 +3,7 @@
 			<view >
 				<uni-icons size="20" color="gray" class="searchIcon" type="search"></uni-icons>
 				<view type="text" class="txt" placeholder="请输入书名或作者名">{{suggest_book}}</view>
-				<button :style="{fontSize:size+'rpx'}">搜索</button>
+				<button :style="{fontSize:size+'rpx',color:'white'}">搜索</button>
 			</view>
 		</view>
 </template>
@@ -28,7 +28,6 @@
 							url:'/pages/service_stop_page/service_stop_page',
 						})
 					}
-					console.log(value,'value');
 					if(value.data.value==2)
 						uni.current_this_1.to_hid=2
 				},fail(e) {
@@ -90,6 +89,7 @@
 </script>
 
 <style lang="less">
+@import url('@/general.less');
 .search{
 	padding:0 15px;
 	box-sizing: border-box;
@@ -103,7 +103,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border:1px solid rgb(248,212,101);
+		border:1px solid @border;
 		border-radius:40rpx;
 		// border-bottom-right-radius:10px;
 		&>view,button{
@@ -134,7 +134,7 @@
 			padding:0;
 			width:25%;
 			height:100%;
-			background-color: rgb(248,212,101);
+			background-color: @btn_color;
 			border-radius:40rpx;
 			display: flex;
 			justify-content: center;
