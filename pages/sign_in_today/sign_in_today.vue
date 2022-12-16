@@ -12,15 +12,8 @@
 						我的积分:{{score}}
 					</view>
 				</view>
-				<view class="week">
-					<view class="" v-for="(item,index) in 7" :key="index">
-						<view class="">
-							<image style="width: 50px;height:50px;" src="https://www.mynameisczy.asia/svgs/sign_manage.svg" mode=""></image>
-						</view>
-						<view class="">
-							星期
-						</view>
-					</view>
+				<view class="show_day">
+					
 				</view>
 				<view class="sgin_in">
 					<view class="flex_center">
@@ -152,12 +145,13 @@
 <style lang="less">
 @import url("@/general.less");
 .container{
-padding:0 20px;
+padding:10px 20px;
 background-color: white;
 box-sizing: border-box;
 height:100%;
 &>.week{
 	display: flex;
+	margin-top:20px;
 	justify-content: space-around;
 }
 &>.user_info{
@@ -167,10 +161,17 @@ height:100%;
 }
 .sgin_in{
 	display: flex;
+	margin-top:200px;
 	flex-direction: column;
 }
 .sign_icon{
 	width: 100px;
 	height: 100px;
+}
+.show_day{
+	height:100px;
+	border-radius: 10px;
+	box-shadow:-2px 2px 10px 2px gray;
+	background-color:rgb(79,70,229);
 }
 </style>

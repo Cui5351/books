@@ -3,7 +3,7 @@
 	<!-- head高度：100rpx -->
 		<navigation-header  :book_wh="goods_category/4" :head_height='header_height*0.4' :head_height_child='head_height_child' :state='header_state'></navigation-header>
 		<view @click.stop="goto1" class="gotoback" :style="{left:left_distance+'%'}">
-			<uni-icons type="arrow-up" color="white" size="30"></uni-icons>
+			<image src="https://www.mynameisczy.asia/rabbit/arrow_top.svg" style="width:30px;height: 50px;"></image>
 		</view>
 		<uni-popup ref="popup" background-color="#fff">
 			<view class="popup-content" >
@@ -468,7 +468,6 @@
 		z-index:999;
 		transition: 0.5s ease;
 		transform: translateX(-100%);
-		background-color: @btn_color;
 		border-radius:10px;
 		font-weight:bold;
 	}

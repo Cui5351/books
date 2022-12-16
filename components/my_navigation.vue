@@ -1,7 +1,8 @@
 <template>
-		<view class="head" :style="{background:head_toggle?'rgb(248,216,102)':'white'}">
+		<view class="head">
 		<navigation>我的</navigation>
-		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:999999999999;" mode="bottom right" src="https://www.mynameisczy.asia/my_image/stars_sky.jpg"></image>
+		<!-- <image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:999999999999;" mode="bottom right" src="https://www.mynameisczy.asia/my_image/stars_sky.jpg"></image> -->
+		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" mode='center' src="@/static/back_img/back1.jpg"></image>
 		<view class="userPortrait" :style="{height:head_height*1.4+'px',marginTop:head_height+'px'}">
 			<view class="portraitEdit" style="position: relative;z-index:9999999999991;">
 				<view class="portrait" :style="{width:portraitW+'px',height:portraitW+'px'}">
@@ -11,7 +12,10 @@
 					<view class="user_name">{{user_info.name}}</view>
 					<view class="user_tel">
 							<view>{{user_info.telephone}}</view>
-							<view class="set"><uni-icons type="notification-filled"></uni-icons>积分:{{user_info.score}}</view>
+						<view class="set">
+							<image style="width:20px;height:20px;" src="../static/back_img/coin.png"></image>
+						积分:{{user_info.score}}</view>
+							<!-- <view class="set"><uni-icons type="notification-filled"></uni-icons>积分:{{user_info.score}}</view> -->
 					</view>
 				</view>
 				<view class="login_btn" v-if="!login_state" @click="login">
@@ -202,7 +206,7 @@
 .userPortrait{
 	padding:0 20px;
 	box-sizing: border-box;
-	background-color: @background;
+	background-color: white;
 	display:flex;
 	justify-content: flex-start;
 	align-items: center;
@@ -227,11 +231,13 @@
 			font-weight:bold;
 			align-items: center;
 			flex-grow: 1;
+			color:white;
 		}
 		&>.user_info{
 			padding:10px 10px;
 			box-sizing: border-box;
 			display: flex;
+			color:white;
 			flex-direction: column;
 			flex-grow: 1;
 			&>.user_name{
@@ -243,11 +249,13 @@
 
 			&>.user_tel{
 				flex-grow: 1;
+				color:white;
 				display: flex;
 				max-height: 50%;
 				min-height: 50%;
 				justify-content: space-between;
 				&>.set{
+					color:white;
 					font-size:14px;
 					border-radius:10rpx;
 				}

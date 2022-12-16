@@ -17,17 +17,17 @@
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
+				<view class="edit_item" @click='gotoPage("/pages/chat/chat")'>
+					<view>
+						<uni-icons type="paperplane"></uni-icons>
+						书友会
+					</view>
+					<uni-icons type="right"></uni-icons>
+				</view>
 				<view class="edit_item" @click="no_develop">
 					<view>
 						<uni-icons type="eye"></uni-icons>
 						最近阅读(暂未开放)
-					</view>
-					<uni-icons type="right"></uni-icons>
-				</view>
-				<view class="edit_item" @click='no_develop'>
-					<view>
-						<uni-icons type="paperplane"></uni-icons>
-						源暮商城(暂未开放)
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
@@ -217,8 +217,13 @@
 					url:'/pages/sign_in_today/sign_in_today'
 				})
 			}
+			function gotoPage(url){
+				uni.navigateTo({
+					url:url
+				})
+			}
 			
-			return {store,sign_in_today,toggle_other_page,toggle_base_info,head_height_child,feedback,login_state,user_info,height_each,exitLogin,info,no_develop}
+			return {gotoPage,store,sign_in_today,toggle_other_page,toggle_base_info,head_height_child,feedback,login_state,user_info,height_each,exitLogin,info,no_develop}
 		},
 		components:{
 			navigation

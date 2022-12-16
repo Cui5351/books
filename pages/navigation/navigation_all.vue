@@ -6,6 +6,7 @@
 			
 			<view class="content" :style="{height:head_height+'px'}">
 				<view>
+					<!-- <image src="" mode=""></image> -->
 					<uni-icons @click="back" type="left" size="25" v-if="show_back"></uni-icons>
 				</view>
 				<view>

@@ -8,6 +8,23 @@
 			}
 		},
 		{
+		    "path" : "pages/chat/chat",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false
+		    }
+		    
+		},
+		{
+		    "path" : "pages/sign_in_today/sign_in_today",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false
+		    }
+		},
+		{
 					"path" : "pages/base_info/base_info",
 					"style" :                                                                                    
 					{
@@ -17,14 +34,6 @@
 					
 				}
 		    ,
-		{
-		    "path" : "pages/sign_in_today/sign_in_today",
-		    "style" :                                                                                    
-		    {
-		        "navigationBarTitleText": "",
-		        "enablePullDownRefresh": false
-		    }
-		},
 		{
 		    "path" : "pages/other_page/other_page",
 		    "style" :                                                                                    
@@ -96,6 +105,15 @@
 		}
         ,{
             "path" : "pages/inner_page/inner_page",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/base_info/avatar_edit/avatar_edit",
             "style" :                                                                                    
             {
                 "navigationBarTitleText": "",

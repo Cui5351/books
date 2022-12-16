@@ -10,8 +10,8 @@
 <script>
 	import {ref,reactive,watch} from 'vue';
 	export default {
-		props:['font_size','timer','passage_height','slider_change','auto_scroll_fn','timer'],
-		setup(props) {
+		props:['font_size','passage_height','slider_change'],
+		setup() {
 			return{
 			}
 		}

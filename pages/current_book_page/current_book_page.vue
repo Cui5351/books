@@ -1,7 +1,7 @@
 <template>
-	<books-page-navigation :head_height_child="head_height_child" :current_book_passage_name="current_book.passage_name"
+	<books-page-navigation :show_e='show_e' :head_height_child="head_height_child" :current_book_passage_name="current_book.passage_name"
 		:book_storage_array="book_storage_array" :color="background_color"></books-page-navigation>
-	<book_page_edit_bar :timer='timer' :auto_scroll_fn='auto_scroll_fn' :total_passage='total_passage' :background_color="background_color" :font_size="font_size"
+	<book_page_edit_bar :total_passage='total_passage' :background_color="background_color" :font_size="font_size"
 		:toggle_passage="toggle_passage" :set_index="set_index" :show_e="show_e" :current_book="current_book"
 		:goTop="goTop" :book_storage_array="book_storage_array" :book_name="book_name"></book_page_edit_bar>
 	<scroll-view @touchend="touchend" @touchstart='touchstart' @touchmove='touch'
@@ -133,7 +133,6 @@
 		},
 		methods: {
 			scroll: function(e) {
-				this.scrollHeight=e.detail.scrollHeight
 				if(this.show_e){
 					this.show_e = 0
 				}
@@ -259,14 +258,13 @@
 			}
 		},
 		setup() {
-			let scrollHeight=ref(0)
 			let total_passage = reactive({
 				count: 0
 			})
 			let timer=reactive({
 				id:0
 			})
-			let show_e = ref(0)
+			let show_e = ref(1)
 			let background_color = reactive({
 				color: 1
 			})
@@ -293,24 +291,6 @@
 
 			function hidden_header_bar() {
 				show_e.value = show_e.value ? 0 : 1
-			}
-			function auto_scroll_fn(flag,speed){
-				if(flag){
-					timer.id=setInterval(()=>{
-						scrollTop.value+=1;
-						console.log('定时器还在执行!!');
-						console.log(scrollTop.value,scrollHeight.value-1000);
-						if(scrollTop.value>=scrollHeight.value-1000){
-							console.log('close 定时器!');
-							clearInterval(timer.id)
-							timer.id=0
-							return;
-						}
-					},speed)
-				}else{
-					clearInterval(timer.id)
-					timer.id=0
-				}
 			}
 			
 			function set_index(value) {
@@ -361,7 +341,6 @@
 
 			return {
 				after_touch,
-				scrollHeight,
 				total_passage,
 				after_scrollTop,
 				touchend,
@@ -380,8 +359,7 @@
 				show_e,
 				book_name,
 				set_index,
-				timer,
-				auto_scroll_fn
+				timer
 			}
 		}
 	}
@@ -395,6 +373,7 @@
 		height: 100%;
 		transition: 0.8s ease;
 		box-sizing: border-box;
+		overflow: hidden;
 
 		// background-color: rgb(241,229,201);
 		&>.passage_name {

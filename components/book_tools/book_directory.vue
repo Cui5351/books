@@ -1,9 +1,10 @@
 <template>
-	<view class="container" :style="{height:window_height*0.7+'px'}">
-		<view style="text-align: center;font-size:25px;font-weight: bold;max-height:70px;">{{book_name}}</view>
+	<view class="container" :style="{height:window_height*0.8+'px'}">
+		<view style="text-align: center;font-size:25px;font-weight: bold;max-height:90px;margin-bottom:20px;">{{book_name}}</view>
 		<view class="select">
-			<view @click="change_dire(true)">{{current_directory.directory}}</view>
-			<view @click="change_dire(false)">{{current_directory.passage}}{{current_directory.passage!='请先选择'?'章':''}}</view>
+			<view :class="background_color.color?'btn':'btn2'" @click="change_dire(true)">{{current_directory.directory}}</view>
+			<view></view>
+			<view :class="background_color.color?'btn':'btn2'" @click="change_dire(false)">{{current_directory.passage}}{{current_directory.passage!='请先选择'?'章':''}}</view>
 		</view>
 		<scroll-view class="passages" scroll-y="true" v-if="toggle">
 			<!-- 每次显示100章 -->
@@ -34,8 +35,10 @@ export default {
 		let timer=ref(0)
 		let toggle=ref(true)
 		function change_dire(e){
-			if(current_directory.passage=='请先选择')
-				return
+			if(current_directory.passage=='请先选择'){
+				toggle.value=true
+				return 
+			}
 			if(e==toggle.value)
 				return
 			toggle.value=e
@@ -208,6 +211,7 @@ export default {
 </script>
 
 <style scoped lang="less">
+@import url('@/general.less');
 	.container{
 		box-shadow:0 -4px 10px -3px gray;
 		display: flex;flex-direction: column;
@@ -222,6 +226,7 @@ export default {
 		width:100%;
 		max-height:40px;
 		display: flex;
+		justify-content: space-between;
 		&>view{
 			text-align: center;
 			flex-grow: 1;

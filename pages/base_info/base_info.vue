@@ -5,8 +5,7 @@
 		<view class="container" :style="{height:screen_height+'px'}">
 			<view class="base_info">
 			<view class="item" :style="{height:item_height*1.5+'px'}">
-				<view>头像</view>
-				<view @click="choosePortrait" :style="{height:item_height+'px',width:item_height+'px',borderRadius:50+'%',overflow:'hidden'}">
+				<view @click="show_corp_fun" :style="{height:item_height+'px',width:item_height+'px',borderRadius:50+'%',overflow:'hidden'}">
 					<image :src="userInfo_.portraitUrl" style="width: 100%;height: 100%;overflow: hidden;"></image>
 				</view>
 			</view>
@@ -46,8 +45,8 @@
 </template>
 
 <script>
-	import inner_page from '../inner_page/inner_page.vue'
 	import {ref,reactive,computed} from 'vue'
+	import inner_page from '../inner_page/inner_page.vue'
 	import navigation from '../navigation/navigation_all.vue'
 	import {useStore} from 'vuex'
 	export default {
@@ -59,7 +58,6 @@
 		},
 		setup() {
 			const store=useStore()
-			console.log(store.state);
 			let userInfo=reactive({
 				portraitUrl:computed(()=>store.getters.user_avatar),
 				name:computed(()=>store.getters.user_name),
@@ -71,6 +69,7 @@
 			let userInfo_=reactive({
 				...userInfo
 			})
+			userInfo_.portraitUrl=computed(()=>store.getters.user_avatar)
 			
 			let info=reactive(uni.getSystemInfoSync())
 			let head_height=ref(uni.getMenuButtonBoundingClientRect().height+info.statusBarHeight)
@@ -80,7 +79,14 @@
 			// 重置数据
 			function reset_data(){
 				Object.keys(userInfo).forEach(item=>{
+					if(item=='portraitUrl')
+						return
 					userInfo_[item]=userInfo[item]
+				})
+			}
+			function show_corp_fun(){
+				uni.navigateTo({
+					url:'/pages/base_info/avatar_edit/avatar_edit?userInfo='+JSON.stringify(userInfo)
 				})
 			}
 			// 提交数据
@@ -90,6 +96,8 @@
 				// 查看要修改的地方
 				let atb=['name','gender','telephone']
 				atb.forEach(item=>{
+					if(item=='portraitUrl')
+						return
 					if(userInfo[item]!=userInfo_[item])
 						console.log(item);
 						// 请求修改
@@ -106,69 +114,10 @@
 				userInfo_.gender=e.detail.value
 			}
 			
-			function choosePortrait(){
-					uni.chooseMedia({
-						count:1,
-						type:'image',
-						camera:'front',
-						success(result){
-							uni.showLoading({
-								title:'修改中'
-							})
-							let image_path=result.tempFiles[0]
-							let url='https://www.mynameisczy.asia:5351/upload_avatar'
-							uni.uploadFile({
-								url:url,
-								filePath:image_path.tempFilePath,
-								name:'avatar',
-								formData:{
-									openid:uni.current_this11.userInfo.openid
-								},
-								success(e) {
-									uni.hideLoading()
-									let data=JSON.parse(e.data)
-									if(data.error){
-										uni.showToast({
-											icon:'error',
-											title:'修改失败'
-										})
-										return
-									}
-									// uni.current_this11.userInfo.portraitUrl=data.value
-									store.state.portraitUrl=data.value
-									userInfo_.portraitUrl=data.value
-									uni.setStorage({
-										key:'user_info',
-										data:{
-											...uni.current_this11.userInfo
-										}
-									})
-										uni.showToast({
-											icon:'success',
-											title:'修改成功'
-										})									
-								},fail(e) {
-									uni.hideLoading()
-									console.log('fail',e);
-								}
-							})
-						},
-						fail(error) {
-							uni.showToast({
-								icon:'error',
-								title:'用户取消',
-								duration:1000
-							})
-							console.log(error);
-						}
-					})
-			}
-			return {
-				head_height,userInfo_,userInfo,info,screen_height,reset_data,item_height,choosePortrait,radioChange,submit_data
-			}
-		},
-		methods: {
 			
+			return {
+				head_height,show_corp_fun,userInfo_,userInfo,info,screen_height,reset_data,item_height,radioChange,submit_data
+			}
 		}
 	}
 </script>

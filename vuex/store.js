@@ -21,13 +21,11 @@ const state={
 		state.gender=e.data.gender
 		state.portraitUrl=e.data.portraitUrl
 		state.score=e.data.score
-		console.log(e.data,'data');
 		uni.getStorage({
 			key:'answer',
 			success(e) {
 				state.author_answer=e.data.author_answer
 				state.data_provide_answer=e.data.data_provide_answer
-				console.log(e.data,'answer');
 			}
 		})
 	},fail(){

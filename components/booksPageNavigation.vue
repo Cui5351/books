@@ -1,10 +1,10 @@
 <template>
-	<view class="head">
+	<view class="head" :style="{marginTop:show_e?'0%':'-100%'}">
 		<view class="status_bar">
 		</view>
 		<view class="edit_bar" :style="{height:head_height_child+'px',color:color.color?'black':' #B1B1B1'}">
 			<view class="back"><uni-icons  :color="color.color?'black':' #B1B1B1'" class="edit_btn" type="left" size="25" @click="back"></uni-icons></view>
-			<view>{{current_book_passage_name}}</view>
+			<view style="text-overflow: ellipsis;white-space: nowrap;">{{current_book_passage_name}}</view>
 			<view></view>
 		</view>
 		<!-- 方案一 -->
@@ -21,7 +21,7 @@
 	import {ref} from 'vue';
 	export default {
 		name:"booksPageNavigation",
-		props:["head_height_child","current_book_passage_name",'color'],
+		props:["head_height_child","current_book_passage_name",'color','show_e'],
 		setup(){
 			function back(){
 				uni.navigateBack({
@@ -43,11 +43,11 @@
 	box-shadow:0 4px 10px -3px gray;
 	// font-family: '楷体';
 	position: fixed;
+	transition: .3s ease;
 	top:0;
 	z-index:9999;
 	left:0;
 	width:100%;
-	transition:0.5s ease;
 	// background-color: rgb(248,216,102);
 }
 .status_bar{

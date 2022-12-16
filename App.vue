@@ -3,7 +3,6 @@
 	//导入微信支付对象
 	export default {
 		onLaunch: function() {
-			
 
 			// 修改字体计划：失败
 			// uni.loadFontFace({

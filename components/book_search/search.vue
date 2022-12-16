@@ -1,6 +1,6 @@
 <template>
 		<view class="search" :style="{height:head_height+'px',width:head_width+'%'}" @click="toSearchPage" >
-			<view >
+			<view>
 				<uni-icons size="20" color="gray" class="searchIcon" type="search"></uni-icons>
 				<view type="text" class="txt" placeholder="请输入书名或作者名">{{suggest_book}}</view>
 				<button :style="{fontSize:size+'rpx',color:'white'}">搜索</button>
