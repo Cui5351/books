@@ -11,7 +11,7 @@
 				<text>{{content}}</text>
 			</view>
 		</uni-popup>
-	<scroll-view class="container" scroll-y='true' :style="{minHeight:container-70+'px',marginTop:head_height_child*1.4+'px'}" @scrolltolower='scroll_fun2' @scroll='scroll_fun' :scroll-top="scroll_top">
+	<scroll-view class="container" scroll-y='true' scroll-with-animation='true' :style="{minHeight:container-70+'px',marginTop:head_height_child*1.4+'px'}" @scrolltolower='scroll_fun2' @scroll='scroll_fun' :scroll-top="scroll_top">
 		<view class="header" :style="{minHeight:header_height+'rpx',maxHeight:header_height+'rpx'}">
 			<search head_width='100' :book_wh="goods_category/4" style="flex-grow: 1;" :head_height_child="head_height_child" :head_height='header_height*0.4'></search>
 		</view>

@@ -31,7 +31,7 @@ import {useStore} from 'vuex'
 								title:'修改中'
 							})
 							let image_path=e.tempFilePath
-							let url='https://www.mynameisczy.asia:5351/upload_avatar'
+							let url='https://www.mynameisczy.asia:5000/upload_avatar'
 							uni.uploadFile({
 								url:url,
 								filePath:image_path,
