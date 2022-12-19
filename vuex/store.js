@@ -65,7 +65,6 @@ const mutations={
 					if(index==favbook.length-1){
 						favbook.push(e.book_name)
 						state.fav_book=JSON.stringify(favbook)
-						console.log('保存',favbook);
 						return;
 					}
 				})
@@ -80,7 +79,6 @@ const mutations={
 					method:'POST',
 					data:{openid:state.openid},
 					success(e) {
-						console.log(e,'192');
 						if(e.data.state==0){
 							uni.showToast({
 								icon:'error',
@@ -91,7 +89,6 @@ const mutations={
 						state.fav_book=JSON.stringify(e.data.data)
 					},
 					fail(e) {
-						console.log(e,'e');
 						uni.showToast({
 							icon:'error',
 							title:"请重新登录后再尝试"

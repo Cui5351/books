@@ -17,7 +17,6 @@
 	import {useStore} from 'vuex'
 	export default {
 		onLoad(e) {
-			console.log(e);
 			this.title=e.title
 			this.book_wh=Number(e.book_wh)
 			this.getCategoryBook()

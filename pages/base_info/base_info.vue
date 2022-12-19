@@ -76,7 +76,6 @@
 			let userInfo_=reactive({
 				...userInfo
 			})
-			console.log(userInfo_,'u');
 			userInfo_.portraitUrl=computed(()=>store.getters.user_avatar)
 			
 			let info=reactive(uni.getSystemInfoSync())

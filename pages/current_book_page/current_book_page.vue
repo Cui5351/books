@@ -146,7 +146,6 @@
 				},500)
 			},
 			goto_after: function() {
-				console.log('goto_after');
 				this.scrollTop = this.old.scrollTop
 				this.$nextTick(function() {
 					this.scrollTop = this.after_scrollTop

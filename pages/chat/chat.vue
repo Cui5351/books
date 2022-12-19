@@ -24,12 +24,17 @@
 								{{item.data}}
 							</view>
 						</view>
+						<view class="before_date" v-if='item.chat_date.length'>
+							<view>
+								{{item.chat_date}}
+							</view>
+						</view>
 					</view>
-					<view class="before_date">
+<!-- 					<view class="before_date">
 						<view>
 							{{before_date}}
 						</view>
-					</view>
+					</view> -->
 					<view :class="item.openid==store.getters.user_openid?'user_my':'user'" v-for="(item,index) in message" :key="index">
 						<view class="name">
 							{{item.name}}
@@ -40,6 +45,12 @@
 							</view>
 						<view class="answer">
 							{{item.data}}
+						</view>
+					</view>
+					<!-- <view class="before_date" v-if="item.chat_date.length"> -->
+					<view class="before_date" v-if='item.state'>
+						<view>
+							{{item.chat_date}}
 						</view>
 					</view>
 				</view>
@@ -139,19 +150,62 @@
 			// 接收消息
 			uni.onSocketMessage(function(res) {
 				let data=JSON.parse(res.data)
+				console.log(data,'data');
+				
+				function time_format(time){
+					console.log(time,'t');
+					let year=time.getFullYear()
+					let month=time.getMonth()<10?'0'+time.getMonth():time.getMonth()
+					let date=time.getDate()<10?'0'+time.getDate():time.getDate()
+					let hours=time.getHours()<10?'0'+time.getHours():time.getHours()
+					let minute=time.getMinutes()<10?'0'+time.getMinutes():time.getMinutes()
+					return {
+						year,month,date,hours,minute,
+						day:`${year}-${month}-${date}`,
+						hm:`${hours}:${minute}`,
+						full:`${year}-${month}-${date} ${hours}:${minute}`
+					}
+				}
+				// 有人进入
 				if(data.state==1){
 					uni.current_this15.chat_count=data.chat_count
 					return
 				}
 				if(data.state==4){
 					let value=JSON.parse(data.value).reverse()
+					// 今天
+					let time=time_format(new Date())
+					let t,t2
 					
-					console.log(value,'value176');	
-					let chat_date=data.chat_date.match(/(\d){4}-(\d){1,2}-(\d){1,2}T(\d){1,2}:(\d){1,2}:(\d){1,2}/g)[0]
-					uni.current_this15.before_date=chat_date
-					// 给小时匹配出来，然后+8
+					value.forEach((item,index)=>{
+						console.log(item.chat_date);
+						t=time_format(new Date(item.chat_date))
+						if(index!=value.length-1)
+							t2=time_format(new Date(value[index+1].chat_date))
+						else
+							t2=null
+						// 同一天，只显示时间
+						if(time.day==t.day){
+							if(t2!=null&&t.hours-t2.hours>=-1){
+								item.chat_date=''
+							}else{
+								item.chat_date=t.hm
+							}
+						}else{
+							if(t2!=null&&t.hours-t2.hours>=-1&&t2!=null&&t2.day==t.day){
+								item.chat_date=''
+								return
+							}
+						// 不同日期（比大小）（显示全日期）
+							item.chat_date=t.full
+						}
+					})
+					// let chat_date=data.chat_date.match(/(\d){4}-(\d){1,2}-(\d){1,2}T(\d){1,2}:(\d){1,2}:(\d){1,2}/g)[0]
+					// let hours=Number(chat_date.match(/[T](\d){2}/g)[0].match(/[^T]/g).join(''))+8
+					// let minute=Number(chat_date.match(/:(\d){2}:/g)[0].match(/[^:]/g).join(''))
 					
-					console.log(uni.current_this15.before_date);
+					// uni.current_this15.before_date=chat_date
+					console.log(value,'value');
 					uni.current_this15.before_message.push(...value)
 					// uni.current_this15
 					uni.current_this15.scrollTop=value.length*120
@@ -172,15 +226,45 @@
 					return
 				}
 				
-				uni.current_this15.chat_count=data.chat_count
-				if(data.state==3)
+				// 有人退出
+				if(data.state==3){
+					uni.current_this15.chat_count=data.chat_count
 					return
+				}
+				
+				
+				let chat_date=time_format(JSON.parse(data.chat_date))
+				let state=0
+				if(uni.current_this15.message.length>0){
+					// 拿到上一个然后进行比较
+					if(Number(uni.current_this15.message[uni.current_this15.message.length-1].chat_date.split('').slice(0,3).join(''))-chat_date.hours<=0){
+						uni.current_this15.message[uni.current_this15.message.length-1].state=1
+					}
+					
+				}
+				// if(uni.current_this15.message.length<=0){
+				// 	// 与before_message最后一个比较
+				// 	let before_mssage_=uni.current_this15.before_mssage[uni.current_this15.before_mssage.length-1]
+				// 	// 今天
+				// 	// &&Number(before_mssage_.split('').slice(0,2).join(''))-time_format(new Date()).hours>=-1
+				// 	if(before_mssage_.length<=5){
+						
+				// 	}else{
+				// 		// 以前
+				// 	}
+				// }else{
+				// 	// 与上一个进行比较
+					
+				// }
+				
 				uni.current_this15.message.push({
 					name:data.name,
 					avatar:data.avatar,
 					data:data.data,
 					openid:data.openid,
-					gender:data.gender
+					gender:data.gender,
+					chat_date:chat_date.hm,
+					state:state
 				})
 				uni.current_this15.scrollTop+=120
             });	
@@ -235,6 +319,13 @@
 				console.log(state.value);
 			}
 			function sendData_(state,data=''){
+				if(state==3){
+					// 关闭连接
+					uni.closeSocket({
+						code:1000
+					})
+					return
+				}
 				uni.showLoading({
 					title:'发送中'
 				})
@@ -255,12 +346,6 @@
 						})
 					},complete() {
 						uni.hideLoading()
-						if(state==3){
-							// 关闭连接
-							uni.closeSocket({
-								code:1000
-							})
-						}
 					}
 					})
 			}

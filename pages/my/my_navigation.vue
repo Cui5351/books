@@ -14,7 +14,6 @@
 						<view class="set">
 							<image style="width:20px;height:20px;" src="../static/back_img/coin.png"></image>
 						积分:{{user_info.score}}</view>
-							<!-- <view class="set"><uni-icons type="notification-filled"></uni-icons>积分:{{user_info.score}}</view> -->
 					</view>
 				</view>
 				<view class="login_btn" v-if="!login_state" @click="login">
@@ -26,7 +25,7 @@
 </template>
 
 <script>
-	import search from './book_search/search.vue'
+	import search from '@/components/book_search/search.vue'
 	import {ref,onMounted,watch,reactive} from 'vue'
 	import {useStore} from 'vuex'
 	import navigation from '@/pages/navigation/navigation_all.vue'
@@ -43,7 +42,6 @@
 				uni.showLoading({
 					title:'加载中'
 				})
-				console.log(this);
 				if(this.user_info.openid&&this.login_state){
 					uni.request({
 						url:'https://www.mynameisczy.asia:5000/getAnswer',
@@ -83,7 +81,6 @@
 			let head_toggle=ref(true)
 			let portraitW=ref(0)
 			watch(()=>props.state,(v)=>{
-				console.log('change',v);
 				head_toggle.value=v
 			})
 			const store=reactive(useStore())
@@ -125,7 +122,6 @@
 											if(res2.state==1){
 												return
 											}
-											console.log('res2',res2);
 											// 将信息进行替换
 											if(res2.data.value instanceof Object){
 												value=res2.data.value
@@ -163,7 +159,7 @@
 										}
 									})
 									},fail(e) {
-										console.log(e,'my_navigation150');
+										console.log(e,'my_navigation162');
 									}
 								})
 							}
@@ -172,7 +168,6 @@
 					faile(err){
 						// 提示错误信息
 						uni.hideLoading()
-						console.log(err);
 					}
 				})
 			}

@@ -68,7 +68,7 @@
 
 <script>
 	import {ref,reactive,computed} from 'vue'
- 	import navigation from '../../components/my_navigation.vue'
+ 	import navigation from './my_navigation.vue'
 	import {useStore} from 'vuex'
 	export default {
 		setup(){
