@@ -8,6 +8,16 @@
 			}
 		},
 		{
+					"path" : "pages/base_info/base_info",
+					"style" :                                                                                    
+					{
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+					
+				}
+		    ,
+		{
 		    "path" : "pages/chat/chat",
 		    "style" :                                                                                    
 		    {
@@ -24,16 +34,6 @@
 		        "enablePullDownRefresh": false
 		    }
 		},
-		{
-					"path" : "pages/base_info/base_info",
-					"style" :                                                                                    
-					{
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": false
-					}
-					
-				}
-		    ,
 		{
 		    "path" : "pages/other_page/other_page",
 		    "style" :                                                                                    

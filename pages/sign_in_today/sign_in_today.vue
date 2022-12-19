@@ -62,7 +62,7 @@
 				uni.navigateBack()
 			}
 			uni.request({
-				url:'https://www.mynameisczy.asia:5351/get_sign_in_day',
+				url:'https://www.mynameisczy.asia:5000/get_sign_in_day',
 				method:'POST',
 				data:{
 					openid:this.openid
@@ -114,7 +114,7 @@
 				if(sign.value==true)
 					return
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/sign_in_day',
+					url:'https://www.mynameisczy.asia:5000/sign_in_day',
 					method:'POST',
 					data:{
 						openid:openid._value

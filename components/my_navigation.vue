@@ -1,7 +1,6 @@
 <template>
 		<view class="head">
 		<navigation>我的</navigation>
-		<!-- <image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:999999999999;" mode="bottom right" src="https://www.mynameisczy.asia/my_image/stars_sky.jpg"></image> -->
 		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" mode='center' src="@/static/back_img/back1.jpg"></image>
 		<view class="userPortrait" :style="{height:head_height*1.4+'px',marginTop:head_height+'px'}">
 			<view class="portraitEdit" style="position: relative;z-index:9999999999991;">
@@ -47,7 +46,7 @@
 				console.log(this);
 				if(this.user_info.openid&&this.login_state){
 					uni.request({
-						url:'https://www.mynameisczy.asia:5351/getAnswer',
+						url:'https://www.mynameisczy.asia:5000/getAnswer',
 						method:'POST',
 						data:{
 							openid:this.user_info.openid
@@ -102,7 +101,7 @@
 							provider:'weixin',
 							success(e) {
 								uni.request({
-									url:'https://www.mynameisczy.asia:5351/getOpenid',
+									url:'https://www.mynameisczy.asia:5000/getOpenid',
 									method:'POST',
 									data:{
 										code:e.code
@@ -117,25 +116,27 @@
 										let data_provide_answer=''
 										
 									uni.request({
-										url:'https://www.mynameisczy.asia:5351/login_user',
+										url:'https://www.mynameisczy.asia:5000/login_user',
 										method:'POST',
 										data:{
 											nickName,gender,avatarUrl,openid
 										},success(res2) {
 											
+											if(res2.state==1){
+												return
+											}
 											console.log('res2',res2);
 											// 将信息进行替换
 											if(res2.data.value instanceof Object){
 												value=res2.data.value
-												
 												nickName=value.nickName
 												gender=value.gender
 												avatarUrl=value.avatarUrl
 												score=value.score
 												author_answer=value.author_answer
 												data_provide_answer=value.data_provide_answer
+												store.state.introduction=value.introduction
 											}
-											
 											store.state.name=nickName
 											store.state.portraitUrl=avatarUrl
 											store.state.score=score

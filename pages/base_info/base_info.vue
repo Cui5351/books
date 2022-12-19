@@ -4,17 +4,19 @@
 		<view class="vessel">
 		<view class="container" :style="{height:screen_height+'px'}">
 			<view class="base_info">
-			<view class="item" :style="{height:item_height*1.5+'px'}">
+			<view class="item" :style="{height:item_height*1.5+'px',justifyContent:'center'}">
 				<view @click="show_corp_fun" :style="{height:item_height+'px',width:item_height+'px',borderRadius:50+'%',overflow:'hidden'}">
 					<image :src="userInfo_.portraitUrl" style="width: 100%;height: 100%;overflow: hidden;"></image>
 				</view>
 			</view>
 			<view class="item">
-				<view>姓名</view>
-				<input type="text" class='user_name' v-model='userInfo_.name' placeholder="name" />
+				<view class="title">姓名</view>
+				<view>
+					<input type="text" class='user_name' v-model='userInfo_.name' placeholder="name" />
+				</view>
 			</view>
 			<view class="item">
-				<view>性别</view>
+				<view class="title">性别</view>
 					<view style="display:flex">
 						<radio-group @change="radioChange">
 						<label class="radio"><radio color="rgb(79,70,229)" value="男" :checked="userInfo_.gender=='男'" />男</label>&emsp;
@@ -23,9 +25,13 @@
 					</view>
 				<!-- <view>{{userInfo.gender}}</view> -->
 			</view>
+			<view class="item" style="height:100px;">
+				<view class="title">个人简介</view>
+					<textarea placeholder="请输入您的自我简介" v-model="userInfo_.introduction" style="border: 1px solid rgba(0,0,0,.1);width: 60%;height:100%;padding: 5px 5px;box-sizing: border-box;" cols="20" rows="5" maxlength="45"></textarea>
+			</view>
 			</view>
 			<view class="butt">
-			<view class="item" style="border: none;">
+			<view class="item" style="border: none;justify-content: space-around;">
 				<view>
 					<view class="btn" @click="reset_data">
 						重置
@@ -64,11 +70,13 @@
 				telephone:'无',
 				openid:computed(()=>store.getters.user_openid),
 				gender:computed(()=>store.getters.user_gender),
-				score:computed(()=>store.getters.user_score)
+				score:computed(()=>store.getters.user_score),
+				introduction:computed(()=>store.getters.user_introduction)
 			})
 			let userInfo_=reactive({
 				...userInfo
 			})
+			console.log(userInfo_,'u');
 			userInfo_.portraitUrl=computed(()=>store.getters.user_avatar)
 			
 			let info=reactive(uni.getSystemInfoSync())
@@ -94,10 +102,8 @@
 				// 查看需要修改的地方
 				// name,telephone,gender,score
 				// 查看要修改的地方
-				let atb=['name','gender','telephone']
+				let atb=['name','gender','telephone','introduction']
 				atb.forEach(item=>{
-					if(item=='portraitUrl')
-						return
 					if(userInfo[item]!=userInfo_[item])
 						console.log(item);
 						// 请求修改
@@ -139,8 +145,22 @@
 		border-bottom: 1px solid rgba(0,0,0,.1);
 		height: 50px;
 		display: flex;
-		justify-content: space-around;
+		justify-content: space-between;
+		padding: 0 20px;
+		box-sizing: border-box;
 		align-items: center;
+		&>.title{
+			width: 30%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		&>view{
+			width:70%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 	}
 }
 .user_name{

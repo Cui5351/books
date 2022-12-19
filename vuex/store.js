@@ -9,7 +9,8 @@ const state={
 	score:'0',
 	telephone:'无',
 	author_answer:'',
-	data_provide_answer:''
+	data_provide_answer:'',
+	introduction:''
 }
 	// 查看用户是否登录
 	uni.getStorage({
@@ -21,6 +22,7 @@ const state={
 		state.gender=e.data.gender
 		state.portraitUrl=e.data.portraitUrl
 		state.score=e.data.score
+		state.introduction=e.data.introduction
 		uni.getStorage({
 			key:'answer',
 			success(e) {
@@ -106,6 +108,7 @@ const mutations={
 			state.telephone='暂无'
 			state.score='0'
 			state.gender='未知'
+			state.introduction=''
 		}
 		state.login_state=value
 	}
@@ -162,6 +165,9 @@ const getters={
 	},
 	data_provide_answer(state){
 		return state.data_provide_answer
+	},
+	user_introduction(state){
+		return state.introduction
 	}
 }
 

@@ -137,7 +137,13 @@
 					this.show_e = 0
 				}
 				this.old.scrollTop = e.detail.scrollTop
-				this.scrollTop = this.old.scrollTop
+				if(this.timer2){
+					clearTimeout(this.timer2)
+					this.timer2=''
+				}
+				this.timer2=setTimeout(()=>{
+					this.scrollTop = this.old.scrollTop
+				},500)
 			},
 			goto_after: function() {
 				console.log('goto_after');
@@ -258,6 +264,7 @@
 			}
 		},
 		setup() {
+			let timer2=ref('')
 			let total_passage = reactive({
 				count: 0
 			})
@@ -359,7 +366,8 @@
 				show_e,
 				book_name,
 				set_index,
-				timer
+				timer,
+				timer2
 			}
 		}
 	}

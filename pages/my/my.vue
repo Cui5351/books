@@ -121,7 +121,8 @@
 									openid:store.state.openid,
 									portraitUrl:store.state.portraitUrl,
 									score:store.state.score,
-									telephone:store.state.telephone
+									telephone:store.state.telephone,
+									introduction:store.state.introduction
 								}
 							})
 						}
@@ -164,7 +165,8 @@
 				telephone:'无',
 				openid:computed(()=>store.getters.user_openid),
 				gender:computed(()=>store.getters.user_gender),
-				score:computed(()=>store.getters.user_score)
+				score:computed(()=>store.getters.user_score),
+				introduction:computed(()=>store.getters.user_introduction)
 			})
 			let login_state=computed(()=>store.getters.login_state)
 			function feedback(){
