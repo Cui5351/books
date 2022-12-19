@@ -153,9 +153,9 @@
 				console.log(data,'data');
 				
 				function time_format(time){
-					console.log(time,'t');
 					let year=time.getFullYear()
-					let month=time.getMonth()<10?'0'+time.getMonth():time.getMonth()
+					let month=time.getMonth()==12?1:time.getMonth()+1
+					month=month<10?'0'+month:month
 					let date=time.getDate()<10?'0'+time.getDate():time.getDate()
 					let hours=time.getHours()<10?'0'+time.getHours():time.getHours()
 					let minute=time.getMinutes()<10?'0'+time.getMinutes():time.getMinutes()
@@ -233,7 +233,7 @@
 				}
 				
 				
-				let chat_date=time_format(JSON.parse(data.chat_date))
+				let chat_date=time_format(new Date(JSON.parse(data.chat_date)))
 				let state=0
 				if(uni.current_this15.message.length>0){
 					// 拿到上一个然后进行比较
