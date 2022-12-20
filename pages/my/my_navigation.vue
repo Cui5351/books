@@ -1,22 +1,26 @@
 <template>
 		<view class="head">
-		<navigation>我的</navigation>
-		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" mode='center' src="@/static/back_img/back1.jpg"></image>
+		<navigation></navigation>
+		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" src="https://www.mynameisczy.asia/rabbit/my_navigation.jpg"></image>
 		<view class="userPortrait" :style="{height:head_height*1.4+'px',marginTop:head_height+'px'}">
-			<view class="portraitEdit" style="position: relative;z-index:9999999999991;">
+			<view @click="login" class="portraitEdit" style="position: relative;z-index:9999999999991;">
 				<view class="portrait" :style="{width:portraitW+'px',height:portraitW+'px'}">
 					<image :src="user_info.portraitUrl" mode=""></image>
 				</view>
 				<view class="user_info" v-if="login_state">
 					<view class="user_name">{{user_info.name}}</view>
 					<view class="user_tel">
-							<view>{{user_info.telephone}}</view>
+							<!-- <view>{{user_info.telephone}}</view> -->
+							<view style="width:20px;height: 20px;">
+								<image v-show="user_info.gender=='未知'" style="width: 100%;height: 100%;" src="/static/icons/unknow_gender.svg"></image>
+								<image v-show="user_info.gender!='未知'" style="width: 100%;height: 100%;" :src="'/static/icons/'+(user_info.gender=='男'?'male.svg':'female.svg')" mode="'"></image>
+							</view>
 						<view class="set">
-							<image style="width:20px;height:20px;" src="../static/back_img/coin.png"></image>
+							<image style="width:23px;height:23px;margin-right:5px;" src="../static/icons/coin.svg"></image>
 						积分:{{user_info.score}}</view>
 					</view>
 				</view>
-				<view class="login_btn" v-if="!login_state" @click="login">
+				<view class="login_btn" v-if="!login_state">
 						登录/注册 
 				</view>
 			</view>
@@ -80,11 +84,17 @@
 			let head_height=ref(uni.getMenuButtonBoundingClientRect().height*2.5)
 			let head_toggle=ref(true)
 			let portraitW=ref(0)
+			const store=reactive(useStore())
 			watch(()=>props.state,(v)=>{
 				head_toggle.value=v
 			})
-			const store=reactive(useStore())
 			function login(){
+				if(store.getters.login_state){
+					uni.navigateTo({
+						url:'/pages/base_info/base_info'
+					})
+					return
+				}
 				uni.getUserProfile({
 					desc:'hello',
 					success(res) {
@@ -204,10 +214,11 @@
 	box-sizing: border-box;
 	background-color: white;
 	display:flex;
+	width:100%;
 	justify-content: flex-start;
 	align-items: center;
 	&>.portraitEdit{
-		width:70%;
+		width:100%;
 		height:80%;
 		display: flex;
 		font-size:18px;
@@ -232,6 +243,7 @@
 		&>.user_info{
 			padding:10px 10px;
 			box-sizing: border-box;
+			width:50%;
 			display: flex;
 			color:white;
 			flex-direction: column;
@@ -240,6 +252,8 @@
 				flex-grow: 1;
 				font-weight:bold;
 				max-height: 50%;
+				color: black;
+				letter-spacing: 2px;
 				min-height: 50%;
 			}
 
@@ -253,6 +267,10 @@
 				&>.set{
 					color:white;
 					font-size:14px;
+					margin-left:10px;
+					display: flex;
+					justify-content: space-around;
+					align-items: center;
 					border-radius:10rpx;
 				}
 			}

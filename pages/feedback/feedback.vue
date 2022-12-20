@@ -38,7 +38,7 @@
 			navigation_all
 		},
 		mounted() {
-			this.audio.play()
+			// this.audio.play()
 			// 这里的this是我打算在页面关闭后停止播放，但是页面虽然切换了(Beforedestroy)，但好像不会摧毁
 		},
 		beforeUnmount() {
@@ -145,7 +145,7 @@
 			&>.container2{
 				&>.showAnswer{
 					&:active{
-						background-color: rgba(0,0,0,0.1);
+						color: rgba(0,0,0,0.1);
 					}
 				}
 				box-sizing: border-box;

@@ -25,9 +25,11 @@
 					</view>
 				<!-- <view>{{userInfo.gender}}</view> -->
 			</view>
-			<view class="item" style="height:100px;">
+			<view class="item" style="height:120px;">
 				<view class="title">个人简介</view>
-					<textarea placeholder="请输入您的自我简介" v-model="userInfo_.introduction" style="border: 1px solid rgba(0,0,0,.1);width: 60%;height:100%;padding: 5px 5px;box-sizing: border-box;" cols="20" rows="5" maxlength="45"></textarea>
+				<view style="padding:5px;box-sizing:border-box;width: 60%;height:100%;">
+					<textarea placeholder="请输入您的自我简介" v-model="userInfo_.introduction" style="border: 1px solid rgba(0,0,0,.1);width: 100%;height:100%;padding: 5px 5px;box-sizing: border-box;" cols="20" rows="5" maxlength="45"></textarea>
+				</view>
 			</view>
 			</view>
 			<view class="butt">
@@ -101,19 +103,49 @@
 				// 查看需要修改的地方
 				// name,telephone,gender,score
 				// 查看要修改的地方
-				let atb=['name','gender','telephone','introduction']
+				let atb=['name','gender','introduction']
 				atb.forEach(item=>{
-					if(userInfo[item]!=userInfo_[item])
-						console.log(item);
+					if(userInfo[item]!=userInfo_[item]){
+						uni.showLoading({
+							title:'修改中'
+						})
+						uni.request({
+							url:'https://www.mynameisczy.asia:5000/set_user_property',
+							method:'POST',
+							data:{
+								openid:userInfo.openid,
+								value:userInfo_[item],
+								property:item=='name'?'nickName':item
+							},success(res) {
+								if(res.data.state==1){
+									store.state[item]=userInfo_[item]
+									uni.showToast({
+										icon:'success',
+										title:'修改成功'
+									})
+									uni.setStorage({
+										key:'user_info',
+										data:{...userInfo}
+									})
+								}else
+									uni.showToast({
+										icon:'error',
+										title:'修改失败'
+									})
+							},complete() {
+								uni.hideLoading()
+							},fail() {
+								uni.showToast({
+									icon:'error',
+									title:'网络错误'
+								})
+							}
+						})
+						}
 						// 请求修改
 					// userInfo_[item]=userInfo[item]
 				})
 				// userInfo_
-				
-				uni.showToast({
-					icon:'success',
-					title:'修改成功'
-				})
 			}
 			function radioChange(e){
 				userInfo_.gender=e.detail.value

@@ -17,13 +17,6 @@
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
-				<view class="edit_item" @click='gotoPage("/pages/chat/chat")'>
-					<view>
-						<uni-icons type="paperplane"></uni-icons>
-						书友会
-					</view>
-					<uni-icons type="right"></uni-icons>
-				</view>
 				<view class="edit_item" @click="no_develop">
 					<view>
 						<uni-icons type="eye"></uni-icons>
@@ -33,8 +26,15 @@
 				</view>
 				<view class="edit_item" @click="no_develop">
 					<view>
-						<uni-icons type="paperplane"></uni-icons>
+						<uni-icons type="cart"></uni-icons>
 						源暮商城(暂未开放)
+					</view>
+					<uni-icons type="right"></uni-icons>
+				</view>
+				<view class="edit_item" @click='gotoPage("/pages/chat/chat")'>
+					<view>
+						<uni-icons type="chatboxes"></uni-icons>
+						书友会
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
@@ -47,7 +47,7 @@
 				</view>
 			<view class="edit_item" @click="feedback">
 					<view>
-						<uni-icons type="chatboxes"></uni-icons>
+						<uni-icons type="email"></uni-icons>
 						小程序反馈
 					</view>
 					<uni-icons type="right"></uni-icons>

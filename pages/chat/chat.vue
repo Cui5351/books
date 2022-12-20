@@ -1,8 +1,9 @@
 <template>
 	<navigation show_back='true'>书友会({{chat_count}})</navigation>
 	<inner_page>
+		<!-- <image src="https://www.mynameisczy.asia/rabbit/back.jpg" style="position: absolute;top:0;height: 100%;width: 100%;opacity:0.8;" mode=""></image> -->
 		<view class="sendMessage" :style="{left:state?'0%':'100%'}">
-			<image  @click="show_" src="https://www.mynameisczy.asia/rabbit/arrow_top.svg"></image>
+			<image  @click="show_" src="@/static/icons/arrow_top.svg"></image>
 			<view class="text_btn">
 				<input type="text" maxlength="30" v-model="msg_data">
 				<view class="btn2" @click="sendData">
@@ -15,6 +16,10 @@
 					<view :class="item.openid==store.getters.user_openid?'user_my':'user'" v-for="(item,index) in before_message" :key="index">
 							<view class="name">
 								{{item.name}}
+								<view style="margin-left:5px;width:20px;height: 20px;">
+									<image v-show="item.gender=='未知'" style="width: 100%;height: 100%;" src="/static/icons/unknow_gender.svg"></image>
+									<image v-show="item.gender!='未知'" style="width: 100%;height: 100%;" :src="'/static/icons/'+(item.gender=='男'?'male.svg':'female.svg')" mode="'"></image>
+								</view>
 							</view>
 							<view class="name_avatar">
 								<view class="avatar">
@@ -38,6 +43,10 @@
 					<view :class="item.openid==store.getters.user_openid?'user_my':'user'" v-for="(item,index) in message" :key="index">
 						<view class="name">
 							{{item.name}}
+							<view style="margin-left:5px;width:20px;height: 20px;">
+								<image v-show="item.gender=='未知'" style="width: 100%;height: 100%;" src="/static/icons/unknow_gender.svg"></image>
+								<image v-show="item.gender!='未知'" style="width: 100%;height: 100%;" :src="'/static/icons/'+(item.gender=='男'?'male.svg':'female.svg')" mode="'"></image>
+							</view>
 						</view>
 						<view class="name_avatar">
 							<view class="avatar">
@@ -138,11 +147,13 @@
 					success(){
 						uni.hideLoading()
 						uni.showToast({
-							title:'进入书友会'
+							icon:'none',
+							title:'点击萝卜可以发送消息哦!'
 						})
 				},fail(){
 						uni.hideLoading()
 						uni.showToast({
+							icon:'none',
 							title:'网络连接失败'
 						})
 				}})
@@ -172,13 +183,15 @@
 					return
 				}
 				if(data.state==4){
+					
 					let value=JSON.parse(data.value).reverse()
 					// 今天
 					let time=time_format(new Date())
+					// 拿到昨天日期
+					let yesterday=time_format(new Date(new Date().setDate(new Date().getDate()-1)))
 					let t,t2
 					
 					value.forEach((item,index)=>{
-						console.log(item.chat_date);
 						t=time_format(new Date(item.chat_date))
 						if(index!=value.length-1)
 							t2=time_format(new Date(value[index+1].chat_date))
@@ -186,33 +199,32 @@
 							t2=null
 						// 同一天，只显示时间
 						if(time.day==t.day){
-							if(t2!=null&&t.hours-t2.hours>=-1){
+							if(t2!=null&&t.hours-t2.hours>-1){
 								item.chat_date=''
 							}else{
 								item.chat_date=t.hm
 							}
 						}else{
-							if(t2!=null&&t.hours-t2.hours>=-1&&t2!=null&&t2.day==t.day){
+							if(t2!=null&&t.hours-t2.hours>-1&&t2.day==t.day){
 								item.chat_date=''
+								return
+							}
+							if(t.date==yesterday.date){
+								// 昨天
+								item.chat_date=`昨天${t.hm}`
 								return
 							}
 						// 不同日期（比大小）（显示全日期）
 							item.chat_date=t.full
 						}
 					})
-					// let chat_date=data.chat_date.match(/(\d){4}-(\d){1,2}-(\d){1,2}T(\d){1,2}:(\d){1,2}:(\d){1,2}/g)[0]
-					// let hours=Number(chat_date.match(/[T](\d){2}/g)[0].match(/[^T]/g).join(''))+8
-					// let minute=Number(chat_date.match(/:(\d){2}:/g)[0].match(/[^:]/g).join(''))
-					
-					// uni.current_this15.before_date=chat_date
-					console.log(value,'value');
 					uni.current_this15.before_message.push(...value)
-					// uni.current_this15
 					uni.current_this15.scrollTop=value.length*120
 					// 将数据导入
 					return
 				}
 				
+				// 头像被修改
 				if(data.state==5){
 					let {value,openid}=data
 					uni.current_this15.before_message.forEach(item=>{
@@ -222,6 +234,20 @@
 					uni.current_this15.message.forEach(item=>{
 						if(item.openid==openid)
 							item.avatar=value
+					})
+					return
+				}
+				
+				// 其他数据被修改
+				if(data.state==6){
+					let {value,openid,property}=data
+					uni.current_this15.before_message.forEach(item=>{
+						if(item.openid==openid)
+							item[property=='nickName'?'name':property]=value
+					})
+					uni.current_this15.message.forEach(item=>{
+						if(item.openid==openid)
+							item[property=='nickName'?'name':property]=value
 					})
 					return
 				}
@@ -237,25 +263,11 @@
 				let state=0
 				if(uni.current_this15.message.length>0){
 					// 拿到上一个然后进行比较
-					if(Number(uni.current_this15.message[uni.current_this15.message.length-1].chat_date.split('').slice(0,3).join(''))-chat_date.hours<=0){
+					if(Number(uni.current_this15.message[uni.current_this15.message.length-1].chat_date.split('').slice(0,3).join(''))-chat_date.hours<-1){
 						uni.current_this15.message[uni.current_this15.message.length-1].state=1
 					}
 					
 				}
-				// if(uni.current_this15.message.length<=0){
-				// 	// 与before_message最后一个比较
-				// 	let before_mssage_=uni.current_this15.before_mssage[uni.current_this15.before_mssage.length-1]
-				// 	// 今天
-				// 	// &&Number(before_mssage_.split('').slice(0,2).join(''))-time_format(new Date()).hours>=-1
-				// 	if(before_mssage_.length<=5){
-						
-				// 	}else{
-				// 		// 以前
-				// 	}
-				// }else{
-				// 	// 与上一个进行比较
-					
-				// }
 				
 				uni.current_this15.message.push({
 					name:data.name,
@@ -278,7 +290,13 @@
 			let scrollTop=ref(0)
 			function sendData(){
 				// 查看当前聊天状态，是否还能继续发送
-				
+				if(store.getters.login_state!=1){
+					uni.showToast({
+						title:'请先登录',
+						icon:'error'
+					})
+					return
+				}
 				uni.request({
 					url:'https://www.mynameisczy.asia:5000/chat_state',
 					method:'POST',
@@ -302,7 +320,7 @@
 						}
 						if(uni.current_this15.msg_data.length<=0){
 							uni.showToast({
-								title:'输入不能为空哦'
+								title:'输入不能为空'
 							})							
 							return
 						}
