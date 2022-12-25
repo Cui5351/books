@@ -47,7 +47,7 @@
 		<view class="bill" :style="{height:bill_height+'rpx'}" v-if='to_hid==1'>
 			<view class="store_infos" :style="{height:goods_category/4+50+'px'}" v-for="(item,index) in store_infos" :key="index"  >
 				<view  @click.stop="toggle(item)" :style="{maxWidth:goods_category/4+'px',minWidth:goods_category/4+'px',maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
-					<image :src="'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
+					<image @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
 				</view>
 				<view class="title" :style="{maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
 					<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
@@ -267,7 +267,6 @@
 					skip:skip.value,
 					count:10
 				},success(value) {
-					
 					if(value.data.value.length>0){
 						// 拿到用户的收藏
 						// 对value.data.value进行遍历（添加一个收藏的属性）
@@ -451,7 +450,10 @@
 				let arr=['柴犬是体型中等并且又最古老的日本犬。柴犬能够应付陡峭的丘陵和山脉的斜坡，拥有灵敏的感官','它们是非常古老的犬种,基因和狼非常相近,相貌也酷似狼,','西伯利亚雪橇犬是原始的古老犬种,主要生活在在西伯利亚东北部、格陵兰南部。哈士奇名字是源自其独特的嘶哑叫声。','外貌：脚步轻快自如，动作优美。犬身适度紧凑，毛量丰，竖耳，尾如毛刷，其典型步态特征为平稳、轻松','性情:友好、温和但不失机警,性格开朗。既不会表现出护卫犬的强烈占有欲,也不会对陌生人产生过度怀疑或攻击其它犬只']
 				uni.current_this2.toggle({book_introduce:'这是狗子'+item+'号'+arr[Math.round(Math.random()*5)]})
 			}
-			return {...toRefs(store.state),toggle_wallpaper_page,show_dog_info,to_hid,load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
+			function image_load_err(item){
+				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+			}
+			return {...toRefs(store.state),image_load_err,toggle_wallpaper_page,show_dog_info,to_hid,load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
 		}
 	}
 </script>

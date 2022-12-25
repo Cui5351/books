@@ -8,7 +8,7 @@
 			</uni-popup>
 			<view class="store_infos" :style="{height:goods_category/4+25+'px'}" v-for="(item,index) in store_infos" :key="index">
 				<view :style="{maxWidth:goods_category/4+'px',minWidth:goods_category/4+'px',maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
-					<image @click.stop="toggle(item)" :src="'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
+					<image @click.stop="toggle(item)" @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
 				</view>
 				<view class="title" >
 					<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
@@ -67,7 +67,10 @@
 					}
 				})
 			}
-			return {content,info,goods_category,request_book_info,fav_b}
+			function image_load_err(item){
+				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+			}
+			return {image_load_err,content,info,goods_category,request_book_info,fav_b}
 		},
 		methods: {
 			toggle(item){

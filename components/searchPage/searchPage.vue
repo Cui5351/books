@@ -63,8 +63,8 @@
 			let hot=reactive([])
 			let search_text=reactive({t:''})
 			let book_wh=ref(0)
-			let skip=ref(0)
 			let count=ref(6)
+			let skip=ref(0)
 			let head_height=ref(0)
 			let default_search_text=ref('')
 			let search_record=reactive([]);
@@ -103,6 +103,8 @@
 			const {request_book_info}=hooks()
 			
 			function search2(t){
+				skip.value=0
+				count.value=6
 				uni.showLoading({
 					title: '书籍加载中'
 				})
@@ -118,8 +120,7 @@
 					method:"POST",
 					data:{
 						book_name:text,
-						skip:skip.value,
-						count:count.value
+						skip:skip.value,count:count.value
 					},success(value) {
 						value.data.value.forEach(item=>{
 							item.fav=false

@@ -178,6 +178,7 @@
 								this.saveIndex()
 								uni.current_this7.goTop()
 								// 找到了直接结束函数
+								this.show_e=0
 								return
 							}
 						}
@@ -254,6 +255,7 @@
 						})
 					}
 				})
+				this.show_e=0
 			},
 			saveIndex: function() {
 				// 每次切换都保存一次索引

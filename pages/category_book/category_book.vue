@@ -3,7 +3,7 @@
 		<navigation :show_back="1">
 			{{title}}
 		</navigation>
-			<view class="container" :style="{marginTop:container_margin+10+'px'}">
+			<view class="container" :style="{marginTop:container_margin+10+'px',height:(container_height-container_margin+50)+'px'}">
 				<bookSearchPage :navigation_hei='0' :load_state='load_state' :tolower="getCategoryBook" :book_wh="book_wh" :store_infos="store_infos" :store='store' v-if="store_infos.length"></bookSearchPage>
 				<h1 v-if="!store_infos.length" style="text-align: center;color:gray;font-size: 18px;">敬请期待</h1>
 			</view>
@@ -27,6 +27,7 @@
 		setup(props) {
 			const store=useStore()
 			let title=ref('')
+			let container_height=ref(uni.getSystemInfoSync().windowHeight)
 			let count=ref(15)
 			let skip=ref(0)
 			let load_state=reactive({state:0})
@@ -78,7 +79,7 @@
 			function scroll_fun(e){
 				console.log(e);
 			}
-			return {scroll_fun,load_state,count,book_wh,title,tolower,getCategoryBook,container_margin,store_infos,store}
+			return {scroll_fun,container_height,load_state,count,book_wh,title,tolower,getCategoryBook,container_margin,store_infos,store}
 		},
 		methods: {
 			
@@ -94,8 +95,6 @@
 		line-height: 24px;
 		box-sizing: border-box;
 		max-width:100%;
-		max-height:100%;
-		min-height:100%;
 		display: flex;
 		flex-direction: column;
 		&>view{

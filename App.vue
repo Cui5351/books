@@ -12,7 +12,7 @@
 			//   success() {
 			// 	  console.log('success')
 			//   },fail(e) {
-			//   	console.log(e);
+			//   	console.log(e)
 			//   }
 			// })
 		},

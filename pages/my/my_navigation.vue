@@ -5,7 +5,7 @@
 		<view class="userPortrait" :style="{height:head_height*1.4+'px',marginTop:head_height+'px'}">
 			<view @click="login" class="portraitEdit" style="position: relative;z-index:9999999999991;">
 				<view class="portrait" :style="{width:portraitW+'px',height:portraitW+'px'}">
-					<image :src="user_info.portraitUrl" mode=""></image>
+					<image :src="user_info.portraitUrl" style="filter: saturate(1.1);"></image>
 				</view>
 				<view class="user_info" v-if="login_state">
 					<view class="user_name">{{user_info.name}}</view>
@@ -146,6 +146,7 @@
 											store.state.name=nickName
 											store.state.portraitUrl=avatarUrl
 											store.state.score=score
+											store.state.gender=gender
 											store.state.author_answer=author_answer
 											store.state.data_provide_answer=data_provide_answer
 											uni.hideLoading()

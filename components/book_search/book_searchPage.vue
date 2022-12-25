@@ -1,5 +1,5 @@
 <template>
-	<scroll-view  v-if="store_infos.length" @scrolltolower="fn" :scroll-y="true" :style="{height:info.screenHeight-navigation_hei*2.3+'px',overflow:'hidden'}">
+	<scroll-view  v-if="store_infos.length" @scrolltolower="fn" :scroll-y="true" :style="{height:info.screenHeight-container_margin-50+'px'}">
 		<view  class="bill" v-for="(item,index) in store_infos" :key="index">
 		<uni-popup ref="popup" background-color="#fff">
 			<view class="popup-content">
@@ -9,7 +9,7 @@
 		</uni-popup>
 		<view class="store_infos" :style="{height:book_wh*1.1+'px',minHeight:book_wh*1.1+'px',maxHeight:book_wh*1.1+'px'}" >
 			<view :style="{maxWidth:book_wh+'px',minWidth:book_wh+'px',minHeight:book_wh*1.2+'px',maxHeight:book_wh*1.2+'px'}">
-				<image  @click.stop="toggle(item)" :src="'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:book_wh*0.8+'px',minWidth:book_wh*0.8+'px',minHeight:book_wh*1+'px',maxHeight:book_wh*1+'px'}"></image>
+				<image  @click.stop="toggle(item)" @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:book_wh*0.8+'px',minWidth:book_wh*0.8+'px',minHeight:book_wh*1+'px',maxHeight:book_wh*1+'px'}"></image>
 			</view>
 			<view class="title">
 				<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
@@ -72,6 +72,7 @@
 		setup(props) {
 			let content=ref('')
 			const store=useStore()
+			let container_margin=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			let user_bookshelf=reactive([])
 			let info=reactive(uni.getSystemInfoSync())
 			const {request_book_info}=hooks()
@@ -88,7 +89,10 @@
 			function fn(){
 				props.tolower()
 			}
-			return {fn,request_book_info,fav_book,content,info}
+			function image_load_err(item){
+				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+			}
+			return {image_load_err,fn,request_book_info,fav_book,content,info,container_margin}
 		}
 	}
 </script>

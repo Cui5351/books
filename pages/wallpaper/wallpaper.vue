@@ -50,6 +50,21 @@
 					image_info:'这是张壁纸',
 					image_path:4,
 					state:0
+				},
+				{
+					image_info:'这是张壁纸',
+					image_path:5,
+					state:0
+				},
+				{
+					image_info:'这是张壁纸',
+					image_path:6,
+					state:0
+				},
+				{
+					image_info:'这是张壁纸',
+					image_path:7,
+					state:0
 				}
 			])
 			function save_image(item){

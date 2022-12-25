@@ -1,151 +1,143 @@
 {
-	"pages": [
-		{
-			"path": "pages/home/home",
-			"style": {
-				"navigationBarTitleText": "首页",
-				"enablePullDownRefresh":true
-			}
-		},
-		{
-					"path" : "pages/base_info/base_info",
-					"style" :                                                                                    
-					{
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": false
-					}
-					
-				}
-		    ,
-		{
-		    "path" : "pages/chat/chat",
-		    "style" :                                                                                    
-		    {
-		        "navigationBarTitleText": "",
-		        "enablePullDownRefresh": false
-		    }
-		    
-		},
-		{
-		    "path" : "pages/sign_in_today/sign_in_today",
-		    "style" :                                                                                    
-		    {
-		        "navigationBarTitleText": "",
-		        "enablePullDownRefresh": false
-		    }
-		},
-		{
-		    "path" : "pages/other_page/other_page",
-		    "style" :                                                                                    
-		    {
-		        "navigationBarTitleText": "",
-		        "enablePullDownRefresh": false
-		    }
-		},
-		{
-		"path": "pages/my/my",
-		"style": {
-			"navigationBarTitleText": "我的"
-		}
-		},{
-		"path": "pages/wallpaper/wallpaper",
-		"style": {
-			"navigationBarTitleText": "精美壁纸"
-		}
-	},{
-		"path": "pages/bills/bills",
-		"style": {
-			"navigationBarTitleText": "订单",
-			"enablePullDownRefresh": true
-		}
-	}
-	,{
-            "path" : "pages/navigation/navigation_all",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
+    "pages" : [
+        {
+            "path" : "pages/home/home",
+            "style" : {
+                "navigationBarTitleText" : "首页",
+                "enablePullDownRefresh" : true
             }
-        },{
-			"path": "pages/current_book_page/current_book_page"
-		}
-        ,{
-            "path" : "components/searchPage/searchPage",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
-            }
-            
-        },		{
-		    "path" : "pages/feedback/feedback",
-		    "style" :                                                                                    
-		    {
-		        "navigationBarTitleText": "",
-		        "enablePullDownRefresh": false
-		    }
-		    
-		}
-        ,{
-            "path" : "pages/category_book/category_book",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
-            }
-            
         },
-		{
-		    "path" : "pages/service_stop_page/service_stop_page",
-		    "style" :                                                                                    
-		    {
-		        "navigationBarTitleText": "",
-		        "enablePullDownRefresh": false
-		    }
-		}
-        ,{
+        {
+            "path" : "pages/base_info/base_info",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/chat/chat",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/sign_in_today/sign_in_today",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/other_page/other_page",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/my/my",
+            "style" : {
+                "navigationBarTitleText" : "我的"
+            }
+        },
+        {
+            "path" : "pages/wallpaper/wallpaper",
+            "style" : {
+                "navigationBarTitleText" : "精美壁纸"
+            }
+        },
+        {
+            "path" : "pages/bills/bills",
+            "style" : {
+                "navigationBarTitleText" : "订单",
+                "enablePullDownRefresh" : true
+            }
+        },
+        {
+            "path" : "pages/navigation/navigation_all",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/current_book_page/current_book_page"
+        },
+        {
+            "path" : "components/searchPage/searchPage",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/feedback/feedback",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/category_book/category_book",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/service_stop_page/service_stop_page",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
             "path" : "pages/inner_page/inner_page",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
             }
-            
-        }
-        ,{
+        },
+        {
             "path" : "pages/base_info/avatar_edit/avatar_edit",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
             }
-            
+        },
+        {
+            "path" : "App",
+            "style" : {}
         }
     ],
-	"tabBar":{
-		"list":[{
-			"pagePath":"pages/home/home",
-			"text":"首页",
-			"iconPath":"./static/icons/home.png",
-			"selectedIconPath":"static/icons/home_active.jpg"
-		},
-		{
-			"pagePath":"pages/bills/bills",
-			"text":"收藏",
-			"iconPath":"./static/icons/bills.png",
-			"selectedIconPath":"./static/icons/bills_active.jpg"
-		},{
-			"pagePath":"pages/my/my",
-			"text":"我的",
-			"iconPath":"static/icons/my.png",
-			"selectedIconPath":"static/icons/my_active.jpg"
-		}]
-	},
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8",
-		"navigationStyle":"custom"
-	}
+    "tabBar" : {
+        "list" : [
+            {
+                "pagePath" : "pages/home/home",
+                "text" : "首页",
+                "iconPath" : "./static/icons/home.png",
+                "selectedIconPath" : "static/icons/home_active.jpg"
+            },
+            {
+                "pagePath" : "pages/bills/bills",
+                "text" : "收藏",
+                "iconPath" : "./static/icons/bills.png",
+                "selectedIconPath" : "./static/icons/bills_active.jpg"
+            },
+            {
+                "pagePath" : "pages/my/my",
+                "text" : "我的",
+                "iconPath" : "static/icons/my.png",
+                "selectedIconPath" : "static/icons/my_active.jpg"
+            }
+        ]
+    },
+    "globalStyle" : {
+        "navigationBarTextStyle" : "black",
+        "navigationBarTitleText" : "uni-app",
+        "navigationBarBackgroundColor" : "#F8F8F8",
+        "backgroundColor" : "#F8F8F8",
+        "navigationStyle" : "custom"
+    }
 }
