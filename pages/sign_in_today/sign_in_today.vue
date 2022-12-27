@@ -13,7 +13,13 @@
 					</view>
 				</view>
 				<view class="show_day">
-					
+					<view v-for="(item,index) in week">
+						<view class="">{{item.day}}</view>
+						<view style="min-height:80%;width: 70%;">
+							<image v-if="item.state==1" src="https://www.mynameisczy.asia/svgs/sign_selected_icon.svg" style="width: 100%;height:100%;"></image>
+							<image v-else src="https://www.mynameisczy.asia/svgs/sign_in_icon.svg" style="width: 100%;height:100%;"></image>
+						</view>
+					</view>
 				</view>
 				<view class="sgin_in">
 					<view class="flex_center">
@@ -44,9 +50,8 @@
 			})
 			uni.current_this10=this
 			let date=new Date()
-			let month=date.getMonth()==12?1:date.getMonth()+1
-			let day=date.getDate()
-			let current_date=`${date.getFullYear()}-${month<10?'0'+month:month}-${day<10?'0'+day:day}`
+			
+			let current_date=this.format(date)
 			// 从服务器内获取签到的次数
 			// uni.request({
 				// url:''
@@ -69,13 +74,29 @@
 				},
 				success(res) {
 					let date_date=res.data.value
-					console.log(res,'res');
+					uni.current_this10.date_date.date_date.push(...date_date)
 					if(!date_date){
 						uni.showToast({
 							icon:'error',
 							title:'发声未知的错误'
 						})
 					}
+					
+					// 查看星期一的日期
+					let monday=date.setDate(date.getDate()-date.getDay())
+					
+					// 推演出一个星期的日期
+					uni.current_this10.week.forEach((item,index)=>{
+						item.date=uni.current_this10.format(new Date(monday+1000*(index+1)*60*60*24))
+					})
+					
+					uni.current_this10.date_date.date_date.forEach(item=>{
+						uni.current_this10.week.forEach(item2=>{
+							if(item==item2.date){
+								item2.state=1
+							}
+						})
+					})
 					// 检索是否存在
 					if(date_date.indexOf(current_date)>=0){
 						// 已签到
@@ -95,11 +116,45 @@
 		},
 		setup(){
 			let store=reactive(useStore())
+			let date_date=reactive({
+				date_date:[]
+			})
 			let openid=computed(()=>store.getters.user_openid)
 			// 当前积分分数
 			let score=computed(()=>store.getters.user_score)
 			// 当前日期
 			let week_info=reactive([])
+			
+			function format(date){
+				let month=date.getMonth()==12?1:date.getMonth()+1
+				let day=date.getDate()
+				return `${date.getFullYear()}-${month<10?'0'+month:month}-${day<10?'0'+day:day}`
+			}
+			
+			let week=reactive([
+				{
+					day:'星期一',
+					state:0
+				},{
+					day:'星期二',
+					state:0
+				},{
+					day:'星期三',
+					state:0
+				},{
+					day:'星期四',
+					state:0
+				},{
+					day:'星期五',
+					state:0
+				},{
+					day:'星期六',
+					state:0
+				},{
+					day:'星期天',
+					state:0
+				}
+			])
 			// 默认未签到
 			let sign=ref(false)
 			let sign_icon=computed(()=>{
@@ -122,7 +177,15 @@
 						if(res.data.error){
 							throw 'err'
 						}
+						uni.current_this10.date_date.date_date.push(uni.current_this10.format(new Date()))
 						uni.current_this10.sign=true
+						uni.current_this10.date_date.date_date.forEach(item=>{
+							uni.current_this10.week.forEach(item2=>{
+								if(item==item2.date){
+									item2.state=1
+								}
+							})
+						})
 						uni.current_this10.store.state.score=Number(uni.current_this10.store.state.score)+10
 						uni.showToast({
 							icon:'success',
@@ -137,7 +200,7 @@
 					}
 				})
 			}
-			return {head_height_child,openid,week_info,sign,sign_fun,sign_icon,score,store}
+			return {head_height_child,openid,week_info,sign,sign_fun,sign_icon,score,store,week,date_date,format}
 		}
 	}
 </script>
@@ -157,11 +220,12 @@ height:100%;
 &>.user_info{
 	display: flex;
 	justify-content: space-between;
+	margin-bottom: 20px;
 }
 }
 .sgin_in{
 	display: flex;
-	margin-top:200px;
+	margin-top:130px;
 	flex-direction: column;
 }
 .sign_icon{
@@ -169,9 +233,24 @@ height:100%;
 	height: 100px;
 }
 .show_day{
-	height:100px;
+	padding:10px 0;
+	box-sizing: border-box;
+	height:300px;
 	border-radius: 10px;
-	box-shadow:-2px 2px 10px 2px gray;
-	background-color:rgb(79,70,229);
+	box-shadow:0px 2px 10px 5px rgba(0,0,0,.1);
+	background-color:@border;
+	display: grid;
+	grid-row: 2;
+	grid-gap:10px 10px;
+	grid-template-columns: 1fr 1fr 1fr;
+	&>view{
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		align-items: center;
+		&>view{
+			flex-grow: 1;
+		}
+	}
 }
 </style>

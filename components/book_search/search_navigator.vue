@@ -50,7 +50,7 @@
 				max-width:85%;
 				min-width:85%;
 				background-color: rgb(244,244,244);
-				padding:-5px 10px;
+				padding:0 10px;
 				justify-content: center;
 				align-items: center;
 				display: flex;

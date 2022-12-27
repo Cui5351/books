@@ -39,6 +39,7 @@
 .head{
 	position: fixed;
 	top:0;
+	background-color: rgb(255,95,103);;
 	z-index:9999;
 	left:0;
 	width:100%;

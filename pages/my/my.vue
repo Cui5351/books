@@ -24,13 +24,6 @@
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
-				<view class="edit_item" @click="no_develop">
-					<view>
-						<uni-icons type="cart"></uni-icons>
-						源暮商城(暂未开放)
-					</view>
-					<uni-icons type="right"></uni-icons>
-				</view>
 				<view class="edit_item" @click='gotoPage("/pages/chat/chat")'>
 					<view>
 						<uni-icons type="chatboxes"></uni-icons>
@@ -49,6 +42,13 @@
 					<view>
 						<uni-icons type="email"></uni-icons>
 						小程序反馈
+					</view>
+					<uni-icons type="right"></uni-icons>
+				</view>
+				<view class="edit_item" @click="no_develop">
+					<view>
+						<uni-icons type="cart"></uni-icons>
+						源暮商城(暂未开放)
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>

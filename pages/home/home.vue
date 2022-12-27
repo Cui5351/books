@@ -1,5 +1,4 @@
 <template>
-	<link rel="preload" href="AaWangCaiZhaoPaiTi.woff2" as="font" type="font/woff2" crossorigin>
 	<!-- head高度：100rpx -->
 		<navigation-header  :book_wh="goods_category/4" :head_height='header_height*0.4' :head_height_child='head_height_child' :state='header_state'></navigation-header>
 		<view @click.stop="goto1" class="gotoback" :style="{left:left_distance+'%'}">
@@ -24,7 +23,7 @@
 			<!-- <view class="advertisement" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}"> -->
 <uni-notice-bar show-icon scrollable style="width: 100%;"
 		
-				text="小 程 序 2.0 终 于 跟 大 家 见 面 啦 ! 大 家 若 在 使 用 小 程 序 中 途 遇 到 问 题 ,  可 以 在 我的 -> 小程序 反 馈 进 行 反 馈 哟 !" />
+				text="新 年 到 了 ! 小 程 序 3.0 也 正 式 上 线 啦 ! 在 这 里 祝 大 家 新 年 快 乐 , 心 想 事 成~" />
 			<!-- </view> -->
 		</view>
 		<view class="fixed" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}">
