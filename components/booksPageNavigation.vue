@@ -1,8 +1,8 @@
 <template>
-	<view class="head" :style="{marginTop:show_e?'0%':'-100%'}">
+	<view class="head" :style="{marginTop:show_e?'0%':'-100%',background:color.color?'rgb(241,229,201)':'#1A1A1A'}">
 		<view class="status_bar">
 		</view>
-		<view class="edit_bar" :style="{height:head_height_child+'px',color:color.color?'black':' #B1B1B1'}">
+		<view class="edit_bar" :style="{height:head_height_child+'px',background:color.color?'rgb(241,229,201)':'#1A1A1A',color:color.color?'black':' #B1B1B1'}">
 			<view class="back"><uni-icons  :color="color.color?'black':' #B1B1B1'" class="edit_btn" type="left" size="25" @click="back"></uni-icons></view>
 			<view style="text-overflow: ellipsis;white-space: nowrap;">{{current_book_passage_name}}</view>
 			<view></view>
@@ -36,9 +36,6 @@
 </script>
 
 <style scoped lang="less">
-.edit_bar{
-		
-}
 .head{
 	box-shadow:0 4px 10px -3px gray;
 	// font-family: '楷体';
@@ -56,6 +53,7 @@
 .edit_bar{
 	transition:1s ease;
 	overflow: hidden;
+	// background-color:red ;
 	display: flex;
 	padding: 0 20px;
 	box-sizing: border-box;

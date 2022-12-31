@@ -235,6 +235,7 @@
 <style lang="less" scoped>
 	.container {
 		font-size:16px;
+		overflow: hidden;
 		// font-size: 14px;
 		line-height: 24px;
 		width:100%;

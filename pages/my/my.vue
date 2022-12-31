@@ -10,6 +10,13 @@
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
+				<view class="edit_item" @click='gotoPage("/pages/store_page/store_page")'>
+					<view>
+						<uni-icons type="cart"></uni-icons>
+						源暮商城
+					</view>
+					<uni-icons type="right"></uni-icons>
+				</view>
 				<view class="edit_item" @click="toggle_base_info">
 					<view>
 						<uni-icons type="person"></uni-icons>
@@ -42,13 +49,6 @@
 					<view>
 						<uni-icons type="email"></uni-icons>
 						小程序反馈
-					</view>
-					<uni-icons type="right"></uni-icons>
-				</view>
-				<view class="edit_item" @click="no_develop">
-					<view>
-						<uni-icons type="cart"></uni-icons>
-						源暮商城(暂未开放)
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>

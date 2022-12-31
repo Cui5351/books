@@ -46,6 +46,8 @@
 	width:100%;
 	transition:0.5s ease;
 	background-color: @background;
+	// border-bottom:1px solid rgba(0,0,0,.1);
+	box-shadow:-1px 1px 10px -5px gray;
 }
 .status_bar{
 	height:var(--status-bar-height);

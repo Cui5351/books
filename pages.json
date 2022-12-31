@@ -110,6 +110,24 @@
             "path" : "App",
             "style" : {}
         }
+        ,{
+            "path" : "pages/store_page/store_page",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/store_page/car/car",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
     "tabBar" : {
         "list" : [

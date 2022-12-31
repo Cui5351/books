@@ -63,6 +63,8 @@
 						</view>
 					</view>
 				</view>
+				<view class="blank" :style="{height:blank-100+'px'}" v-if="state==true">
+				</view>
 				</view>
 			</scroll-view>
 	</inner_page>
@@ -292,8 +294,7 @@
 				// 查看当前聊天状态，是否还能继续发送
 				if(store.getters.login_state!=1){
 					uni.showToast({
-						title:'请先登录',
-						icon:'error'
+						title:'请先登录'
 					})
 					return
 				}
@@ -314,12 +315,14 @@
 						// 无法发送数据（禁言状态）
 						if(!res.data.value){
 							uni.showToast({
+								icon:'none',
 								title:'您已被禁言'
 							})					
 						return
 						}
 						if(uni.current_this15.msg_data.length<=0){
 							uni.showToast({
+								icon:'none',
 								title:'输入不能为空'
 							})							
 							return
@@ -334,6 +337,11 @@
 			let before_message=reactive([])
 			function show_(){
 				state.value=!state.value
+				if(state.value){
+					scrollTop.value+=(blank.value-100)
+				}else{
+					scrollTop.value-=(blank.value-100)
+				}
 				console.log(state.value);
 			}
 			function sendData_(state,data=''){
@@ -367,7 +375,8 @@
 					}
 					})
 			}
-			return {scrollTop,before_date,before_message,message,state,show_,store,sendData,msg_data,sendData_,chat_count}
+			let blank=ref(uni.getSystemInfoSync().screenHeight/2)
+			return {blank,scrollTop,before_date,before_message,message,state,show_,store,sendData,msg_data,sendData_,chat_count}
 		},
 		methods: {
 			
@@ -430,9 +439,14 @@
 		}
 		.answer{
 			border-radius: 8px;
+			max-width:70%;
+			white-space: normal;
 			padding:8px 10px;
 			background-color: rgb(149,236,105);
 			font-size: 18px;
+			word-wrap:break-word;
+			word-break:break-all; 
+			overflow: hidden;
 			box-sizing: border-box;
 		}
 }
@@ -473,6 +487,12 @@
 		border-radius: 8px;
 		padding:8px 10px;
 		background-color: white;
+		// word-wrap:break-word单词不截断自动换行
+		word-wrap:break-word; 
+		// word-break:break-all单词截断自动换行
+		word-break:break-all; 
+		overflow: hidden;
+		max-width:70%;
 		font-size: 18px;
 		box-sizing: border-box;
 	}
@@ -523,6 +543,7 @@
 	}
 }
 .before_date{
+	margin-top:10px;
 	width:100%;
 	display: flex;
 	justify-content: center;

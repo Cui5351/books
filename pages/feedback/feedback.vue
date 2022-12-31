@@ -23,7 +23,9 @@
 				</view>
 				<view style="max-height: 10%;min-height:10%;font-size: 18px;" class="showAnswer" @click="showAnswer(item.name,item.after_answer)">查看回复</view>
 			</view>
-			<text style="text-align: center;margin-top: 10px;color:gray">小程序作者(**一)——数据来源:(*杰)</text>
+			<text style="text-align: center;margin-top: 10px;color:gray">小程序作者(任*一)</text>
+			<text style="text-align: center;margin-top: 10px;color:gray">数据来源:(雷*华)——数据来源:(*杰)</text>
+			
 		</view>
 	</view>
 </template>
