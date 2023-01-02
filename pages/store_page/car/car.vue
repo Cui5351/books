@@ -1,5 +1,5 @@
 <template>
-	<navigation show_back='true'>购物车</navigation>
+	<navigation show_back='true'>我的商品</navigation>
 	<innerpage>
 		<view class="container">
 			<uni-notice-bar show-icon scrollable style="width: 100%;"
@@ -22,14 +22,18 @@
 	import innerpage from '../../inner_page/inner_page.vue'
 	import navigation from '../../navigation/navigation_all.vue'
 	import uniPopup from '@/uni_modules/uni-popup/components/uni-popup/popup.js'
+	import {reactive} from 'vue'
 	export default {
 		components:{
 			innerpage,navigation,uniPopup
 		},
-		data() {
-			return {
-				
-			}
+		onLoad(res) {
+			this.user_car.push(...JSON.parse(res.user_car))
+			console.log(this.user_car,'购物车');
+		},
+		setup(){
+			let user_car=reactive([])
+			return {user_car}
 		}
 	}
 </script>

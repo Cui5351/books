@@ -83,12 +83,12 @@
 					}
 					
 					// 查看星期一的日期
-					let monday=date.setDate(date.getDate()-date.getDay())
-					
+					let monday=date.setDate(date.getDate()-(date.getDay()?date.getDay():7))
 					// 推演出一个星期的日期
 					uni.current_this10.week.forEach((item,index)=>{
 						item.date=uni.current_this10.format(new Date(monday+1000*(index+1)*60*60*24))
 					})
+					console.log(uni.current_this10.week);
 					
 					uni.current_this10.date_date.date_date.forEach(item=>{
 						uni.current_this10.week.forEach(item2=>{

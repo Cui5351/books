@@ -37,7 +37,8 @@
 
 <style scoped lang="less">
 .head{
-	box-shadow:0 4px 10px -3px gray;
+	// box-shadow:0 4px 10px -3px gray;
+	box-shadow:-1px 1px 10px -5px gray;
 	// font-family: '楷体';
 	position: fixed;
 	transition: .3s ease;

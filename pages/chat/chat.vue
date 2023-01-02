@@ -63,6 +63,7 @@
 						</view>
 					</view>
 				</view>
+				<view style="height:50px;"></view>
 				<view class="blank" :style="{height:blank-100+'px'}" v-if="state==true">
 				</view>
 				</view>
