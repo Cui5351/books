@@ -5,13 +5,17 @@
 			<uni-notice-bar show-icon scrollable style="width: 100%;"
 				text="每 周 三 / 周 六 可 以 在 长 艺 2 栋 教 学 楼 下 领 取 兑 换 的 礼 品" />
 			<scroll-view class="bills" scroll-y="true">
-				<view class="bill" v-for="(item,index) in 3" :index='index' >
+				<view class="bill" v-for="(item,index) in user_car" :index='index' >
 					<view class="img">
-						<image src="../../../static/icons/home_active.jpg"></image>
+						<image :src="item.picture"></image>
 					</view>
 					<view class="title">
-						萝卜
+						{{item.name}}
+						<uni-icons type="closeempty"></uni-icons>{{item.count2}}
 					</view>
+				</view>
+				<view class="none" v-show="user_car.length<=0">
+					暂无商品
 				</view>
 			</scroll-view>
 		</view>
@@ -52,7 +56,7 @@
 }
 .bill{
 	box-sizing: border-box;
-	padding:0 10px;
+	padding:0 20px;
 	border-radius: 15px;
 	margin-bottom:10px;
 	background-color: white;
@@ -70,5 +74,12 @@
 		width: 90%;
 		height:90%;
 	}
+}
+.none{
+	width: 100%;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	color: gray;
 }
 </style>

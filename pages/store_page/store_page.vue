@@ -76,32 +76,50 @@
 				let data=JSON.parse(res.data)
 				console.log(data,'data');
 				// 加载商品信息
-				if(data.state==1){
-					uni.current_this16.shops.push(...data.value)
-					// 获取用户的购物车信息
-					uni.request({
-						url:'https://www.mynameisczy.asia:5000/get_user_shop',
-						method:'POST',
-						data:{
-							openid:uni.current_this16.store.getters.user_openid
-						},success(res) {
-							if(res.data.state==0){
+			})
+		},
+		mounted() {
+			uni.showLoading({
+				title:'加载商品中'
+			})
+			uni.request({
+				url:'https://www.mynameisczy.asia:5000/get_shops',
+				method:'GET',
+				success(res) {
+					if(res.data.state==0)
+						return
+					uni.current_this16.shops.push(...res.data.value)
+						// 获取用户的购物车信息
+						uni.request({
+							url:'https://www.mynameisczy.asia:5000/get_user_shop',
+							method:'POST',
+							data:{
+								openid:uni.current_this16.store.getters.user_openid
+							},success(res) {
+								if(res.data.state==0){
+									uni.showToast({
+										title:'购物车加载失败',
+										icon:'error'
+									})
+									return
+								}
+								let shops=JSON.parse(res.data.value.shops)
+								if(shops.length)
+									uni.current_this16.user_car.push(...shops)
+							},fail() {
 								uni.showToast({
 									title:'购物车加载失败',
 									icon:'error'
 								})
-								return
 							}
-							let shops=JSON.parse(res.data.value.shops)
-							if(shops.length)
-								uni.current_this16.user_car.push(...shops)
-						},fail() {
-							uni.showToast({
-								title:'购物车加载失败',
-								icon:'error'
-							})
-						}
+						})
+				},fail() {
+					uni.showToast({
+						title:'商品',
+						icon:'error'
 					})
+				},complete() {
+					uni.hideLoading()
 				}
 			})
 		},
@@ -129,6 +147,14 @@
 				if(item.count<=0){
 					console.log('存货不足');
 					return
+				}
+				item.count--
+				let flag=user_car.indexOf(item)
+				if(flag>=0){
+					user_car[flag].count2++
+				}else{
+					user_car.push(item)
+					user_car[user_car.length-1].count2=1
 				}
 				uni.showToast({
 					title:'购买成功',
@@ -181,7 +207,7 @@
 		display: flex;
 		column-count: 2;
 		width:100%;
-		height:100%;
+		// height:100%;
 		flex-wrap: wrap;
 		box-sizing: border-box;
 		.shop{
