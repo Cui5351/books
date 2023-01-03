@@ -130,7 +130,7 @@
 			const store=reactive(useStore())
 			let shops=reactive([])
 			let user_car=reactive([])
-			let score=ref(store.getters.user_score)
+			let score=computed(()=>store.getters.user_score)
 			function car(){
 				if(!store.getters.login_state){
 					uni.showToast({
@@ -145,20 +145,60 @@
 			}
 			function buy(item){
 				if(item.count<=0){
-					console.log('存货不足');
 					return
 				}
-				item.count--
-				let flag=user_car.indexOf(item)
-				if(flag>=0){
-					user_car[flag].count2++
-				}else{
-					user_car.push(item)
-					user_car[user_car.length-1].count2=1
+				item.price=Number(item.price)
+				
+				if(store.getters.user_score<item.price){
+					uni.showToast({
+						title:'金币不足',
+						icon:'error'
+					})
+					return
 				}
-				uni.showToast({
-					title:'购买成功',
-					icon:'success'
+				uni.showLoading({
+					title:'购买中'
+				})
+				// 发送请求
+				uni.request({
+					url:'https://www.mynameisczy.asia:5000/before_pay',
+					method:'POST',
+					data:{
+						openid:store.getters.user_openid,
+						shop_info:item
+					},success(res){
+						if(res.data.state!==1)
+							return
+						item.count--
+						let flag=0
+						user_car.forEach(item2=>{
+							if(item2.name==item.name){
+								item2.count2++
+								flag++
+							}
+						})
+						if(flag<=0){
+							user_car.push(item)
+							user_car[user_car.length-1].count2=1
+						}
+						uni.showToast({
+							title:'购买成功',
+							icon:'success'
+						})
+						store.state.score=Number(store.state.score)-Number(item.price)
+						console.log(store.state);
+						uni.setStorage({
+							key:'user_info',
+							data:{
+								...store.state
+							}
+						})
+					},fail() {
+						console.log('error');
+					},
+					complete() {
+						uni.hideLoading()
+					}
 				})
 			}
 			return {store,score,car,buy,shops,user_car}
