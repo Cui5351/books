@@ -8,7 +8,7 @@
 						{{score}}
 					</view>
 				<view @click="car">
-					<uni-badge class="uni-badge-left-margin" :text="user_car.length" absolute="rightTop" :offset="[-3, -3]" size="small">
+					<uni-badge class="uni-badge-left-margin" :text="car_count" absolute="rightTop" :offset="[-3, -3]" size="small">
 					<uni-icons type="cart" size="27"></uni-icons>
 					</uni-badge>
 					<!-- 购物车 -->
@@ -30,7 +30,7 @@
 							<image :src="item.picture" mode=""></image>
 						</view>
 						<view class="btn" @click="buy(item)" :style="{background:item.count<=0?'lightgray':'orange',border:item.count<=0?'1px solid lightgray':'1px solid orange'}">
-							兑换
+							{{item.count>0?'兑换':'售空'}}
 						</view>
 					</view>
 				</view>
@@ -74,7 +74,14 @@
 			uni.current_this16=this
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
-				console.log(data,'data');
+				if(data.state==1){
+					uni.current_this16.shops.forEach(item=>{
+						if(item.name==data.value.name){
+							item.count=data.value.count
+						}
+					})
+					return
+				}
 				// 加载商品信息
 			})
 		},
@@ -143,6 +150,7 @@
 					url:'/pages/store_page/car/car?user_car='+JSON.stringify(user_car)
 				})
 			}
+			let car_count=computed(()=>user_car.map(item=>item.count2).reduce((a,b)=>a+b,0))
 			function buy(item){
 				if(item.count<=0){
 					return
@@ -156,52 +164,57 @@
 					})
 					return
 				}
-				uni.showLoading({
-					title:'购买中'
-				})
-				// 发送请求
-				uni.request({
-					url:'https://www.mynameisczy.asia:5000/before_pay',
-					method:'POST',
-					data:{
-						openid:store.getters.user_openid,
-						shop_info:item
-					},success(res){
-						if(res.data.state!==1)
-							return
-						item.count--
-						let flag=0
-						user_car.forEach(item2=>{
-							if(item2.name==item.name){
-								item2.count2++
-								flag++
-							}
-						})
-						if(flag<=0){
-							user_car.push(item)
-							user_car[user_car.length-1].count2=1
-						}
-						uni.showToast({
-							title:'购买成功',
-							icon:'success'
-						})
-						store.state.score=Number(store.state.score)-Number(item.price)
-						console.log(store.state);
-						uni.setStorage({
-							key:'user_info',
-							data:{
-								...store.state
-							}
-						})
-					},fail() {
-						console.log('error');
-					},
-					complete() {
-						uni.hideLoading()
+				uni.showModal({
+					content:'是否购买',
+					success(res) {
+						if (res.confirm) {
+							uni.showLoading({
+								title:'购买中'
+							})
+							// 发送请求
+							uni.request({
+								url:'https://www.mynameisczy.asia:5000/before_pay',
+								method:'POST',
+								data:{
+									openid:store.getters.user_openid,
+									shop_info:item
+								},success(res){
+									if(res.data.state!==1)
+										return
+									let flag=0
+									user_car.forEach(item2=>{
+										if(item2.name==item.name){
+											item2.count2++
+											flag++
+										}
+									})
+									if(flag<=0){
+										user_car.push(item)
+										user_car[user_car.length-1].count2=1
+									}
+									uni.showToast({
+										title:'购买成功',
+										icon:'success'
+									})
+									store.state.score=Number(store.state.score)-Number(item.price)
+									uni.setStorage({
+										key:'user_info',
+										data:{
+											...store.state
+										}
+									})
+								},fail() {
+									console.log('error');
+								},
+								complete() {
+									uni.hideLoading()
+								}
+							})
+						}					
 					}
 				})
 			}
-			return {store,score,car,buy,shops,user_car}
+			return {store,score,car,buy,shops,user_car,car_count}
 		}
 	}
 </script>

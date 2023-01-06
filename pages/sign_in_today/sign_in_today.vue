@@ -8,8 +8,9 @@
 				<view class="user_info">
 					<view>
 					</view>
-					<view>
-						我的积分:{{score}}
+					<view style="display: flex;">
+					<image style="width:23px;height:23px;margin-right:5px;" src="../../static/icons/coin.svg"></image>
+					积分:{{score}}
 					</view>
 				</view>
 				<view class="show_day">
@@ -238,7 +239,7 @@ height:100%;
 	height:300px;
 	border-radius: 10px;
 	box-shadow:0px 2px 10px 5px rgba(0,0,0,.1);
-	background-color:@border;
+	background-color:rgba(255,0,0,.5);
 	display: grid;
 	grid-row: 2;
 	grid-gap:10px 10px;

@@ -33,7 +33,6 @@
 		},
 		onLoad(res) {
 			this.user_car.push(...JSON.parse(res.user_car))
-			console.log(this.user_car,'购物车');
 		},
 		setup(){
 			let user_car=reactive([])

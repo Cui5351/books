@@ -24,6 +24,30 @@
 			console.log('exit');
 		},
 		onLoad(){
+			
+			
+			// 检查版本更新
+			let updateManager=uni.getUpdateManager()
+			updateManager.onCheckForUpdate(function (res) {
+			  // 请求完新版本信息的回调
+			  console.log(res.hasUpdate);
+			})
+			
+			updateManager.onUpdateReady(function (res) {
+			  uni.showModal({
+			    title: '更新提示',
+			    content: '新版本已经准备好，是否重启应用？',
+			    success(res) {
+			      if (res.confirm) {
+			        // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+			        updateManager.applyUpdate();
+			      }
+			    }
+			  });
+			
+			});
+			
+			
 			// 每20s(20000ms)发送一次网络请求（更新数据）
 			const store=reactive(useStore())
 			let timer=setInterval(()=>{
@@ -94,7 +118,7 @@
 						}
 					}
 				})
-			},20000)
+			},30000)
 			
 			// 获取分享功能
 			uni.showShareMenu({

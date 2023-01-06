@@ -19,7 +19,7 @@
 					</view>
 				</view>
 				<view class="text" style="max-height: 65%;min-height:65%;">
-					<textarea style="width:100%;height:100%;" v-model="item.content" :placeholder="'给'+item.name+'个留言吧'" placeholder-style="font-size:16px" maxlength="35"></textarea>
+					<textarea style="width:100%;height:100%;" v-model="item.content" :placeholder="item.pre" placeholder-style="font-size:16px" maxlength="35"></textarea>
 				</view>
 				<view style="max-height: 10%;min-height:10%;font-size: 18px;" class="showAnswer" @click="showAnswer(item.name,item.after_answer)">查看回复</view>
 			</view>
@@ -40,17 +40,24 @@
 			navigation_all
 		},
 		mounted() {
-			// this.audio.play()
 			// 这里的this是我打算在页面关闭后停止播放，但是页面虽然切换了(Beforedestroy)，但好像不会摧毁
+			this.audio=uni.createInnerAudioContext()
+			this.audio.src="https://www.mynameisczy.asia/audio/lover boy.mp3"
+			this.audio.autoplay=true
+			this.audio.loop=true
+			this.audio.obeyMuteSwitch=true
+			// this.audio.play()
+			this.audio.title="lover boy来自QQ音乐"
+			this.audio.onError(err=>{
+				console.log(err,'audio err');
+			})
 		},
 		beforeUnmount() {
 			this.audio.stop()
 		},
 		setup() {
+			let audio=reactive(null)
 			let store=useStore()
-			let audio=reactive(uni.getBackgroundAudioManager())
-			audio.src="https://www.mynameisczy.asia/audio/小糊涂.mp3"
-			audio.title="《熊出没》小糊涂"
 			let head_height=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			let body_height=ref(uni.getSystemInfoSync().windowHeight/1.4)
 			let person=reactive([{
@@ -58,12 +65,14 @@
 				maxL:35,
 				content:'',
 				type:0,
+				pre:'小程序体验有问题可以进行反馈',
 				after_answer:computed(()=>store.getters.author_answer)
 			},{
 				name:'小说提供猿',
 				maxL:35,
 				content:'',	
 				type:0,
+				pre:'有啥想看的小说可以进行反馈',
 				after_answer:computed(()=>store.getters.data_provide_answer)
 			}])
 			function submit(item){
@@ -118,11 +127,8 @@
 				})
 			}
 			return {
-				head_height,body_height,person,submit,audio,showAnswer
+				head_height,body_height,person,submit,showAnswer,audio
 			}
-		},
-		methods: {
-			
 		}
 	}
 </script>

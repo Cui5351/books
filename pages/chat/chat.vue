@@ -26,7 +26,9 @@
 									<image :src="item.avatar" style="width: 100%;height:100%;" mode=""></image>
 								</view>
 							<view class="answer">
-								{{item.data}}
+								<text user-select='true'>
+									{{item.data}}
+								</text>
 							</view>
 						</view>
 						<view class="before_date" v-if='item.chat_date.length'>
@@ -53,7 +55,9 @@
 								<image :src="item.avatar" style="width: 100%;height:100%;" mode=""></image>
 							</view>
 						<view class="answer">
-							{{item.data}}
+							<text user-select='true'>
+								{{item.data}}
+							</text>
 						</view>
 					</view>
 					<!-- <view class="before_date" v-if="item.chat_date.length"> -->
@@ -103,16 +107,9 @@
 			
 		// 关闭连接
 		uni.onSocketError(function(){
-			uni.request({
-				url:'https://www.mynameisczy.asia:5000/chat_out',
-				method:'GET',
-				success(res) {
-					uni.current_this15.chat_count=res.data.chat_count
-					uni.showToast({
-						title:'断开连接',
-						icon:'error'
-					})
-			}
+			uni.showToast({
+				title:'断开连接',
+				icon:'error'
 			})
 		})
 		
@@ -126,11 +123,12 @@
 			// 给性别gender查找两个图标
 		
 			
-		// 打开连接
-			uni.onSocketOpen(function(res){
 			uni.showLoading({
 				title:'进入中'
 			})
+		// 打开连接
+			uni.onSocketOpen(function(res){
+				uni.hideLoading()
 			// state
 				// 进入聊天为1
 				// 发送消息为2
@@ -148,13 +146,11 @@
 						data:''
 					}),
 					success(){
-						uni.hideLoading()
 						uni.showToast({
 							icon:'none',
 							title:'点击萝卜可以发送消息哦!'
 						})
 				},fail(){
-						uni.hideLoading()
 						uni.showToast({
 							icon:'none',
 							title:'网络连接失败'
@@ -164,7 +160,6 @@
 			// 接收消息
 			uni.onSocketMessage(function(res) {
 				let data=JSON.parse(res.data)
-				console.log(data,'data');
 				
 				function time_format(time){
 					let year=time.getFullYear()
@@ -305,7 +300,6 @@
 					data:{
 						openid:store.getters.user_openid
 					},success(res) {
-						console.log(res);
 						if(res.data.state==0){
 							uni.showToast({
 								icon:'error',
@@ -343,7 +337,6 @@
 				}else{
 					scrollTop.value-=(blank.value-100)
 				}
-				console.log(state.value);
 			}
 			function sendData_(state,data=''){
 				if(state==3){
@@ -406,6 +399,7 @@
 .user_my{
 	height:120px;
 	display:flex;
+	margin:20px 0 20px 0;
 	padding:0 10px ;
 	box-sizing: border-box;
 	flex-direction: column;
@@ -440,6 +434,7 @@
 		}
 		.answer{
 			border-radius: 8px;
+			
 			max-width:70%;
 			white-space: normal;
 			padding:8px 10px;
@@ -530,9 +525,7 @@
 		}
 	}
 	&>image{
-		
 		margin-right:10px;
-		
 		flex-grow: 1;
 		width:70px;
 		min-width:70px;
@@ -544,7 +537,7 @@
 	}
 }
 .before_date{
-	margin-top:10px;
+	margin:10px 0 20px 0;
 	width:100%;
 	display: flex;
 	justify-content: center;
