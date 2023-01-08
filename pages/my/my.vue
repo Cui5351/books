@@ -24,10 +24,10 @@
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
-				<view class="edit_item" @click="no_develop">
+				<view class="edit_item" @click='gotoPage("/pages/poker/poker")'>
 					<view>
 						<uni-icons type="eye"></uni-icons>
-						最近阅读(暂未开放)
+						斗地主
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
@@ -150,6 +150,15 @@
 				})
 			}
 			function gotoPage(url){
+				if(url=='/pages/poker/poker')
+					if(!store.getters.login_state){
+						uni.showToast({
+							icon:'error',
+							title:'请先登录'
+						})
+						return
+					}
+						
 				uni.navigateTo({
 					url:url
 				})

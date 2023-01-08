@@ -98,13 +98,16 @@
 		},
 		onLoad() {
 			// 连接socket
-			uni.connectSocket({url:'wss://www.mynameisczy.asia:5000/user_chat',fail(e) {
+			uni.connectSocket({url:'wss://www.mynameisczy.asia:5000/user_chat',
+				header: {
+					'content-type': 'application/json'
+				}
+			,fail(e) {
 				console.log('fail',e);	
 			},success(e) {
 				console.log('success',e);
 			}})
 			uni.current_this15=this
-			
 		// 关闭连接
 		uni.onSocketError(function(){
 			uni.showToast({
@@ -266,6 +269,7 @@
 					}
 					
 				}
+				console.log('data',data);
 				
 				uni.current_this15.message.push({
 					name:data.name,

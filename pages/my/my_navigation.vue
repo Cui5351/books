@@ -225,9 +225,8 @@
 		font-size:18px;
 		&>.portrait{
 			height:95%;
-			border-radius:50%;
-			overflow: hidden;
 			&>image{
+				border-radius:50%;
 				width:100%;
 				height:100%;
 			}
