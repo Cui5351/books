@@ -117,6 +117,7 @@
 										let openid=value.data.value.openid
 										// 默认的用户信息
 										let {nickName,gender,avatarUrl}=res.userInfo
+								
 										store.state.openid=openid
 										let score=0
 										let author_answer=''
@@ -146,6 +147,8 @@
 											store.state.name=nickName
 											store.state.portraitUrl=avatarUrl
 											store.state.score=score
+											if(gender==0)
+												gender='男'
 											store.state.gender=gender
 											store.state.author_answer=author_answer
 											store.state.data_provide_answer=data_provide_answer

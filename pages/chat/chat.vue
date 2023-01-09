@@ -95,6 +95,7 @@
 		},
 		onUnload() {
 			uni.current_this15.sendData_(3)
+			uni.onSocketOpen(function(){})
 		},
 		onLoad() {
 			// 连接socket

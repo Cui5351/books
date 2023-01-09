@@ -615,10 +615,7 @@
 				}
 		}
 	.fixed{
-		position: sticky;
-		margin-top:0px;
-		margin-bottom:0px;
-		top:0px;
+		position: relative;
 		padding-top:0;
 		padding-bottom:0;
 		display: flex;
