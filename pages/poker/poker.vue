@@ -20,7 +20,12 @@
 					</view>
 				</view>
 			</view>
-			<view class="btns">
+			<view class="btns" v-if="count>=3&&room_state">
+				<view class="btn2" @click='start_game'>
+					开始游戏
+				</view>				
+			</view>
+			<view class="btns" v-if='!(count>=3&&room_state)'>
 				<view class="btn2" @click="rand_persons" v-if='room_state'>
 					{{solo_state?'匹配队友':'匹配中->'+time}}
 				</view>
@@ -76,6 +81,7 @@
 							name:''
 						})
 					}
+					uni.current_this18.count=data.current_persons.length
 					if(data.current_persons.length<=1){
 						uni.current_this18.users[0].ready=true
 						uni.current_this18.time=0
@@ -96,6 +102,10 @@
 							}
 						})
 					})
+				}else if(data.state==4){
+					uni.navigateTo({
+						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)
+					})
 				}
 			})
 		},
@@ -109,6 +119,7 @@
 			let user_state=ref(true)
 			let solo_state=ref(true)
 			let time=ref(0)
+			let count=ref(1)
 			const store=reactive(useStore())
 			let users=reactive([{
 				avatar:store.getters.user_avatar,
@@ -183,7 +194,19 @@
 				})
 			})
 		}
-			return{change_user_state,room_id,store,users,rand_persons,solo_state,time,timer,invation,room_state,user_state}
+		function start_game(){
+			uni.showToast({
+				title:'开始游戏'
+			})
+			// 开始游戏
+			uni.sendSocketMessage({
+				data:JSON.stringify({
+					state:4,
+					room_id:room_id.value
+				})
+			})
+		}
+			return{count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,time,timer,invation,room_state,user_state}
 		}
 	}
 </script>

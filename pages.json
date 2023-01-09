@@ -137,6 +137,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/poker/game/game",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
     "tabBar" : {
         "list" : [
