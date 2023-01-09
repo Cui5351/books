@@ -5,7 +5,12 @@
 		<image src="https://www.mynameisczy.asia/rabbit/back.jpg" style="position: absolute;top:0;height: 100%;width: 100%;opacity:0.8;" mode=""></image>
 		<view class="invitation">
 			<view class="title">
-				我的队伍
+				<view class="tit" v-if='!p_time.flag'>
+					我的队伍
+				</view>
+				<view class="load"  v-if='p_time.flag'>
+					{{p_time.flag?'正在匹配:'+p_time.time:'1'}}
+				</view>
 			</view>
 			<view class="users">
 				<view class="user" v-for="(item,index) in users" :key="index">
@@ -27,11 +32,14 @@
 			</view>
 			<view class="btns" v-if='!(count>=3&&room_state)'>
 				<view class="btn2" @click="rand_persons" v-if='room_state'>
-					{{solo_state?'匹配队友':'匹配中->'+time}}
+					{{solo_state?'匹配队友':'匹配中'}}
 				</view>
 				<view class="btn" @click="change_user_state" :style="{backgroundColor:user_state?'rgb(79,70,229)':'rgba(255,255,255,0)',color:user_state?'white':'black'}" v-if="!room_state">
 					{{user_state?'取消准备':'准备'}}
 				</view>
+<!-- 				<view class="">
+					{{p_time.flag?'正在匹配'+p_time.time:''}}
+				</view> -->
 			</view>
 		</view>
 		</view>
@@ -57,6 +65,20 @@
 			},fail() {
 				console.log('连接失败');
 			}})
+			
+			uni.onSocketError(function(){
+				uni.showToast({
+					title:'正在重连',
+					icon:'error'
+				})
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${store.getters.user_openid}&&user_name=${store.getters.user_name}&&user_avatar=${store.getters.user_avatar}`),
+				success() {
+					console.log('连接成功');
+				},fail() {
+					console.log('连接失败');
+				}})
+			})
+			
 			uni.onSocketMessage(function(res){
 				console.log(res,'res');
 				let data=JSON.parse(res.data)
@@ -78,7 +100,7 @@
 					while(uni.current_this18.users.length<3){
 						uni.current_this18.users.push({
 							avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
-							name:''
+							name:'邀请好友'
 						})
 					}
 					uni.current_this18.count=data.current_persons.length
@@ -88,6 +110,7 @@
 						uni.current_this18.solo_state=true
 						uni.current_this18.room_state=true
 						uni.current_this18.user_state=true
+						uni.current_this18.room_id=-1
 					}
 				}else if(data.state==3){
 					data.current_persons_ready.forEach(item=>{
@@ -103,9 +126,20 @@
 						})
 					})
 				}else if(data.state==4){
+					// 开始游戏
 					uni.navigateTo({
 						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)
 					})
+				}else if(data.state==5){
+					clearTimeout(uni.current_this18.p_time.timer)
+					uni.current_this18.p_time.flag=1
+					uni.current_this18.p_time.time++
+					// 匹配中
+					uni.current_this18.p_time.timer=setTimeout(function(){
+						uni.current_this18.p_time.time=0
+						uni.current_this18.p_time.flag=0
+						// 结束匹配
+					},1200)
 				}
 			})
 		},
@@ -115,10 +149,14 @@
 		},
 		setup() {
 			let room_state=ref(true)
-			let room_id=ref(0)
+			let room_id=ref(-1)
+			let p_time=reactive({
+				time:0,
+				flag:0,
+				timer:0
+			})
 			let user_state=ref(true)
 			let solo_state=ref(true)
-			let time=ref(0)
 			let count=ref(1)
 			const store=reactive(useStore())
 			let users=reactive([{
@@ -146,25 +184,28 @@
 				}
 				solo_state.value=!solo_state.value
 				if(solo_state.value){
-					time.value=0
 					clearInterval(timer.value)
 					return
 				}
 				timer.value=setInterval(function(){
 					if(solo_state.value){
-						time.value=0
 						clearInterval(timer.value)
 						return
 					}
-					time.value++
+					if(count.value>=3){
+						clearInterval(timer.value)
+						return
+					}
 				// 匹配人
 				// 多人匹配：3
 				// 单人匹配：2
+				console.log('正在匹配');
 				uni.sendSocketMessage({
 					data:JSON.stringify({
 						openid:store.getters.user_openid,
 						user_name:store.getters.user_name,
 						avatar:store.getters.user_avatar,
+						room_id:room_id.value,
 						state:2
 					})
 				})
@@ -206,7 +247,7 @@
 				})
 			})
 		}
-			return{count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,time,timer,invation,room_state,user_state}
+			return{p_time,count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,timer,invation,room_state,user_state}
 		}
 	}
 </script>
@@ -245,6 +286,8 @@
 				height:20px;
 			}
 			&>.avatar{
+				border:7px solid white;
+				border-radius: 50%;
 				margin-bottom:10px;
 				width:80px;
 				height:80px;
@@ -273,9 +316,17 @@
 		}
 	}
 	&>.title{
-		font-size:30px;
-		color: orange;
-		font-weight: bold;
+		padding:0 40px;
+		box-sizing: border-box;
+		display:flex;
+			font-size:30px;
+		.tit{
+			color: black;
+			font-weight: bold;
+			margin-right:10px;
+		}
+		&>.load{
+		}
 	}
 	&>.btns{
 		justify-content: space-around;

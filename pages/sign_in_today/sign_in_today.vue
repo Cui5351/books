@@ -234,7 +234,7 @@ height:100%;
 	height: 100px;
 }
 .show_day{
-	padding:10px 0;
+	padding:10px 0 20px 0;
 	box-sizing: border-box;
 	height:300px;
 	border-radius: 10px;

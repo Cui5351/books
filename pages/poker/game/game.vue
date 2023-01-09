@@ -25,7 +25,14 @@
 		},
 		onLoad(res) {
 			let cards=JSON.parse(res.cards)
-			this.user_cards.push(...cards)
+			console.log(cards);
+			cards.forEach(item=>{
+				setTimeout(()=>{
+					console.log(this,'this');
+					this.user_cards.push(item)
+				},300)
+			})
+			// this.user_cards.push(...cards)
 			this.audio=uni.createInnerAudioContext()
 			this.audio.src="https://www.mynameisczy.asia/audio/poker.mp3"
 			this.audio.autoplay=true
