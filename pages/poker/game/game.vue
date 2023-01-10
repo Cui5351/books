@@ -16,10 +16,10 @@
 				</view>
 			</view>
 			<view class="menu" v-if="rule.pre_master_count>=0">
-				<view class="btn2" @click="get_master" v-show='rule.pre_master&&!rule.master'>
+				<view class="btn2" @click="get_master" v-show='rule.pre_master&&!rule.master&&!rule.cancel_master'>
 					{{rule.total_count?'抢地主':'叫地主'}}
 				</view>
-				<view class="btn" v-show='rule.pre_master_count<=0'>
+				<view class="btn" v-show='rule.pre_master_count<=0&&rule.pre_master&&!rule.cancel_master' @click="cancel_master">
 					不叫
 				</view>
 			</view>
@@ -107,6 +107,38 @@
 						uni.current_this18.user_state=true
 						uni.current_this18.room_id=-1
 					}
+				}else if(data.state==7){
+					uni.current_this19.users.forEach(item=>{
+						if(item.openid==data.current_player_openid){
+							uni.showToast({
+								title:`${item.name}放弃地主了`
+							})		
+						}
+					})
+					
+					data.users_info.forEach(item=>{
+						uni.current_this19.users.forEach(item2=>{
+							if(item.openid==item2.openid){
+								Object.keys(item).forEach(key=>{
+									item2[key]=item[key]
+								})
+							}
+						})
+						if(item.openid==uni.current_this19.rule.openid){
+							Object.keys(item).forEach(key=>{
+								uni.current_this19.rule[key]=item[key]
+							})
+						}
+					})
+				}else if(data.state==8){
+					// 游戏结束
+					uni.showToast({
+						icon:'none',
+						title:'因为所有人都没有抢地主,游戏结束'
+					})
+					setTimeout(()=>{
+						uni.navigateBack()
+					},1000)
 				}
 				
 			})
@@ -158,7 +190,8 @@
 					pre_master:false,
 					pre_master_count:0,
 					openid:store.getters.user_openid,
-					master:false
+					master:false,
+					cancel_master:false
 			})
 			function get_master(){
 				uni.sendSocketMessage({
@@ -168,8 +201,18 @@
 					})
 				})
 			}
+			
+		// 放弃抢地主
+		function cancel_master(){
+			uni.sendSocketMessage({
+				data:JSON.stringify({
+					state:6,
+					rule:rule
+				})
+			})
+		}
 			// 地主产生后，将所有pre.master=false
-			return {user_cards,audio,rule,get_master,store,users_info,users}
+			return {user_cards,audio,rule,get_master,store,users_info,users,cancel_master}
 		}
 	}
 </script>
