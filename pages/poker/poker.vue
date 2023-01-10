@@ -80,7 +80,6 @@
 			})
 			
 			uni.onSocketMessage(function(res){
-				console.log(res,'res');
 				let data=JSON.parse(res.data)
 				if(data.state==2){
 					uni.current_this18.users.shift()
@@ -126,9 +125,14 @@
 						})
 					})
 				}else if(data.state==4){
+					uni.current_this18.users.forEach((item,index)=>{
+						Object.keys(data.users_card[index]).forEach(item2=>{
+							item[item2]=data.users_card[index][item2]
+						})
+					})
 					// 开始游戏
 					uni.navigateTo({
-						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)
+						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)
 					})
 				}else if(data.state==5){
 					clearTimeout(uni.current_this18.p_time.timer)
@@ -144,7 +148,7 @@
 			})
 		},
 		onUnload() {
-			uni.closeSocket()
+			// uni.closeSocket()
 			clearInterval(this.timer)
 		},
 		setup() {

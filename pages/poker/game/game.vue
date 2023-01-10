@@ -2,6 +2,27 @@
 	<navigation show_back='1'>进入阶段</navigation>
 	<page>
 		<view class="container">
+			<view class="users">
+				<view class="user" v-for="(item,index) in users" :key="index">
+					<view class="avatar" :style="{border:'7px solid '+(item.pre_master?'red':'white')}">
+						<image :src="item.avatar"></image>
+						<view class="ready" :style="{backgroundColor:item.ready?'rgb(102,188,39)':'orangered'}">
+							{{item.ready?'已准备':'未准备'}}
+						</view>
+					</view>
+					<view class="name">
+						{{item.name}}
+					</view>
+				</view>
+			</view>
+			<view class="menu" v-if="rule.pre_master_count>=0">
+				<view class="btn2" @click="get_master" v-show='rule.pre_master&&!rule.master'>
+					{{rule.total_count?'抢地主':'叫地主'}}
+				</view>
+				<view class="btn" v-show='rule.pre_master_count<=0'>
+					不叫
+				</view>
+			</view>
 			<view class="cards">
 				<view class="card" v-for="(item,index) in user_cards" :key="index">
 					{{item}}
@@ -24,15 +45,95 @@
 			this.audio.stop()
 		},
 		onLoad(res) {
+			
+			uni.current_this19=this
+			uni.onSocketMessage(function(res){
+				let data=JSON.parse(res.data)
+				console.log(data,'game data');
+				if(data.state==6){
+					// 拿到刚刚抢地主的openid
+					uni.current_this19.users.forEach(item=>{
+						if(item.openid==data.current_player_openid){
+							uni.showToast({
+								title:`${item.name}抢地主了`
+							})			
+						}
+					})
+					
+					data.users_info.forEach(item=>{
+						uni.current_this19.users.forEach(item2=>{
+							if(item.openid==item2.openid){
+								Object.keys(item).forEach(key=>{
+									item2[key]=item[key]
+									// uni.current_this19.rule[key]=item[key]
+								})
+							}
+						})
+						if(item.openid==uni.current_this19.rule.openid){
+							Object.keys(item).forEach(key=>{
+								uni.current_this19.rule[key]=item[key]
+							})
+						}
+					})
+					
+						
+				}else if(data.state==2){
+					uni.current_this18.users.shift()
+					uni.current_this18.users.shift()
+					uni.current_this18.users.shift()
+					uni.current_this18.users.unshift(...data.current_persons)
+					uni.current_this18.room_id=data.room_id
+					data.current_persons.forEach(item=>{
+						if(item.openid==uni.current_this18.store.getters.user_openid){
+							// 设置房间权限
+							uni.current_this18.room_state=item.privilege
+							if(item.privilege==false){
+								clearInterval(uni.current_this18.timer)
+							}
+						}
+					})
+					while(uni.current_this18.users.length<3){
+						uni.current_this18.users.push({
+							avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+							name:'邀请好友'
+						})
+					}
+					uni.current_this18.count=data.current_persons.length
+					if(data.current_persons.length<=1){
+						uni.current_this18.users[0].ready=true
+						uni.current_this18.time=0
+						uni.current_this18.solo_state=true
+						uni.current_this18.room_state=true
+						uni.current_this18.user_state=true
+						uni.current_this18.room_id=-1
+					}
+				}
+				
+			})
 			let cards=JSON.parse(res.cards)
-			console.log(cards);
-			cards.forEach(item=>{
+			
+			console.log(JSON.parse(res.users));
+			// 将原用户信息推入
+			this.users.push(...JSON.parse(res.users))
+			
+			console.log(this.users,'users');
+			
+			this.rule.room_id=Number(res.room_id)
+			
+			Object.keys(this.rule).forEach(item=>{
+				if(item=='room_id'||item=='openid')
+					return
+				this.rule[item]=cards[item]
+			})
+			console.log(this.rule,'rule');
+			cards.cards.forEach(item=>{
 				setTimeout(()=>{
-					console.log(this,'this');
 					this.user_cards.push(item)
 				},300)
 			})
-			// this.user_cards.push(...cards)
+			
+			
+			// 音乐
 			this.audio=uni.createInnerAudioContext()
 			this.audio.src="https://www.mynameisczy.asia/audio/poker.mp3"
 			this.audio.autoplay=true
@@ -45,20 +146,94 @@
 			})
 		},
 		setup() {
+			let store=reactive(useStore())
 			let user_cards=reactive([])
+			let users=reactive([])
+			let users_info=reactive([])
 			let audio=reactive(null)
-			return {user_cards,audio}
+			// 默认属性
+			let rule=reactive({
+					room_id:-1,
+				    count:17,
+					pre_master:false,
+					pre_master_count:0,
+					openid:store.getters.user_openid,
+					master:false
+			})
+			function get_master(){
+				uni.sendSocketMessage({
+					data:JSON.stringify({
+						state:5,
+						rule:rule
+					})
+				})
+			}
+			// 地主产生后，将所有pre.master=false
+			return {user_cards,audio,rule,get_master,store,users_info,users}
 		}
 	}
 </script>
 
 <style lang="less">
+@import url('@/general.less');
 .container{
 	height:100%;
 	width:100%;
+&>.users{
+		margin:20px 0;
+		justify-content: space-around;
+		display: flex;
+		&>.user{
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+			box-sizing: border-box;
+			&>.name{
+				background-color: rgba(0,0,0,.2);
+				padding:5px 10px;
+				border-radius: 10px;
+				color: white;
+				height:20px;
+			}
+			&>.avatar{
+				border:7px solid white;
+				border-radius: 50%;
+				margin-bottom:10px;
+				width:80px;
+				height:80px;
+				display: flex;
+				flex-direction: column;
+				position: relative;
+				&>image{
+					border-radius:50%;
+					width:100%;height:100%;
+				}
+				&>.ready{
+					position: absolute;
+					top:100%;
+					background-color: rgb(102,188,39);
+					color:white;
+					opacity:0.9;
+					box-shadow: 0px 2px 10px -1px gray;
+					font-size:13px;
+					left:50%;
+					width:50%;
+					border-radius: 10px;
+					transform: translateY(-100%) translateX(-50%);
+					padding:5px 10px;
+				}
+			}
+		}
+	}
+	&>.menu{
+		height:10%;
+		display: flex;
+		justify-content: space-around;
+	}
 	&>.cards{
 		width:100%;
-		height:100%;
+		height:40%;
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr 1fr;
 		background-color: black;

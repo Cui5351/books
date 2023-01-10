@@ -125,7 +125,7 @@
 						title:'商品',
 						icon:'error'
 					})
-				},complete() {
+				},complete() {	
 					uni.hideLoading()
 				}
 			})
