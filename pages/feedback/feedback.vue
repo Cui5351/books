@@ -39,7 +39,7 @@
 		components:{
 			navigation_all
 		},
-		mounted() {
+		onLoad() {
 			// 这里的this是我打算在页面关闭后停止播放，但是页面虽然切换了(Beforedestroy)，但好像不会摧毁
 			this.audio=uni.createInnerAudioContext()
 			this.audio.src="https://www.mynameisczy.asia/audio/lover_boy.mp3"
@@ -52,7 +52,7 @@
 				console.log(err,'audio err');
 			})
 		},
-		beforeUnmount() {
+		onUnload() {
 			this.audio.stop()
 		},
 		setup() {

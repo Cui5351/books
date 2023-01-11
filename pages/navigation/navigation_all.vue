@@ -29,7 +29,15 @@
 		setup(){
 			let head_height=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			function back(){
-				uni.navigateBack();
+				// uni.getImageInfo({
+					// src:''
+				// })
+				if(getCurrentPages().length>1)
+					uni.navigateBack();
+				else
+					uni.switchTab({
+						url:'/pages/home/home'
+					})
 			}
 			return {head_height,back}
 		}

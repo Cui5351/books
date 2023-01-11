@@ -66,6 +66,10 @@ function MountRouter(port,dbs,db_config){
         }
     })
 
+    app.post('/check_',function(req,res){
+
+    })
+
         app.post('/setBookshelf',function(req,res){
             // 参数列表
             // openid:<number>
@@ -141,9 +145,6 @@ function MountRouter(port,dbs,db_config){
                 })          
                 return      
             })
-            
-            
-
         })
 
         app.post('/getBookshelf',function(req,res){
@@ -235,7 +236,7 @@ function MountRouter(port,dbs,db_config){
         app.post('/upload',async function(req,res){
             
             // 上传书籍内容
-            // 地址:http://43.143.121.202:5351/upload
+            // 地址:https://www.mynameisczy.asia:5351/upload
             // 请求方法:POST
             
             // 请求参数：
@@ -402,14 +403,14 @@ function MountRouter(port,dbs,db_config){
 
         app.post('/uploadBookInfo',function(req,res){
             // 上传书的信息
-            // 地址:http://43.143.121.202:5351/uploadBookInfo
+            // 地址:https://www.mynameisczy.asia:5351/uploadBookInfo
             // 请求方法:POST
 
             // 参数列表:
             // book_name:<string>书名(必须)
             // author:<string>作者名(必须)
                 // score:<number>评分(可选)
-            // book_type:<string>小说类型(玄幻，修真，科幻，都市，出版，仙侠，网游，悬疑)(必须)
+            // book_type:<string>小说类型(玄幻，修真,古史，科幻，文学，都市，出版，仙侠，网游，悬疑)(必须)
             // book_introduce:<string>小说简介(必须)
                 // book_state:<string>书的状态(可选{完结,连载}(默认连载))
             
@@ -784,7 +785,7 @@ function MountRouter(port,dbs,db_config){
         }
             
             let {skip,count}=req.body
-            query(dbs,'mynameisczy_asia.books_info','','',{skip:skip,count:count},{order:'desc',by:'score'}).then(value=>{
+            query(dbs,'mynameisczy_asia.books_info','','',{skip:skip,count:count},{order:'desc',by:'score'},true).then(value=>{
                 res.send({
                     state:1,
                     value:value,

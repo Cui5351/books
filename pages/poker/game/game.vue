@@ -81,8 +81,21 @@
 					uni.current_this18.users.shift()
 					uni.current_this18.users.shift()
 					uni.current_this18.users.shift()
-					uni.current_this18.users.unshift(...data.current_persons)
-					uni.current_this18.room_id=data.room_id
+					data.current_persons.forEach(item=>{
+						if(item.openid.length>=1)
+							uni.current_this18.users.push(item)
+					})
+					if(data.hasOwnProperty('room_id'))
+						uni.current_this18.room_id=data.room_id
+					if(data.hasOwnProperty('lost')){
+						if(data.lost){
+							uni.showToast({
+								title:'有人离开了',
+								icon:'none'
+							})
+						}
+					}
+						
 					data.current_persons.forEach(item=>{
 						if(item.openid==uni.current_this18.store.getters.user_openid){
 							// 设置房间权限
@@ -140,7 +153,6 @@
 						uni.navigateBack()
 					},1000)
 				}
-				
 			})
 			let cards=JSON.parse(res.cards)
 			

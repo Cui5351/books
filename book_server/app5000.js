@@ -63,7 +63,174 @@ function entry(){
 
 // 路由注入
 function MountRouter(port,dbs,db_config,ws_config){
+
+    app.ws('/store_info',function(ws,req){
+        // 发送菜单
+        // 查询菜单
+
+        ws.on('message',function(msg){
+            msg=JSON.parse(msg)
+            console.log(msg,'msg73');
+            // 减少
+            if(msg.state==1){
+                console.log('商品',msg.name,'减少了')
+            }
+        })
+    })
+    app.post('/before_pay',function(req,res){
+        // 获取商品信息(个数)
+        if(typeof req.body == 'string')
+            req.body=JSON.parse(req.body)
+        if(!req.body.hasOwnProperty('openid')||!req.body.hasOwnProperty('shop_info')){
+            res.send({
+                state:0,
+                error:1,
+                errMes:'缺少参数'
+            })
+            return
+        }
+        let {openid,shop_info}=req.body        
+        // 先查询存货
+        query(dbs,db_config.database+'.store',['count','price'],{name:shop_info.name}).then(result=>{
+            console.log('shop',result);
+            if(result.length<=0){
+                res.send({
+                    state:0,        
+                    error:1,
+                    errMes:'select error'
+                })
+                return
+            }
+            let {count,price}=result[0]
+            price=Number(price)
+            if(count<=0){
+                res.send({
+                    state:0,
+                    error:2,
+                    errMes:'存货不足'
+                })
+                return
+            }
+            // 查询用户信息
+            query(dbs,db_config.database+'.user_info',['score','shops'],{openid}).then(result=>{
+                console.log('user',result);
+                if(result.length<=0){
+                    res.send({
+                        state:0,
+                        error:3,
+                        errMes:'users select error'
+                    })
+                    return
+                }
+                if(result[0].score<price){
+                    res.send({
+                        state:0,
+                        error:4,
+                        errMes:'score is no enough '
+                    })
+                    return
+                }
+                // 扣除相应的值
+                result[0].shops=JSON.parse(result[0].shops)
+                result[0].score=Number(result[0].score)-price
+                count--
+                console.log(result[0].shops,'shops');
+                console.log(result[0].shops.length,'shops_len');
+                let flag=0
+                result[0].shops.forEach(item=>{
+                    if(item.name==shop_info.name){
+                        item.count2++
+                        flag++
+                    }
+                })
+                console.log(result[0].shops,'shops');
+                if(!flag){
+                    shop_info.count2=1
+                    result[0].shops.push(shop_info)
+                }
+                console.log(result[0].shops,'shops');
+                update(dbs,db_config.database+'.user_info',{openid},'score',result[0].score,'number')
+                update(dbs,db_config.database+'.user_info',{openid},'shops',JSON.stringify(result[0].shops),'string')
+                update(dbs,db_config.database+'.store',{name:shop_info.name},'count',count,'number')
+                shop_info.count--
+                ws_config.wss.clients.forEach(item=>{
+                    item.send(JSON.stringify({
+                        state:1,
+                        value:shop_info
+                    }))
+                })
+                res.send({
+                    state:1,
+                    error:0
+                })
+            }).catch(e=>{
+            console.log('用户查询失败');
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:'select error2'
+                })                
+            })
+        }).catch(e=>{
+            console.log('商品查询失败');
+            res.send({
+                state:0,
+                error:1,
+                errMes:'select error2'
+            })
+        })
+    })
+    app.get('/get_shops',function(req,res){
+        query(dbs,db_config.database+'.store',['name','picture','price','count']).then(e=>{
+            res.send({
+                state:1,
+                error:0,
+                value:e
+            })
+        }).catch(e=>{
+            res.send({
+                error:1,
+                state:0,
+                errMes:'Select Error'
+            })
+        })
+    })
+    app.post('/get_user_shop',function(req,res){
+        if(typeof req.body == 'string')
+            req.body=JSON.parse(req.body)
+        if(!req.body.hasOwnProperty('openid')){
+            res.send({
+                state:0,
+                error:1,
+                errMes:'缺少参数'
+            })
+            return
+        }
+        const {openid}=req.body
+        query(dbs,db_config.database+'.user_info',['shops'],{openid},{skip:0,count:1}).then(e=>{
+            if(e.length<=0){
+                res.send({
+                    state:0,
+                    error:1,
+                    error:'用户不存在'
+                })
+                return
+            }
+            res.send({
+                    state:1,
+                    error:0,
+                    value:e[0]
+                })
+        }).catch(()=>{
+            res.send({
+                state:0,
+                error:1,
+                error:'用户不存在'
+            })
+        })
+    })
     app.ws('/user_chat',function(ws,req){
+        console.log(req,'socket req');
         // 返回最近10条信息
         ws_config.chat_count++
         //  将最近15条数据传回
@@ -258,7 +425,7 @@ function MountRouter(port,dbs,db_config,ws_config){
             let {openid}=req.body
             // 通过openid查询
             query(dbs,db_config.database+'.user_info','chat_state',{openid:openid}).then(result=>{
-                if(result[0].length<=0){
+                if(result.length<=0){
                     res.send({
                         state:0,
                         errorCode:1,
@@ -533,6 +700,7 @@ function MountRouter(port,dbs,db_config,ws_config){
         let bookshelf='[]'
         let author_answer='[]'
         let sign_in_day='[]'
+        let shops='[]'
         let data_provide_answer='[]'
             insertData(dbs,'mynameisczy_asia.user_info',JSON.stringify({
                 nickName,
@@ -542,7 +710,8 @@ function MountRouter(port,dbs,db_config,ws_config){
                 bookshelf,
                 author_answer,
                 data_provide_answer,
-                sign_in_day
+                sign_in_day,
+                shops
             })).then(e=>{
                 // 插入成功
                 res.send({
@@ -982,8 +1151,6 @@ function MountRouter(port,dbs,db_config,ws_config){
                 })
             }
         })
-
-
 
     })
 }
