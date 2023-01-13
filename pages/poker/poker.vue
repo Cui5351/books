@@ -130,6 +130,19 @@
 				}})
 			},200)
 			
+			uni.onSocketClose(function(){
+				uni.showToast({
+					title:'正在重连',
+					icon:'error'
+				})
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
+				success() {
+					console.log('连接成功');
+				},fail() {
+					console.log('连接失败');
+				}})				
+			})
+			
 			uni.onSocketError(function(){
 				uni.showToast({
 					title:'正在重连',
@@ -197,6 +210,7 @@
 							})
 						}
 					}
+					uni.current_this18.solo_state=true
 					data.current_persons.forEach(item=>{
 						if(item.openid==uni.current_this18.store.getters.user_openid){
 							// 设置房间权限
@@ -240,9 +254,10 @@
 							item[item2]=data.users_card[index][item2]
 						})
 					})
+					uni.current_this18.solo_state=true
 					// 开始游戏
 					uni.navigateTo({
-						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)
+						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid
 					})
 				}else if(data.state==5){
 					clearTimeout(uni.current_this18.p_time.timer)
@@ -270,6 +285,7 @@
 				title:'close',
 				icon:'none'
 			})
+			uni.onSocketClose(()=>{})
 			clearInterval(this.timer)
 		},
 		setup() {
@@ -362,6 +378,15 @@
 			})
 		}
 		function start_game(){
+			for(let i=0;i<users.length;i++){
+				if(users[i].ready==false&&users[i].hasOwnProperty('openid')){
+					uni.showToast({
+						icon:'none',
+						title:'有人未准备'
+					})
+					return
+				}
+			}
 			uni.showToast({
 				title:'开始游戏'
 			})

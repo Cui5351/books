@@ -340,7 +340,7 @@
 				if(state.value){
 					scrollTop.value+=(blank.value-100)
 				}else{
-					scrollTop.value-=(blank.value-100)
+					// scrollTop.value-=(blank.value-100)
 				}
 			}
 			function sendData_(state,data=''){

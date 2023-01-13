@@ -45,8 +45,6 @@ function entry(){
 function MountRouter(dbs,db_config,ws_config){
     app.ws('/poker',function(ws,req){
         // 每个人已进入都是单独一个数组房间
-        console.log(req.query,'有人加入');
-
         req.query.ws=ws
 
         // 是否在进行匹配
@@ -55,6 +53,8 @@ function MountRouter(dbs,db_config,ws_config){
         req.query.playing=0
         // 是否正在队伍
         req.query.teams=0
+
+        req.query.timer=null
         
         let position=ws_config.persons.length
         if(ws_config.persons.indexOf('空')!=-1){
@@ -72,7 +72,7 @@ function MountRouter(dbs,db_config,ws_config){
         ws.on('message',function(msg){
             msg=JSON.parse(msg)
 
-            if(msg.state==1){
+    if(msg.state==1){
                 // 创建房间成功
                 let {position}=msg
                 ws_config.persons[position].privilege=true
@@ -91,9 +91,7 @@ function MountRouter(dbs,db_config,ws_config){
                 })
             }
             // 开始匹配
-            else if(msg.state==2){
-
-                console.log('正在匹配',msg.user_name);
+    else if(msg.state==2){
                 // 查找遍历数组
                 const {openid}=msg
                 let index=0
@@ -109,37 +107,45 @@ function MountRouter(dbs,db_config,ws_config){
                     }
                 }
                 if(msg.room_id!=-1){
-                    // 房间存在
+                    // 房间存在,向所有人发
                     ws_config.teams[msg.room_id].forEach(item=>{
+                        clearTimeout(item.timer)
+                        item.timer=setTimeout(() => {
+                            item.state=0
+                        }, 1200);
                         item.ws.send(JSON.stringify({
                             state:5
                         }))
                     })
+                    // 如果1s后没有再请求，就将state==0
                 }else{
+                    clearTimeout(ws_config.persons[index].timer)
+                    ws_config.persons[index].timer=setTimeout(() => {
+                        ws_config.persons[index].state=0
+                    }, 1200);
                     ws_config.persons[index].ws.send(JSON.stringify({
                         state:5
                     }))
                 }                
-                console.log('index',index);
 
                 // 遍历是否在队伍team里
 
-                // 先遍历teams,看是否差人
+    // 先遍历teams,看是否差人（玩家是一个人的时候，可以匹配到团队）
             if(msg.room_id==-1)
                 for(let i=0;i<ws_config.teams.length;i++){
-                    // 有队伍差人进入
-                    if(ws_config.teams[i].length<3){
+                    // 有队伍差人进入,并且队伍没有在进行游戏
+                    if(ws_config.teams[i].length<3&&ws_config.teams[i][0].playing==0&&ws_config.teams[i][0].state==1){
                         for(let j=0;j<ws_config.teams[i].length;j++){
                             // 匹配自己是否已经在内（那么退出）
                             if(ws_config.teams[i][j].openid===ws_config.persons[index].openid)
                                 return
                         }
                         ws_config.teams[i].push(ws_config.persons[index])
-                        // 游戏中
+                        // 加入队伍
                         ws_config.persons[index].teams=1
                         ws_config.persons[index].state=1
                         // 给ws_config.persons[index]回复进入成功
-                                            // 房主
+                        // 房主
                         ws_config.teams[i][0].privilege=true
                         ws_config.teams[i][0].ready=true
                         let k=1;
@@ -167,21 +173,20 @@ function MountRouter(dbs,db_config,ws_config){
                 let arr=[ws_config.persons[index]]
                 // 查找其他正在匹配的人(非队伍，非开游戏)
                 for(let i=0;i<ws_config.persons.length;i++){
-                    if(ws_config.persons[i].openid!=ws_config.persons[index].openid&&ws_config.persons[i].state==1&&ws_config.persons[i].teams==0&&ws_config.persons[i].playing==0&&arr.length<=3){
+                    if(ws_config.persons[i].openid!=ws_config.persons[index].openid&&ws_config.persons[i].state==1&&ws_config.persons[i].teams==0&&ws_config.persons[i].playing==0&&arr.length<3){
                         arr.push(ws_config.persons[i])
-                        ws_config.persons[i].teams=1
                     }
                 }
 
                 // 是否匹配到人
                 if(arr.length>1){
-                    console.log('匹配成功');
                     ws_config.persons[index].teams=1
                     // 房主
                     arr[0].privilege=true
                     arr[0].ready=true
                     let i=1;
                     while(i<arr.length){
+                        arr[i].teams=1
                         // 其他玩家
                         arr[i].privilege=false
                         // 是否准备
@@ -200,9 +205,8 @@ function MountRouter(dbs,db_config,ws_config){
                     return
                 }
             }
-            else if(msg.state==3){
+    else if(msg.state==3){
                 // 用户取消准备
-                console.log(msg,'msg');
                 ws_config.teams[msg.room_id].forEach(item=>{
                     if(item.openid==msg.openid)
                         item.ready=msg.ready
@@ -214,26 +218,27 @@ function MountRouter(dbs,db_config,ws_config){
                     }))
                 })
             }
-            else if(msg.state==4){
+    else if(msg.state==4){ // 开始游戏
                 // 如果都不叫地主：将重新调用4
                 const {room_id}=msg
                 let obj=create()
                 console.log(room_id,'桌开始');
 
-                // 设置一个首先抢地主的人
+                // 设置一个首先能抢地主的人
                 let master=Math.round(Math.random()*2)
 
-                // 预抢地主
-                obj.user_cards[master].pre_master=true
-
                 ws_config.teams[room_id].forEach((item,index)=>{
-                    // item.game_info=obj.user_cards[index]
+                    // 将正在匹配设置为0
+                    item.state=0
+                    // 游戏进行中
+                    item.playing=1
                     obj.user_cards[index].openid=item.openid
                     item.ws.send(JSON.stringify({
                         state:4,
                         cards:obj.user_cards[index],
+                        current_player_openid:ws_config.teams[room_id][master].openid,
                         users_card:obj.user_cards.map(item2=>{
-                            return JSON.parse(JSON.stringify(item2,['count','pre_master','pre_master_count','master']))
+                            return JSON.parse(JSON.stringify(item2,['count','pre_master_count','master']))
                         })
                     }))
                 })
@@ -241,7 +246,6 @@ function MountRouter(dbs,db_config,ws_config){
             // 每个用户参数
                 // count:17,
                 // cards:[],
-                // pre_master:false,
                 // pre_master_count:0,
                 // master:false,
                 // total_count:0
@@ -258,8 +262,7 @@ function MountRouter(dbs,db_config,ws_config){
                 console.log(ws_config.teams[room_id][master].user_name,'是先手');
             }
             // 抢地主
-            else if(msg.state==5){
-
+    else if(msg.state==5){
                 // 设置抢地主信息
                 const {room_id,openid}=msg.rule
                 ws_config.teams[room_id].forEach(item=>{
@@ -269,25 +272,34 @@ function MountRouter(dbs,db_config,ws_config){
                 })
                 let openid_count_max=openid
                 let count=0;
-                console.log( ws_config.teams[room_id][3].users,'users');
                 ws_config.teams[room_id][3].users.forEach(item=>{
-                    console.log(item,'item');
-                    if(item.pre_master_count>count){
-                        count=item.pre_master_count
-                        openid_count_max=item.openid
-                    }
                     if(item.openid==openid){
                         // 这个玩家抢地主
                         item.pre_master_count++
                     }
+                    if(item.pre_master_count>count){
+                        count=item.pre_master_count
+                        openid_count_max=item.openid
+                    }
                 })
-                
+                if(count>=2){
+                    // 地主产生
+                    ws_config.teams[room_id][3].master_openid=openid_count_max
+                    ws_config.teams[room_id][3].current_player_openid=openid_count_max
+                    // 把地主牌发给地主并公布
+                    ws_config.teams[room_id].forEach((item,index)=>{
+                        if(index>=3)
+                            return
+                        item.ws.send(JSON.stringify({
+                            state:9,
+                            master_openid:ws_config.teams[room_id][3].master_openid,
+                            master_card:ws_config.teams[room_id][3].master_card,
+                            current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                        }))
+                    })
+                    return
+                }
                 // 裁判判断
-                ws_config.teams[room_id][3].master_openid=openid_count_max
-
-                // 这一个玩家抢过地主，然后使其不预抢
-                ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].pre_master=false
-                // ws_config.teams[room_id][ws_config.teams[room_id][3].order].game_info.pre_master=false
 
                 // 下一个到玩家
                 ws_config.teams[room_id][3].order=ws_config.teams[room_id][3].order>=2?0:ws_config.teams[room_id][3].order+1
@@ -298,11 +310,6 @@ function MountRouter(dbs,db_config,ws_config){
                 if(ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].cancel_master==true)
                     ws_config.teams[room_id][3].order=ws_config.teams[room_id][3].order>=2?0:ws_config.teams[room_id][3].order+1                    
 
-                // 给下一个玩家抢地主的机会
-                // ws_config.teams[room_id][ws_config.teams[room_id][3].order].game_info.pre_master=true
-                ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].pre_master=true
-                
-                // 
                 ws_config.teams[room_id][3].current_player_openid=ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].openid
                 // 发送抢地主消息
                 ws_config.teams[room_id].forEach((item,index)=>{
@@ -310,36 +317,69 @@ function MountRouter(dbs,db_config,ws_config){
                         return
                     item.ws.send(JSON.stringify({
                         state:6,
-                        current_player_openid:openid, // 当前抢地主的玩家id
-                        next_player_openid:ws_config.teams[room_id][3].current_player_openid,
-                        users_info:ws_config.teams[room_id][3].users.map((item2,index)=>{
-                            // console.log(item2,'item2');
-                            let obj=JSON.parse(JSON.stringify(item2,['count','pre_master_count','pre_master','master']))
-                            obj.openid=ws_config.teams[room_id][index].openid
-                            return obj
-                        })
+                        after_player_openid:openid, // 当前抢地主的玩家id
+                        current_player_openid:ws_config.teams[room_id][3].current_player_openid
                     }))
                 })
-            }else if((msg.state==6)){
+    }else if((msg.state==6)){
                 let {room_id,openid}=msg.rule
                 // 放弃抢地主，下个玩家
 
-                ws_config.teams[room_id][3].users.forEach(item=>{
+                let master=false
+                
+                ws_config.teams[room_id][3].users.forEach((item,index)=>{
+                    if(index>=3)
+                        return
                     if(item.openid==openid){
                         item.cancel_master=true
+                        let flag={
+                            count:0,
+                            openid:''
+                        }
+                        // 查看其他两个的pre_master_count
+                        // 如果另外两个其中有一个是true，另外一个的count>=1，那么另外一个就是地主
+                    ws_config.teams[room_id][3].users.forEach((item2,index2)=>{
+                        if(index2>=3||index2==index)
+                            return
+                        // 统计没有取消的人数
+                        if(!item2.cancel_master){
+                            flag.count++
+                            flag.openid=item2.openid
+                        }
+                    })
+                    if(flag.count==1){
+                            // 地主产生
+                            master=true
+                            ws_config.teams[room_id][3].master_openid=flag.openid
+                            ws_config.teams[room_id][3].current_player_openid=flag.openid
+                            // 把地主牌发给地主并公布
+                            ws_config.teams[room_id].forEach((item3,index)=>{
+                                if(index>=3)
+                                    return
+                                item3.ws.send(JSON.stringify({
+                                    state:9,
+                                    master_openid:ws_config.teams[room_id][3].master_openid,
+                                    master_card:ws_config.teams[room_id][3].master_card,
+                                    current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                                }))
+                            })
+                            return                            
+                    }
                     }
                 })
+                if(master){
+                    return
+                }
+
                 
-                
-                // 将预抢地主设置为false
-                ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].pre_master=false
-                console.log(ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order],'teams');
                 
                 ws_config.teams[room_id][3].order=ws_config.teams[room_id][3].order>=2?0:ws_config.teams[room_id][3].order+1
 
                 // 如果cancel_master为true，那么就跳过
-                if(ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].cancel_master==true)
+                if(ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].cancel_master==true){
                     ws_config.teams[room_id][3].order=ws_config.teams[room_id][3].order>=2?0:ws_config.teams[room_id][3].order+1
+                    // 查看第三者
+                }
 
                 if(ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].cancel_master==true){
                     // 这里都没有抢地主
@@ -355,32 +395,21 @@ function MountRouter(dbs,db_config,ws_config){
 
                 ws_config.teams[room_id][3].current_player_openid=ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].openid
 
-                // 将(下一个)预抢地主设置为true
-                ws_config.teams[room_id][3].users[ws_config.teams[room_id][3].order].pre_master=true
-
-
-            // 发送抢地主消息
+            // 发送放弃消息
                 ws_config.teams[room_id].forEach((item,index)=>{
                     if(index>=3)
                         return
                     item.ws.send(JSON.stringify({
                         state:7,
-                        current_player_openid:openid, // 当前放弃抢地主的玩家id
-                        next_player_openid:ws_config.teams[room_id][3].current_player_openid,
-                        users_info:ws_config.teams[room_id][3].users.map((item2,index)=>{
-                            // console.log(item2,'item2');
-                            let obj=JSON.parse(JSON.stringify(item2,['count','pre_master_count','pre_master','master','cancel_master']))
-                            console.log(obj.pre_master);
-                            obj.openid=ws_config.teams[room_id][index].openid
-                            return obj
-                        })
+                        after_player_openid:openid, // 当前放弃抢地主的玩家id
+                        current_player_openid:ws_config.teams[room_id][3].current_player_openid
                     }))
                 })
+                
+
             }else if(msg.state==7){
-                console.log('有人加入房间');
                 // 加入房间
                 const {room_id,position}=msg
-                console.log('position',position);
 
                 // 查看房间是否存在
                 if(ws_config.teams[room_id]==undefined){
@@ -418,7 +447,7 @@ function MountRouter(dbs,db_config,ws_config){
         })
 
         ws.on('close',function(){
-            console.log('有人离开',[position]);
+            console.log('有人离开',ws_config.persons[position].user_name);
             // 遍历teams，查看是否在队伍当中
             ws_config.teams.forEach((item,index)=>{
                 for(let i=0;i<item.length;i++){
@@ -428,14 +457,23 @@ function MountRouter(dbs,db_config,ws_config){
                     if(item[i].openid==ws_config.persons[position].openid){
                         // 找到了,进行删除
                         let rm=item.splice(i,1)
+                        console.log(rm[0].user_name,'删除');
                         if(rm[0].privilege)
                             if(item.length)
                                 item[0].privilege=true
                         // 通知其他人
-                        item.forEach((item,index)=>{
-                            if(!item.hasOwnProperty('openid'))
+                        item.forEach((item2,ind)=>{
+                            // 结束正在游戏标识
+                            item2.playing=0
+                            if(item2.hasOwnProperty('master_openid')){
+                                // 移除裁判
+                                item.splice(ind,1)
                                 return
-                            item.ws.send(JSON.stringify({
+                            }
+                            if(!item2.hasOwnProperty('openid'))
+                                return
+                        // 移除裁判
+                            item2.ws.send(JSON.stringify({
                                 state:2,
                                 lost:true,
                                 current_persons:ws_config.teams[index].map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
@@ -476,7 +514,6 @@ function create(){
     let a={
         count:17,
         cards:[],
-        pre_master:false,
         pre_master_count:0,
         master:false,
         total_count:0,
@@ -485,7 +522,6 @@ function create(){
     let b={
         count:17,
         cards:[],
-        pre_master:false,
         pre_master_count:0,
         master:false,
         total_count:0,
@@ -494,7 +530,6 @@ function create(){
     let c={
         count:17,
         cards:[],
-        pre_master:false,
         pre_master_count:0,
         master:false,
         total_count:0,

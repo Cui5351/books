@@ -111,7 +111,7 @@
 					})
 			}
 			function no_develop(){
-				uni.showToast({title:"此功能暂时未开放",icon:'none'})
+				uni.showToast({title:"此功能在2月初开放",icon:'none'})
 			}
 			
 			function toggle_base_info(){

@@ -55,9 +55,9 @@
 					</view>
 					<view style="color:gray;font-size:13px;" @click.stop="request_book_info(item)" >
 						<!-- <view style="display: inline-block;font-size:16px;color: red;">{{item.score}}分</view> -->
-						<text decode>
-							作者: {{item.author}}
-						</text>
+					<view decode style="max-width:200px;min-width:200px;width:200px;text-overflow:ellipsis;overflow: hidden;white-space: nowrap;max-height:30px;">
+						作者: {{item.author}}
+					</view>
 						<view style="display: flex;flex-direction:column;vertical-align: center;" >
 							<text decode style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
 								总章节: {{item.passage_count}}&emsp;
