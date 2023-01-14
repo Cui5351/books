@@ -142,6 +142,25 @@
             "style" :                                                                                    
             {
                 "navigationBarTitleText": "",
+                "enablePullDownRefresh": false,
+                "pageOrientation": "auto" //开启自动旋转屏幕
+            }
+            
+        }
+        ,{
+            "path" : "pages/inner_page_reverse/inner_page_reverse",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/reverse/reverse",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
                 "enablePullDownRefresh": false
             }
             
@@ -174,6 +193,7 @@
         "navigationBarTitleText" : "uni-app",
         "navigationBarBackgroundColor" : "#F8F8F8",
         "backgroundColor" : "#F8F8F8",
-        "navigationStyle" : "custom"
+        "navigationStyle" : "custom",
+        "pageOrientation": "auto"
     }
 }

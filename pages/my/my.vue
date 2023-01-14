@@ -25,6 +25,7 @@
 					<uni-icons type="right"></uni-icons>
 				</view>
 				<view class="edit_item" @click='gotoPage("/pages/poker/poker")'>
+				<!-- <view class="edit_item" @click='gotoPage("/pages/reverse/reverse")'> -->
 					<view>
 						<uni-icons type="eye"></uni-icons>
 						斗地主

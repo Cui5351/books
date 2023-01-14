@@ -1,0 +1,68 @@
+    {
+        "pages":["pages/home/home",
+    "pages/base_info/base_info",
+    "pages/chat/chat",
+    "pages/sign_in_today/sign_in_today",
+    "pages/other_page/other_page",
+    "pages/my/my",
+    "pages/wallpaper/wallpaper",
+    "pages/bills/bills",
+    "pages/navigation/navigation_all",
+    "pages/current_book_page/current_book_page",
+    "components/searchPage/searchPage",
+    "pages/feedback/feedback",
+    "pages/category_book/category_book",
+    "pages/service_stop_page/service_stop_page",
+    "pages/inner_page/inner_page",
+    "pages/base_info/avatar_edit/avatar_edit",
+    "pages/store_page/store_page",
+    "pages/store_page/car/car",
+    "pages/poker/poker",
+    "pages/poker/game/game",
+    "pages/inner_page_reverse/inner_page_reverse",
+    "pages/reverse/reverse"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8",
+    "navigationStyle": "custom"
+  },
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "./static/icons/home.png",
+        "selectedIconPath": "static/icons/home_active.jpg"
+      },
+      {
+        "pagePath": "pages/bills/bills",
+        "text": "收藏",
+        "iconPath": "./static/icons/bills.png",
+        "selectedIconPath": "./static/icons/bills_active.jpg"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "static/icons/my.png",
+        "selectedIconPath": "static/icons/my_active.jpg"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "requiredBackgroundModes": [
+    "audio",
+    "location"
+  ],
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
+  "usingComponents": {}
+}

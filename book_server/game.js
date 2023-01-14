@@ -95,6 +95,7 @@ function MountRouter(dbs,db_config,ws_config){
                 // 查找遍历数组
                 const {openid}=msg
                 let index=0
+                let flag=0
                 for(let i=0;i<ws_config.persons.length;i++){
                     if(ws_config.persons[i].openid==openid){
                         index=i
@@ -106,7 +107,15 @@ function MountRouter(dbs,db_config,ws_config){
                         return
                     }
                 }
-                if(msg.room_id!=-1){
+                // 查看是否在房间内
+                for(let i=0;i<ws_config.teams.length;i++){
+                    ws_config.teams[i].forEach(i=>{
+                        if(i.openid==openid){
+                            flag=1
+                        }
+                    })
+                }
+                if(msg.room_id!=-1||flag==-1){
                     // 房间存在,向所有人发
                     ws_config.teams[msg.room_id].forEach(item=>{
                         clearTimeout(item.timer)
@@ -117,6 +126,10 @@ function MountRouter(dbs,db_config,ws_config){
                             state:5
                         }))
                     })
+                    // 团队是不需要进行匹配其他人
+                        // 只需要将正在匹配设置为true
+                        // 然后再让单个匹配者匹配进入即可
+                    return
                     // 如果1s后没有再请求，就将state==0
                 }else{
                     clearTimeout(ws_config.persons[index].timer)
@@ -128,10 +141,9 @@ function MountRouter(dbs,db_config,ws_config){
                     }))
                 }                
 
-                // 遍历是否在队伍team里
 
-    // 先遍历teams,看是否差人（玩家是一个人的时候，可以匹配到团队）
-            if(msg.room_id==-1)
+                // 遍历是否在队伍team里
+                // 先遍历teams,看是否差人（玩家是一个人的时候，可以匹配到团队）
                 for(let i=0;i<ws_config.teams.length;i++){
                     // 有队伍差人进入,并且队伍没有在进行游戏
                     if(ws_config.teams[i].length<3&&ws_config.teams[i][0].playing==0&&ws_config.teams[i][0].state==1){
@@ -141,6 +153,8 @@ function MountRouter(dbs,db_config,ws_config){
                                 return
                         }
                         ws_config.teams[i].push(ws_config.persons[index])
+                        console.log(ws_config.teams[i]);
+                        console.log(ws_config.persons[index].user_name,'加入');
                         // 加入队伍
                         ws_config.persons[index].teams=1
                         ws_config.persons[index].state=1
@@ -448,6 +462,8 @@ function MountRouter(dbs,db_config,ws_config){
 
         ws.on('close',function(){
             console.log('有人离开',ws_config.persons[position].user_name);
+            console.log(ws_config.teams,'team');
+            console.log(ws_config.persons[position].openid,'openid');
             // 遍历teams，查看是否在队伍当中
             ws_config.teams.forEach((item,index)=>{
                 for(let i=0;i<item.length;i++){
@@ -494,7 +510,7 @@ function MountRouter(dbs,db_config,ws_config){
 }
 
 function create(){
-    let cards1=['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+    let cards1=['14','15','3','4','5','6','7','8','9','10','11','12','13']
 
     cards1=cards1.map(item=>{return [item,item,item,item]})
 
@@ -503,7 +519,7 @@ function create(){
     cards1.forEach(item=>{
         cards2.push(...item)    
     })
-    cards2.push(...['w','W'])
+    cards2.push(...['16','17'])
 
     // 首先是发牌,所谓发牌就是开局时一副牌共有 54 张,分为三份,
         // 一人 17 张,留 3 张做底牌,在确定地主之前玩家不能看底牌。

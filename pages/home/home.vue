@@ -50,7 +50,9 @@
 				</view>
 				<view class="title" :style="{maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
 					<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
-						{{item.book_name}}
+						<view style="text-overflow:ellipsis;overflow: hidden;white-space: nowrap;width:170px;">
+							{{item.book_name}}
+						</view>
 						<uni-fav class="favBtn" :checked='item.fav' circle="true" bgColorChecked="#dd524d" @click.stop="fav_book(item)"/>
 					</view>
 					<view style="color:gray;font-size:13px;" @click.stop="request_book_info(item)" >
