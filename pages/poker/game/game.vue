@@ -4,7 +4,7 @@
 					<view @click="back" class="back">退出</view>
 					<view class="master_card">
 						<view v-for="(item,index) in master_cards" :key="index">
-							{{item}}
+							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
 				<view>12</view>
@@ -31,7 +31,7 @@
 							{{rule.total_count?'抢地主':'叫地主'}}
 						</view>
 						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards">
+						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
 					</view>
@@ -47,8 +47,8 @@
 				</view> -->
 			</view>
 			<view class="cards">
-				<view class="card"  v-for="(item,index) in user_cards" :key="index">
-					{{item}}
+				<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${!index?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+					<image :src="'https://www.mynameisczy.asia/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
 				</view>
 			</view>
 			<view class="myself">
@@ -61,6 +61,9 @@
 					</view>
 					<view class="my_name">{{item.name}}</view>
 					<view class="my_count">牌:{{item.count}}</view>
+					<view style="margin-left:10px;">
+						{{rule.master?'地主':'农民'}}
+					</view>
 				</view>
 				</template>
 				<view class="chat">
@@ -329,7 +332,11 @@
 					if(uni.current_this19.rule.openid==data.master_openid){
 						// 地主牌给他/她
 						uni.current_this19.user_cards.push(...data.master_card)
-						uni.current_this19.user_cards=uni.current_this19.user_cards.sort((a,b)=>a-b)
+											
+						uni.current_this19.user_cards=uni.current_this19.user_cards.sort((a,b)=>{
+						                        let reg=/(\d)/g
+						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                      })
 					// 权限赋值
 						uni.current_this19.rule.master=true
 					}
@@ -353,7 +360,10 @@
 					return
 				this.rule[item]=cards[item]
 			})
-			cards.cards=cards.cards.sort((a,b)=>a-b)
+			cards.cards=cards.cards.sort((a,b)=>{
+						                        let reg=/(\d)/g
+						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                      })
 			this.user_cards.push(...cards.cards)
 			// 音乐
 			this.audio=uni.createInnerAudioContext()
@@ -402,9 +412,31 @@
 				})
 			})
 		}
-		function out_cards(){
+		let user_out_cards=reactive([])
+		function out_cards(item,index){
+			// 检测user_cout_cards内是否有这个牌
+				// 有：删除
+				// 没有：添加
+			for(let i=0;i<user_out_cards.length;i++){
+				if(user_out_cards[i].index==index&&user_out_cards[i].card==item){
+					// 将其删除
+					user_out_cards.splice(i,1)
+					return
+				}
+			}
+				user_out_cards.push({
+					card:item,
+					index:index
+				})
+				user_out_cards=user_out_cards.sort((a,b)=>{
+						                        let reg=/(\d)/g
+						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                      })
+				console.log(user_out_cards);
+		}
+		function out_cards_btn(){
 			uni.showToast({
-				title:'出牌'
+				title:'出'+user_out_cards[0]
 			})
 		}
 			function back(){
@@ -422,7 +454,7 @@
 		let container_height=ref(uni.getSystemInfoSync().windowHeight)
 		let container_width=ref(uni.getSystemInfoSync().windowWidth)
 			// 地主产生后，将所有pre.master=false
-			return {back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
@@ -439,7 +471,7 @@
         // transform: rotateZ(90deg) translateY(-100%);
 		&>view{
 			flex-grow: 1;
-			background-color: red;
+			background-color:blanchedalmond;
 			border-bottom:5px solid white;
 			box-sizing: border-box;
 		}
@@ -529,13 +561,9 @@
 				display: flex;
 			}
 		}
-		.btns{
-			max-height:40px;
-		}
 		.others{
-			padding-top:5%;
 			display: flex;
-			padding: 5% 10px 0 10px;
+			padding: 2% 10px 0 10px;
 			justify-content: space-between;
 			align-items: center;
 			height:30%;
@@ -545,6 +573,7 @@
 				left:50%;
 				top:50%;
 				display: flex;
+				align-items: center;
 				justify-content: space-between;
 				&>view{
 					max-width:40%;
@@ -571,15 +600,22 @@
 		}
 		.cards{
 			display: flex;
+			max-height:120px;
 			padding:0 20px;
 			&>view{
+				max-width:75px;
+				height:120px;
+				width:75px;
+				
+				transition:.5s ease;
+				box-shadow:-2px 0px 10px -5px gray;
+				min-width:75px;
 				display: flex;
-				justify-content: center;
+				transform: translate(0%,0%);
+				justify-content:flex-start;
 				font-size: 20px;
 				font-weight: bold;
 				flex-grow: 1;
-				background-color: white;
-				border: 5px solid orangered;
 				box-sizing: border-box;
 			}
 		}
@@ -597,14 +633,19 @@
 				width:150px;
 				display: flex;
 				justify-content: space-around;
+					background-color: rgba(0,0,0,.1);
 				&>view{
-					width:40px;
-					background-color: white;
+					height:100%;
+					min-width:60px;
+					max-width:60px;
+					width:60px;
+					border-radius: 10px;
 					color: black;
+					transform: scale(1.2);
 					font-weight: bold;
 				}
 			}
-			padding:0 130px 0 30px;
+			padding:0 50px 0 30px;
 			max-height:40px;
 			&>view{
 				border: 1px solid white;
@@ -643,7 +684,6 @@
 			max-width:100px;
 			color: white;
 			max-height:30px;
-			background-color: red;
 		}
 		&>view{
 			text-align: center;

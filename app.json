@@ -1,5 +1,5 @@
-    {
-        "pages":["pages/home/home",
+{
+    "pages":["pages/home/home",
     "pages/base_info/base_info",
     "pages/chat/chat",
     "pages/sign_in_today/sign_in_today",
@@ -27,7 +27,8 @@
     "navigationBarTitleText": "uni-app",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8",
-    "navigationStyle": "custom"
+    "navigationStyle": "custom",
+    "pageOrientation": "auto"
   },
   "tabBar": {
     "list": [

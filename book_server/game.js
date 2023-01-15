@@ -247,6 +247,12 @@ function MountRouter(dbs,db_config,ws_config){
                     // 游戏进行中
                     item.playing=1
                     obj.user_cards[index].openid=item.openid
+                // 排序函数
+                    // arr=arr.sort((a,b)=>{
+                    //     let reg=/(\d)/g
+                    //     // console.log(a.match(reg).join(''));
+                    //     return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+                    //   })
                     item.ws.send(JSON.stringify({
                         state:4,
                         cards:obj.user_cards[index],
@@ -510,17 +516,26 @@ function MountRouter(dbs,db_config,ws_config){
 }
 
 function create(){
-    let cards1=['14','15','3','4','5','6','7','8','9','10','11','12','13']
-
-    cards1=cards1.map(item=>{return [item,item,item,item]})
-
-    let cards2=[]
-
-    cards1.forEach(item=>{
-        cards2.push(...item)    
-    })
-    cards2.push(...['16','17'])
-
+    let cards2=[
+        '10black_peach.svg', '10block.svg',           '10club.svg',
+        '10red_heart.svg',   '11black_peach.svg',     '11block.svg',
+        '11club.svg',        '11red_heart.svg',       '12black_peach.svg',
+        '12block.svg',       '12club.svg',            '12red_heart.svg',
+        '13black_peach.svg', '13block.svg',           '13club.svg',
+        '13red_heart.svg',   '14black_peach.svg',     '14block.svg',
+        '14club.svg',        '14red_heart.svg',       '15black_peach.svg',
+        '15block.svg',       '15club.svg',            '15red_heart.svg',
+        '16king.svg',        '17king.svg',            '3black_peach.svg',
+        '3block.svg',        '3club.svg',             '3red_heart.svg',
+        '4black_peach.svg',  '4block.svg',            '4club.svg',
+        '4red_heart.svg',    '5black_peach.svg',      '5block.svg',
+        '5club.svg',         '5red_heart.svg',        '6black_peach.svg',
+        '6block.svg',        '6club.svg',             '6red_heart.svg',
+        '7black_peach.svg',  '7block.svg',            '7club.svg',
+        '7red_heart.svg',    '8black_peach.svg',      '8block.svg',
+        '8club.svg',         '8red_heart.svg',        '9black_peach.svg',
+        '9block.svg',        '9club.svg',             '9red_heart.svg'
+      ]
     // 首先是发牌,所谓发牌就是开局时一副牌共有 54 张,分为三份,
         // 一人 17 张,留 3 张做底牌,在确定地主之前玩家不能看底牌。
 
