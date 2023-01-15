@@ -47,8 +47,8 @@
 				</view> -->
 			</view>
 			<view class="cards">
-				<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${!index?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
-					<image :src="'https://www.mynameisczy.asia/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
+				<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+					<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
 				</view>
 			</view>
 			<view class="myself">
@@ -72,7 +72,7 @@
 						倍
 						</view>
 					<view class="bei">
-						60
+						0
 					</view>
 					</view>
 					<view class="chat2">聊天</view>
@@ -331,11 +331,16 @@
 					uni.current_this19.master_cards.push(...data.master_card)
 					if(uni.current_this19.rule.openid==data.master_openid){
 						// 地主牌给他/她
-						uni.current_this19.user_cards.push(...data.master_card)
+						uni.current_this19.user_cards.push(...data.master_card.map(item=>{
+							return {
+								card:item,
+								flag:0
+							}
+						}))
 											
 						uni.current_this19.user_cards=uni.current_this19.user_cards.sort((a,b)=>{
 						                        let reg=/(\d)/g
-						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                        return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
 						                      })
 					// 权限赋值
 						uni.current_this19.rule.master=true
@@ -360,9 +365,15 @@
 					return
 				this.rule[item]=cards[item]
 			})
+			cards.cards=cards.cards.map(item=>{
+				return {
+					card:item,
+					flag:0
+				}
+			})
 			cards.cards=cards.cards.sort((a,b)=>{
 						                        let reg=/(\d)/g
-						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                        return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
 						                      })
 			this.user_cards.push(...cards.cards)
 			// 音乐
@@ -418,19 +429,21 @@
 				// 有：删除
 				// 没有：添加
 			for(let i=0;i<user_out_cards.length;i++){
-				if(user_out_cards[i].index==index&&user_out_cards[i].card==item){
+				if(user_out_cards[i].index==index&&user_out_cards[i].card.card==item.card){
+					user_out_cards[i].card.flag=0
 					// 将其删除
 					user_out_cards.splice(i,1)
 					return
 				}
 			}
+				item.flag=1
 				user_out_cards.push({
 					card:item,
 					index:index
 				})
 				user_out_cards=user_out_cards.sort((a,b)=>{
 						                        let reg=/(\d)/g
-						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                        return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
 						                      })
 				console.log(user_out_cards);
 		}
@@ -636,9 +649,9 @@
 					background-color: rgba(0,0,0,.1);
 				&>view{
 					height:100%;
-					min-width:60px;
-					max-width:60px;
-					width:60px;
+					min-width:30px;
+					max-width:30px;
+					width:30px;
 					border-radius: 10px;
 					color: black;
 					transform: scale(1.2);

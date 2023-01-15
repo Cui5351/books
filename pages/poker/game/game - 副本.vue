@@ -1,38 +1,84 @@
 <template>
-	<navigation show_back='1'>进入阶段</navigation>
-	<page>
-		<view class="container">
-			<view class="users">
-				<view class="user" v-for="(item,index) in users" :key="index">
-					<view class="avatar" :style="{border:'7px solid '+(rule.current_player_openid==item.openid?'red':'white')}">
-						<image :src="item.avatar"></image>
-						<view class="ready" :style="{backgroundColor:item.ready?'rgb(102,188,39)':'orangered'}">
-							{{item.ready?'已准备':'未准备'}}
+		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
+			<view class='head'>
+					<view @click="back" class="back">退出</view>
+					<view class="master_card">
+						<view v-for="(item,index) in master_cards" :key="index">
+							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
-					<view class="name">
-						{{item.name}}
+				<view>12</view>
+			</view>
+			<view class="others">
+				<!-- <view  v-for="(item,index) in users" :key="index" v-if='item.openid!=rule.openid'> -->
+				<template  v-for="(item,index) in users" :key="index" >
+				<view  v-if='item.openid!==rule.openid'>
+					<view class="user">
+						<view class="avatar">
+							<image style="height: 100%;width:100%;" :src='item.avatar' mode=""></image>
+						</view>
+						<view class="name">{{item.name}}</view>
+						<view class="count">牌:{{item.count}}</view>
+						<view class="master">{{rule.current_player_openid==item.openid?'master':''}}</view>	
+						</view>
+					<view class="person_cards">
+						cards
 					</view>
 				</view>
-			</view>
-			<view class="menu" v-if="rule.pre_master_count>=0">
-				<view class="btn2" @click="get_master" v-show='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
-					{{rule.total_count?'抢地主':'叫地主'}}
-				</view>
-				<view class="btn" v-show='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">
-					不叫
-				</view>
-				<view class="btn2" v-show="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards">
-					出牌
-				</view>
+				</template>
+					<view class="btns"  v-if="rule.pre_master_count>=0">
+						<view class="btn2"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
+							{{rule.total_count?'抢地主':'叫地主'}}
+						</view>
+						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
+						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
+							出牌
+						</view>
+					</view>
+<!-- 				<view class="person2">
+					<view class="user">
+						<view class="avatar">
+							<image style="height: 100%;width:100%;" src='../../static/back_img/back1.jpg' mode=""></image>
+						</view>
+						<view class="name">name</view>
+						<view class="count">count</view>
+						<view class="master">master</view>
+						</view>
+				</view> -->
 			</view>
 			<view class="cards">
-				<view class="card" v-for="(item,index) in user_cards" :key="index">
-					{{item}}
+				<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${!index?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+					<image :src="'https://www.mynameisczy.asia/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
+				</view>
+			</view>
+			<view class="myself">
+				<!-- <view class="user2" v-for="(item,index) in users" :key="index" v-if='item.openid==rule.openid'> -->
+				<template  v-for="(item,index) in users" :key="index" >
+				<view class="user2" v-if='item.openid==rule.openid'>
+						
+					<view class="avatar">
+						<image style="height: 100%;width:100%;" :src='item.avatar' mode=""></image>
+					</view>
+					<view class="my_name">{{item.name}}</view>
+					<view class="my_count">牌:{{item.count}}</view>
+					<view style="margin-left:10px;">
+						{{rule.master?'地主':'农民'}}
+					</view>
+				</view>
+				</template>
+				<view class="chat">
+					<view>
+						<view class="bei1">
+						倍
+						</view>
+					<view class="bei">
+						60
+					</view>
+					</view>
+					<view class="chat2">聊天</view>
 				</view>
 			</view>
 		</view>
-	</page>
 </template>
 
 <script>
@@ -164,6 +210,7 @@
 			})
 		},
 		onLoad(res) {
+			uni.current_this19=this
 			console.log('进入了');
 			uni.onSocketClose(function(){
 				uni.showToast({
@@ -191,7 +238,6 @@
 			})
 			// 如果发现没有登录，那么退出登录
 			
-			uni.current_this19=this
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
 				console.log(data,'game data');
@@ -282,15 +328,15 @@
 							})
 						}
 					})
-					setTimeout(()=>{
-						uni.showToast({
-							title:`地主牌是${data.master_card}`,
-							duration:2000
-						})
-					},2000)
+					uni.current_this19.master_cards.push(...data.master_card)
 					if(uni.current_this19.rule.openid==data.master_openid){
 						// 地主牌给他/她
 						uni.current_this19.user_cards.push(...data.master_card)
+											
+						uni.current_this19.user_cards=uni.current_this19.user_cards.sort((a,b)=>{
+						                        let reg=/(\d)/g
+						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                      })
 					// 权限赋值
 						uni.current_this19.rule.master=true
 					}
@@ -304,6 +350,7 @@
 			
 			// 将原用户信息推入
 			this.users.push(...JSON.parse(res.users))
+			console.log(this.users,'users');
 			
 			this.rule.room_id=Number(res.room_id)
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
@@ -313,14 +360,11 @@
 					return
 				this.rule[item]=cards[item]
 			})
-			console.log('rule',this.rule);
-			cards.cards.forEach(item=>{
-				setTimeout(()=>{
-					this.user_cards.push(item)
-				},300)
-			})
-			
-			
+			cards.cards=cards.cards.sort((a,b)=>{
+						                        let reg=/(\d)/g
+						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                      })
+			this.user_cards.push(...cards.cards)
 			// 音乐
 			this.audio=uni.createInnerAudioContext()
 			this.audio.src="https://www.mynameisczy.asia/audio/poker.mp3"
@@ -338,6 +382,7 @@
 			let user_cards=reactive([])
 			let users=reactive([])
 			let audio=reactive(null)
+			let master_cards=reactive([])
 			// 默认属性
 			let rule=reactive({
 					room_id:-1,
@@ -367,91 +412,282 @@
 				})
 			})
 		}
-		function out_cards(){
+		let user_out_cards=reactive([])
+		function out_cards(item,index){
+			// 检测user_cout_cards内是否有这个牌
+				// 有：删除
+				// 没有：添加
+			for(let i=0;i<user_out_cards.length;i++){
+				if(user_out_cards[i].index==index&&user_out_cards[i].card==item){
+					// 将其删除
+					user_out_cards.splice(i,1)
+					return
+				}
+			}
+				user_out_cards.push({
+					card:item,
+					index:index
+				})
+				user_out_cards=user_out_cards.sort((a,b)=>{
+						                        let reg=/(\d)/g
+						                        return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+						                      })
+				console.log(user_out_cards);
+		}
+		function out_cards_btn(){
 			uni.showToast({
-				title:'出牌'
+				title:'出'+user_out_cards[0]
 			})
 		}
+			function back(){
+				// uni.getImageInfo({
+					// src:''
+				// })
+				if(getCurrentPages().length>1)
+					uni.navigateBack();
+				else
+					uni.switchTab({
+						url:'/pages/home/home'
+					})
+			}
+		let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
+		let container_height=ref(uni.getSystemInfoSync().windowHeight)
+		let container_width=ref(uni.getSystemInfoSync().windowWidth)
 			// 地主产生后，将所有pre.master=false
-			return {out_cards,user_cards,audio,rule,get_master,store,users,cancel_master}
+			return {user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
-
-<style lang="less">
-@import url('@/general.less');
-.container{
-	height:100%;
-	width:100%;
-&>.users{
-		margin:20px 0;
-		justify-content: space-around;
-		display: flex;
-		&>.user{
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			flex-direction: column;
+<style scoped lang="less">
+@import url('/general.less');
+      /*竖屏样式*/
+      .container {
+		  position: absolute;
+		  /* top:0%; */
+		  display: flex;
+		  flex-direction: column;
+        transform-origin: 0 0;
+		/* background-color:red; */
+        // transform: rotateZ(90deg) translateY(-100%);
+		&>view{
+			flex-grow: 1;
+			background-color:blanchedalmond;
+			border-bottom:5px solid white;
 			box-sizing: border-box;
-			&>.name{
-				background-color: rgba(0,0,0,.2);
-				padding:5px 10px;
-				border-radius: 10px;
-				color: white;
-				height:20px;
-			}
-			&>.avatar{
-				border:7px solid white;
-				border-radius: 50%;
-				margin-bottom:10px;
-				width:80px;
-				height:80px;
+		}
+		.myself{
+			padding: 0 20px;
+			box-sizing: border-box;
+			max-height:50px;
+			display: flex;
+			justify-content: space-between;
+			.chat{
 				display: flex;
-				flex-direction: column;
-				position: relative;
-				&>image{
-					border-radius:50%;
-					width:100%;height:100%;
+				justify-content: center;
+				align-items: center;
+				&>view{
+					// width:50px;
+					display: flex;
+					height:60%;
 				}
-				&>.ready{
-					position: absolute;
-					top:100%;
-					background-color: rgb(102,188,39);
-					color:white;
-					opacity:0.9;
-					box-shadow: 0px 2px 10px -1px gray;
-					font-size:13px;
-					left:50%;
-					width:50%;
-					border-radius: 10px;
-					transform: translateY(-100%) translateX(-50%);
-					padding:5px 10px;
+				.chat2{
+					background-color: yellowgreen;
+					padding:10px;
+					box-sizing: border-box;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					border-radius:10px;
+				}
+				.bei1{
+					height:30px;
+					width:30px;
+					text-align: center;
+					line-height: 30px;
+					background-color: skyblue;
+					border-radius: 50%;
+					position: relative;
+					z-index: 2;
+				}
+				.bei{
+					transform: translateX(-10%);
+					border-top-right-radius: 10px;
+					border-bottom-right-radius: 10px;
+					width:80px;
+					text-align: center;
+					background-color: rgba(0,0,0,.1);
 				}
 			}
+			&>.user2{
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				.avatar{
+					max-height:70px;
+					max-width:70px;
+					min-height:70px;
+					min-width:70px;
+					width:70px;
+					height:70px;
+					&>image{
+						transform: translateY(-30%);
+						border-radius:50%;
+						position: relative;
+						z-index:2;
+						border: 5px solid white;
+						box-sizing: border-box;
+						background-color: white;
+					}
+				}
+				.my_name{
+					background-color: rgba(0,0,0,.1);
+					height:60%;
+					border-top-right-radius: 15px;
+					display: flex;
+					align-items: center;
+					border-bottom-right-radius: 15px;
+					// width:70px;
+					padding:0 10px 0 50px;
+					overflow: hidden;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					max-width:150px;
+					color: white;
+					box-sizing: border-box;
+					transform: translateX(-30%);
+				}
+			}
+			&>view{
+				display: flex;
+			}
 		}
-	}
-	&>.menu{
-		height:10%;
-		display: flex;
-		justify-content: space-around;
-	}
-	&>.cards{
-		width:100%;
-		height:40%;
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr 1fr;
-		background-color: black;
-		grid-gap: 10px;
-		&>.card{
-			border: 5px solid red;
-			box-sizing: border-box;
+		.others{
 			display: flex;
-			background-color: white;
-			font-size:30px;
-			border-radius: 10px;
-			justify-content:center;
-			padding:20px 0 0 0;
+			padding: 2% 10px 0 10px;
+			justify-content: space-between;
+			align-items: center;
+			height:30%;
+			.btns{
+				position: absolute;
+				width:150px;
+				left:50%;
+				top:50%;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				&>view{
+					max-width:40%;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+				}
+				transform: translate(-50%,-50%);
+			}
+			&>view{
+				height:100%;
+				width:35%;
+				.person_cards{
+					background-color: yellow;
+				}
+				display: flex;
+				&>view{
+					flex-grow: 1;
+				}
+			}
+			&>view:nth-child(2){
+				flex-direction: row-reverse;
+			}
+		}
+		.cards{
+			display: flex;
+			max-height:120px;
+			padding:0 20px;
+			&>view{
+				max-width:75px;
+				height:120px;
+				width:75px;
+				
+				transition:.5s ease;
+				box-shadow:-2px 0px 10px -5px gray;
+				min-width:75px;
+				display: flex;
+				transform: translate(0%,0%);
+				justify-content:flex-start;
+				font-size: 20px;
+				font-weight: bold;
+				flex-grow: 1;
+				box-sizing: border-box;
+			}
+		}
+		.head{
+			display: flex;	
+			align-items: center;
+			justify-content: space-around;
+			.back{
+				font-weight: bold;
+				&:active{
+					background-color: @border;
+				}
+			}
+			&>.master_card{
+				width:150px;
+				display: flex;
+				justify-content: space-around;
+					background-color: rgba(0,0,0,.1);
+				&>view{
+					height:100%;
+					min-width:60px;
+					max-width:60px;
+					width:60px;
+					border-radius: 10px;
+					color: black;
+					transform: scale(1.2);
+					font-weight: bold;
+				}
+			}
+			padding:0 50px 0 30px;
+			max-height:40px;
+			&>view{
+				border: 1px solid white;
+				border-radius: 10px;
+				// width:30px;
+				padding:0 5px;
+				height:30px;
+				line-height: 30px;
+				text-align: center;
+			}
+		}
+    }
+	.user{
+		max-width:30%;
+		&>view{
+			margin-top:5px;
+		}
+		.avatar{
+			max-height:70px;
+			max-width:70px;
+			min-height:70px;
+			min-width:70px;
+			width:70px;
+			height:70px;
+			&>image{
+				border: 5px solid white;
+				box-sizing: border-box;
+				background-color: white;
+				border-radius:50%;
+			}
+		}
+		.name{
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			max-width:100px;
+			color: white;
+			max-height:30px;
+		}
+		&>view{
+			text-align: center;
+			flex-grow: 1;
 		}
 	}
-}
 </style>

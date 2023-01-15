@@ -581,5 +581,8 @@ function create(){
             c.count--
         }
     }
+    a.count=a.cards.length
+    b.count=b.cards.length
+    c.count=c.cards.length
     return {user_cards:[a,b,c],others:cards2}
 }
