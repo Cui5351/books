@@ -69,7 +69,7 @@ function MountRouter(dbs,db_config,ws_config){
             state:1,
             position:position
         }))
-        ws.on('message',function(msg){
+        ws.on('message',async function(msg){
             msg=JSON.parse(msg)
 
     if(msg.state==1){
@@ -153,7 +153,6 @@ function MountRouter(dbs,db_config,ws_config){
                                 return
                         }
                         ws_config.teams[i].push(ws_config.persons[index])
-                        console.log(ws_config.teams[i]);
                         console.log(ws_config.persons[index].user_name,'加入');
                         // 加入队伍
                         ws_config.persons[index].teams=1
@@ -258,7 +257,7 @@ function MountRouter(dbs,db_config,ws_config){
                         cards:obj.user_cards[index],
                         current_player_openid:ws_config.teams[room_id][master].openid,
                         users_card:obj.user_cards.map(item2=>{
-                            return JSON.parse(JSON.stringify(item2,['count','pre_master_count','master']))
+                            return JSON.parse(JSON.stringify(item2,['count','pre_master_count','master','out_card_state']))
                         })
                     }))
                 })
@@ -276,7 +275,9 @@ function MountRouter(dbs,db_config,ws_config){
                     master_openid:'',
                     users:obj.user_cards,
                     master_card:obj.others,
-                    current_player_openid:''
+                    current_player_openid:'',
+                    rounds:[],
+                    rounds_state:false
                 })
                 console.log('创建裁判');
                 console.log(ws_config.teams[room_id][master].user_name,'是先手');
@@ -292,7 +293,8 @@ function MountRouter(dbs,db_config,ws_config){
                 })
                 let openid_count_max=openid
                 let count=0;
-                ws_config.teams[room_id][3].users.forEach(item=>{
+                let inde=0
+                ws_config.teams[room_id][3].users.forEach((item,index)=>{
                     if(item.openid==openid){
                         // 这个玩家抢地主
                         item.pre_master_count++
@@ -300,12 +302,16 @@ function MountRouter(dbs,db_config,ws_config){
                     if(item.pre_master_count>count){
                         count=item.pre_master_count
                         openid_count_max=item.openid
+                        inde=index
                     }
                 })
                 if(count>=2){
                     // 地主产生
                     ws_config.teams[room_id][3].master_openid=openid_count_max
                     ws_config.teams[room_id][3].current_player_openid=openid_count_max
+                    ws_config.teams[room_id][3].users[inde].out_card_state=true
+
+                    ws_config.teams[room_id][3].users[inde].cards.push(...ws_config.teams[room_id][3].master_card)
                     // 把地主牌发给地主并公布
                     ws_config.teams[room_id].forEach((item,index)=>{
                         if(index>=3)
@@ -354,7 +360,8 @@ function MountRouter(dbs,db_config,ws_config){
                         item.cancel_master=true
                         let flag={
                             count:0,
-                            openid:''
+                            openid:'',
+                            index:0
                         }
                         // 查看其他两个的pre_master_count
                         // 如果另外两个其中有一个是true，另外一个的count>=1，那么另外一个就是地主
@@ -365,6 +372,7 @@ function MountRouter(dbs,db_config,ws_config){
                         if(!item2.cancel_master){
                             flag.count++
                             flag.openid=item2.openid
+                            flag.index=index2
                         }
                     })
                     if(flag.count==1){
@@ -373,6 +381,8 @@ function MountRouter(dbs,db_config,ws_config){
                             ws_config.teams[room_id][3].master_openid=flag.openid
                             ws_config.teams[room_id][3].current_player_openid=flag.openid
                             // 把地主牌发给地主并公布
+                            ws_config.teams[room_id][3].users[flag.index].cards.push(...ws_config.teams[room_id][3].master_card)
+                            console.log();
                             ws_config.teams[room_id].forEach((item3,index)=>{
                                 if(index>=3)
                                     return
@@ -425,9 +435,8 @@ function MountRouter(dbs,db_config,ws_config){
                         current_player_openid:ws_config.teams[room_id][3].current_player_openid
                     }))
                 })
-                
-
-            }else if(msg.state==7){
+    // 邀请人加入房间
+    }else if(msg.state==7){
                 // 加入房间
                 const {room_id,position}=msg
 
@@ -463,13 +472,196 @@ function MountRouter(dbs,db_config,ws_config){
                         current_persons:ws_config.teams[room_id].map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                     }))
                 })
+            }else if(msg.state==8){
+                const {room_id,openid,cards}=msg
+                if(ws_config.teams[room_id].length<=2){
+                    console.log('退出');
+                    // 房间异常
+                    return
+                }
+
+                if(ws_config.teams[room_id][3].current_player_openid!=openid){
+                    // 有人抢先，（还没轮到该角色出牌）
+                    return
+                }
+                // 检测牌是否存在
+
+                let exists=await test_cards_exists(room_id,cards,openid)
+                // 不存在
+                if(!exists){
+                    console.log('出的牌不存在');
+                }
+
+                // 检测出的牌是否合理
+
+                // 创建(第一回合或开始新的回合)
+                if(ws_config.teams[room_id][3].rounds.length<=0||ws_config.teams[room_id][3].rounds_state==false){
+                    await set_users_out_card_state_all_true(room_id)
+                    await set_next_out_card_user(room_id)
+                    ws_config.teams[room_id][3].rounds_state=true
+                    // 扣除cards
+
+                    ws_config.teams[room_id][3].rounds.push([{
+                        openid:openid,
+                        cards:cards
+                    }])
+                    // 返回最新的一回合
+                    ws_config.teams[room_id].forEach((item,index)=>{
+                        if(index>=3)
+                            return
+                        item.ws.send(JSON.stringify({
+                            state:10,
+                            cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1],
+                            current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                        }))
+                    })
+                    return
+                }
+
+                await set_next_out_card_user(room_id)
+                // 扣除cards
+                await decrement_cards(room_id,cards,openid)
+
+                // 回合添加数据
+                ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].push({
+                    openid:openid,
+                    cards:cards
+                })
+                // 将出的牌返回，每次返回2个
+                ws_config.teams[room_id].forEach((item,index)=>{
+                    if(index>=3)
+                        return
+                    // 每次返回最新的两条数据
+                    item.ws.send(JSON.stringify({
+                        state:10,
+                        cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),
+                        current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                    }))
+                })
+                
+            }else if(msg.state==9){
+                // 不出牌
+                const {room_id,openid}=msg
+
+                if(ws_config.teams[room_id].length<=2){
+                    console.log('退出');
+                    // 房间异常
+                    return
+                }
+
+                if(ws_config.teams[room_id][3].current_player_openid!=openid){
+                    // 有人抢先，（还没轮到该角色出牌）
+                    return
+                }
+                for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                    if(i>=3)
+                        break
+                    if(ws_config.teams[room_id][3].users[i].openid==current_player_openid){
+                        ws_config.teams[room_id][3].users[i].out_card_state=false
+                    }
+                }
+
+                let test=await test_users_out_card_state(room_id)
+                // 检测回合是否结束
+                if(test){
+                    // 回合结束:test是可以出牌的openid
+                    ws_config.teams[room_id][3].rounds_state=false
+                    ws_config.teams[room_id][3].current_player_openid=test
+                    // 通知所有人下一回合开始
+
+                    return
+                }
+
+            // 设置下一个玩家
+                await set_next_out_card_user(room_id)
+            }
+
+            // 检测牌是否存在
+            function test_cards_exists(room_id,cards,openid){
+                return new Promise(res=>{
+                    for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                        if(ws_config.teams[room_id][3].users[i].openid==openid){
+                            console.log(cards);
+                            console.log(ws_config.teams[room_id][3].users[i].cards);
+                            for(let j=0;j<cards.length;j++){
+                                    if(ws_config.teams[room_id][3].users[i].cards.indexOf(cards[j])<0){
+                                        res(false)
+                                    }
+                            }
+                            res(true)
+                        }
+                    }
+                })
+            }
+
+            // 扣除对应的牌
+            function decrement_cards(room_id,cards,openid){
+                return new Promise(res=>{
+                    for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                        if(ws_config.teams[room_id][3].users[i].openid==openid){
+                            for(let j=0;j<cards.length;j++){
+                                for(let k=0;k<ws_config.teams[room_id][3].users[i].cards.length;k++){
+                                    if(cards[j]==ws_config.teams[room_id][3].users[i].cards[k])
+                                        ws_config.teams[room_id][3].users[i].cards.splice(k,1)
+                                }
+                            }
+                            console.log(ws_config.teams[room_id][3].users[i].cards);
+                            res()
+                        }
+                    }
+                })
+            }
+
+            // 检测是否有两个人不出(回合结束)
+            function test_users_out_card_state(room_id){
+                let count=0
+                let openid=''
+                return new Promise(res=>{
+                    for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                        if(ws_config.teams[room_id][3].users[i].out_card_state==false)
+                            count++
+                        else
+                            openid=ws_config.teams[room_id][3].users[i].openid
+                    }
+                    // 回合结束，返回那个可以出牌的openid
+                    if(count>=2)
+                        res(openid)
+                    res(false)
+                })
+            }
+
+            // 将所有人是否能出牌重置为true(每回合开始前调用)
+            function set_users_out_card_state_all_true(room_id){
+                return new Promise(res=>{
+                for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                    ws_config.teams[room_id][3].users[i].out_card_state=true
+                }
+                res()
+            })
+            }
+
+                function set_next_out_card_user(room_id){
+                    return new Promise(res=>{
+                        for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                            if(i>=3)
+                                break
+                            if(ws_config.teams[room_id][3].users[i].openid==ws_config.teams[room_id][3].current_player_openid){
+                                if(((i+1)>=3?ws_config.teams[room_id][3].users[0].out_card_state:ws_config.teams[room_id][3].users[i+1].out_card_state)==false){
+                                    // 如果下一个为false，就检测下下个
+                                    i++
+                                }
+                                // 设置下一个出牌用户
+                                ws_config.teams[room_id][3].current_player_openid=(i+1)>=3?ws_config.teams[room_id][3].users[0].openid:ws_config.teams[room_id][3].users[i+1].openid
+                                res()
+                                return
+                        }
+                    }
+                })
             }
         })
 
         ws.on('close',function(){
             console.log('有人离开',ws_config.persons[position].user_name);
-            console.log(ws_config.teams,'team');
-            console.log(ws_config.persons[position].openid,'openid');
             // 遍历teams，查看是否在队伍当中
             ws_config.teams.forEach((item,index)=>{
                 for(let i=0;i<item.length;i++){
@@ -479,7 +671,6 @@ function MountRouter(dbs,db_config,ws_config){
                     if(item[i].openid==ws_config.persons[position].openid){
                         // 找到了,进行删除
                         let rm=item.splice(i,1)
-                        console.log(rm[0].user_name,'删除');
                         if(rm[0].privilege)
                             if(item.length)
                                 item[0].privilege=true
@@ -548,6 +739,7 @@ function create(){
         pre_master_count:0,
         master:false,
         total_count:0,
+        out_card_state:false,
         cancel_master:false
     }
     let b={
@@ -556,6 +748,7 @@ function create(){
         pre_master_count:0,
         master:false,
         total_count:0,
+        out_card_state:false,
         cancel_master:false
     }
     let c={
@@ -564,6 +757,7 @@ function create(){
         pre_master_count:0,
         master:false,
         total_count:0,
+        out_card_state:false,
         cancel_master:false
     }
     let rand=0

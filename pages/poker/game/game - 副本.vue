@@ -19,19 +19,21 @@
 						</view>
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
-						<view class="master">{{rule.current_player_openid==item.openid?'master':''}}</view>	
+						<view class="master">{{rule.current_player_openid==item.openid?'当前玩家':''}}</view>	
 						</view>
 					<view class="person_cards">
-						cards
+						<view v-for="(item2,index) in item.out_cards" :key="index">
+							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+						</view>
 					</view>
 				</view>
 				</template>
-					<view class="btns"  v-if="rule.pre_master_count>=0">
+					<view class="btns" >
 						<view class="btn2"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							{{rule.total_count?'抢地主':'叫地主'}}
 						</view>
 						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&rule.out_card_state" @click="out_cards_btn">
+						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
 					</view>
@@ -350,13 +352,46 @@
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
 					// 开始游戏
 					uni.current_this19.rule.game_playing=true
+				}else if(data.state==10){
+					let {cards,current_player_openid}=data
+					uni.current_this19.rule.current_player_openid=data.current_player_openid
+					for(let i=0;i<uni.current_this19.users.length;i++){
+						while(uni.current_this19.users[i].out_cards.length>0){
+							uni.current_this19.users[i].out_cards.pop()
+						}
+					}	
+					// 将数据推入
+					uni.current_this19.users.forEach(item=>{
+						data.cards.forEach(item2=>{
+							if(item2.openid==item.openid){
+								item.out_cards.push(...item2.cards)
+							}
+						})
+					})
+					if(data.cards[data.cards.length-1].openid==uni.current_this19.rule.openid){
+						let reg=/(\d)/g
+					// 将牌减去
+					while(data.cards[data.cards.length-1].cards.length>0){
+						let b=data.cards[data.cards.length-1].cards.pop()[0]
+						
+						for(let i=0;i<uni.current_this19.user_cards.length;i++){
+							if(Number(uni.current_this19.user_cards[i].card.match(reg).join(''))==b){
+								uni.current_this19.user_cards.splice(i,1)
+								break
+							}
+						}
+					}
+					// 清空预出的牌
+					while(uni.current_this19.user_out_cards.length)
+						uni.current_this19.user_out_cards.pop()
+					}
 				}
 			})
 			let cards=JSON.parse(res.cards)
 			
 			// 将原用户信息推入
-			this.users.push(...JSON.parse(res.users))
-			console.log(this.users,'users');
+			this.users.push(...JSON.parse(res.users).map(item=>{item.out_cards=['14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg'];return item}))
+			console.log(this.users);
 			
 			this.rule.room_id=Number(res.room_id)
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
@@ -445,13 +480,22 @@
 				})
 				user_out_cards=user_out_cards.sort((a,b)=>{
 						                        let reg=/(\d)/g
-						                        return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
+						                        return Number(b.card.card.match(reg).join(''))-Number(a.card.card.match(reg).join(''))
 						                      })
-				console.log(user_out_cards);
 		}
 		function out_cards_btn(){
-			uni.showToast({
-				title:'出'+user_out_cards[0]
+			console.log(user_out_cards.map(item=>{
+						return item.card.card
+					}),'card');
+			uni.sendSocketMessage({
+				data:JSON.stringify({
+					state:8,
+					room_id:rule.room_id,
+					openid:rule.openid,
+					cards:user_out_cards.map(item=>{
+						return item.card.card
+					})
+				})
 			})
 		}
 			function back(){
@@ -600,12 +644,27 @@
 			}
 			&>view{
 				height:100%;
-				width:35%;
+				max-width:40%;
+				min-width:40%;
+				width: 40%;
 				.person_cards{
-					background-color: yellow;
+					max-width:100%;
+					display: grid;
+					grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+					overflow: hidden;
+					grid-gap:0px;
+					&>view{
+						height:50px;
+						max-height:50px;
+						max-width:30px;
+						min-width:30px;
+					}
+					padding: 10px;
+					box-sizing: border-box;
+					// background-color: yellow;
 				}
 				display: flex;
-				&>view{
+				view{
 					flex-grow: 1;
 				}
 			}
@@ -616,15 +675,15 @@
 		.cards{
 			display: flex;
 			max-height:120px;
-			padding:0 20px;
+			padding:0 50px;
+			align-items: flex-end;
 			&>view{
 				max-width:75px;
-				height:120px;
+				height:100px;
 				width:75px;
-				
-				transition:.5s ease;
-				box-shadow:-2px 0px 10px -5px gray;
 				min-width:75px;
+				transition:.1s linear;
+				box-shadow:-2px 0px 10px -5px gray;
 				display: flex;
 				transform: translate(0%,0%);
 				justify-content:flex-start;

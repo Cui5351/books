@@ -15,26 +15,42 @@
 				<view  v-if='item.openid!==rule.openid'>
 					<view class="user">
 						<view class="avatar">
-							<image style="height: 100%;width:100%;" :src='item.avatar' mode=""></image>
+							<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'red':'white')}" :src='item.avatar' mode=""></image>
 						</view>
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
-						<view class="master">{{rule.current_player_openid==item.openid?'当前玩家':''}}</view>	
+						<view class="master">{{item.openid==rule.master_id?'地主':'农民'}}</view>	
 						</view>
 					<view class="person_cards">
-						<view v-for="(item2,index) in item.out_cards" :key="index">
+						<view v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
 							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
 				</view>
 				</template>
-					<view class="btns" >
+					<view class="btns">
+						<view class="">
+							<view class="myself_out_cards">
+							<template v-for="(item,index) in users" :key="index">
+							<template v-for="(item2,index) in item.out_cards" :key="index">
+								<view class="myself_out_card" :style="{transform:`translateX(-${index*55}%`}" v-if="item.openid==rule.openid">
+									<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+								</view>
+							</template>
+							</template>
+							</view>
+						</view>
+						<view class="">
 						<view class="btn2"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							{{rule.total_count?'抢地主':'叫地主'}}
 						</view>
 						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
 						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
+						</view>
+						<view class="btn" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="no_card">
+							不要
+						</view>
 						</view>
 					</view>
 <!-- 				<view class="person2">
@@ -57,9 +73,8 @@
 				<!-- <view class="user2" v-for="(item,index) in users" :key="index" v-if='item.openid==rule.openid'> -->
 				<template  v-for="(item,index) in users" :key="index" >
 				<view class="user2" v-if='item.openid==rule.openid'>
-						
 					<view class="avatar">
-						<image style="height: 100%;width:100%;" :src='item.avatar' mode=""></image>
+						<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'red':'white')}" :src='item.avatar' mode=""></image>
 					</view>
 					<view class="my_name">{{item.name}}</view>
 					<view class="my_count">牌:{{item.count}}</view>
@@ -324,6 +339,7 @@
 					// 地主产生，地主牌公布
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.master_openid){
+							item.master=true
 							uni.showToast({
 								title:`地主是${item.name}`,
 								icon:'none'
@@ -331,6 +347,7 @@
 						}
 					})
 					uni.current_this19.master_cards.push(...data.master_card)
+					uni.current_this19.rule.master_id=data.master_openid
 					if(uni.current_this19.rule.openid==data.master_openid){
 						uni.current_this19.rule.out_card_state=true
 						// 地主牌给他/她
@@ -365,6 +382,7 @@
 						data.cards.forEach(item2=>{
 							if(item2.openid==item.openid){
 								item.out_cards.push(...item2.cards)
+								item.count=item2.count
 							}
 						})
 					})
@@ -372,7 +390,8 @@
 						let reg=/(\d)/g
 					// 将牌减去
 					while(data.cards[data.cards.length-1].cards.length>0){
-						let b=data.cards[data.cards.length-1].cards.pop()[0]
+						let b=data.cards[data.cards.length-1].cards.pop()
+						b=Number(b.match(reg).join(''))
 						
 						for(let i=0;i<uni.current_this19.user_cards.length;i++){
 							if(Number(uni.current_this19.user_cards[i].card.match(reg).join(''))==b){
@@ -385,6 +404,16 @@
 					while(uni.current_this19.user_out_cards.length)
 						uni.current_this19.user_out_cards.pop()
 					}
+				}else if(data.state==20){
+					uni.showToast({
+						title:data.errMes,
+						icon:'error'
+					})
+				}else if(data.state==21){
+					uni.showToast({
+						title:data.errMes,
+						icon:'error'
+					})					
 				}
 			})
 			let cards=JSON.parse(res.cards)
@@ -397,7 +426,7 @@
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
 			
 			Object.keys(this.rule).forEach(item=>{
-				if(item=='room_id'||item=='openid'||item=='current_player_openid'||item=='game_playing')
+				if(item=='room_id'||item=='openid'||item=='current_player_openid'||item=='game_playing'||item=='master_id')
 					return
 				this.rule[item]=cards[item]
 			})
@@ -440,7 +469,8 @@
 					master:false,
 					cancel_master:false,
 					game_playing:false,
-					out_card_state:false
+					out_card_state:false,
+					master_id:''
 			})
 			function get_master(){
 				uni.sendSocketMessage({
@@ -484,6 +514,9 @@
 						                      })
 		}
 		function out_cards_btn(){
+			console.log(user_out_cards.map(item=>{
+						return item.card.card
+					}),'card');
 			uni.sendSocketMessage({
 				data:JSON.stringify({
 					state:8,
@@ -509,8 +542,11 @@
 		let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 		let container_height=ref(uni.getSystemInfoSync().windowHeight)
 		let container_width=ref(uni.getSystemInfoSync().windowWidth)
+		function no_card(){
+			console.log('不要');
+		}
 			// 地主产生后，将所有pre.master=false
-			return {user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {no_card,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
@@ -625,6 +661,7 @@
 			height:30%;
 			.btns{
 				position: absolute;
+				flex-direction: column;
 				width:150px;
 				left:50%;
 				top:50%;
@@ -632,27 +669,63 @@
 				align-items: center;
 				justify-content: space-between;
 				&>view{
-					max-width:40%;
+					min-height:45%;
+					flex-grow: 1;
+					max-width:100%;
+					min-width:100%;
 					display: flex;
 					justify-content: center;
 					align-items: center;
+				}
+				&>view:nth-child(1){
+					display: flex;
+					align-items: flex-end;
+					&>.myself_out_cards{
+						// border-radius: 10px;
+						display: flex;
+						justify-content: center;
+						&>view{
+							box-shadow:-2px 0px 10px -7px gray;
+							height:55px;
+							max-height:55px;
+							max-width:35px;
+							min-width:35px;
+						}
+					}
+				}
+				&>view:nth-child(2){
+					align-items: flex-start;
+					min-height:55%;
+					justify-content: space-around;
+					&>view{
+						max-width:30%;
+					}
 				}
 				transform: translate(-50%,-50%);
 			}
 			&>view{
 				height:100%;
-				width:35%;
+				max-width:40%;
+				min-width:40%;
+				width: 40%;
 				.person_cards{
+					max-width:100%;
+					// background-color: rgba(0,0,0,.1);
 					display: flex;
 					&>view{
-						height:70px;
-						max-width:75px;
-						min-width:75px;
+						box-shadow:-2px 0px 10px -7px gray;
+							height:55px;
+							max-height:55px;
+							max-width:35px;
+							min-width:35px;
+							width: 35px;
 					}
-					background-color: yellow;
+					padding: 10px;
+					box-sizing: border-box;
+					// background-color: yellow;
 				}
 				display: flex;
-				&>view{
+				view{
 					flex-grow: 1;
 				}
 			}
@@ -663,15 +736,16 @@
 		.cards{
 			display: flex;
 			max-height:120px;
-			padding:0 20px;
+			box-sizing: border-box;
+			padding:0 45px;
+			align-items: flex-end;
 			&>view{
 				max-width:75px;
-				height:120px;
+				height:100px;
 				width:75px;
-				
-				transition:.5s ease;
-				box-shadow:-2px 0px 10px -5px gray;
 				min-width:75px;
+				transition:.1s linear;
+				box-shadow:-2px 0px 10px -5px gray;
 				display: flex;
 				transform: translate(0%,0%);
 				justify-content:flex-start;
@@ -687,8 +761,9 @@
 			justify-content: space-around;
 			.back{
 				font-weight: bold;
+				background-color: @border;
 				&:active{
-					background-color: @border;
+					background-color:navajowhite;
 				}
 			}
 			&>.master_card{
