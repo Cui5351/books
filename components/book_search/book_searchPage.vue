@@ -13,7 +13,7 @@
 			</view>
 			<view class="title">
 				<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
-					<view style="text-overflow:ellipsis;overflow: hidden;white-space: nowrap;width:170px;">
+					<view style="text-overflow:ellipsis;overflow: hidden;white-space: nowrap;width:50%;">
 						{{item.book_name}}
 					</view>
 					<uni-fav class="favBtn" :checked='item.fav' circle="true" bgColorChecked="#dd524d" @click.stop="fav_book(item)"/>
@@ -116,6 +116,7 @@
 	.title{
 		justify-content: space-around;
 		display: flex;
+		width: 50%;
 		flex-direction: column;
 	}
 	.bill:first-child{

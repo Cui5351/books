@@ -50,14 +50,14 @@
 				</view>
 				<view class="title" :style="{maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
 					<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
-						<view style="text-overflow:ellipsis;overflow: hidden;white-space: nowrap;width:170px;">
+						<view style="text-overflow:ellipsis;overflow: hidden;white-space: nowrap;width:70%;">
 							{{item.book_name}}
 						</view>
 						<uni-fav class="favBtn" :checked='item.fav' circle="true" bgColorChecked="#dd524d" @click.stop="fav_book(item)"/>
 					</view>
 					<view style="color:gray;font-size:13px;" @click.stop="request_book_info(item)" >
 						<!-- <view style="display: inline-block;font-size:16px;color: red;">{{item.score}}分</view> -->
-					<view decode style="max-width:200px;min-width:200px;width:200px;text-overflow:ellipsis;overflow: hidden;white-space: nowrap;max-height:30px;">
+					<view decode style="max-width:100px;min-width:100px;width:100px;text-overflow:ellipsis;overflow: hidden;white-space: nowrap;max-height:30px;">
 						作者: {{item.author}}
 					</view>
 						<view style="display: flex;flex-direction:column;vertical-align: center;" >
@@ -545,6 +545,7 @@
 				.title{
 					justify-content: space-around;
 					display: flex;
+					width:50%;
 					flex-direction: column;
 				}
 				&>view{

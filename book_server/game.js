@@ -5,7 +5,6 @@ const {query} =require('./query')
 const {connectionMysql,insertData, update}=require('./dbs')
 const { resolve } = require('path')
 const https=require('https')
-const { default: axios } = require('axios')
 const expressWS=require('express-ws')
 
 
@@ -492,18 +491,35 @@ function MountRouter(dbs,db_config,ws_config){
                     console.log('出的牌不存在');
                 }
 
-                // 检测出的牌是否合理
+                // 检测出牌是否符合规则
+                let result2=await check_card_regular(cards)
+
+                if(!result2){
+                    // 出的牌不符合规则
+                    ws_config.teams[room_id].forEach((item,index)=>{
+                        if(index>=3)
+                            return
+                        if(item.openid==openid)
+                            item.ws.send(JSON.stringify({
+                                    state:20,
+                                    errMes:'出的牌不符合规则'
+                                }))
+                    })
+                    return
+                }
+                
 
                 // 创建(第一回合或开始新的回合)
                 if(ws_config.teams[room_id][3].rounds.length<=0||ws_config.teams[room_id][3].rounds_state==false){
                     await set_users_out_card_state_all_true(room_id)
                     await set_next_out_card_user(room_id)
+                    let count=await decrement_cards(room_id,cards,openid)
                     ws_config.teams[room_id][3].rounds_state=true
                     // 扣除cards
-
                     ws_config.teams[room_id][3].rounds.push([{
                         openid:openid,
-                        cards:cards
+                        cards:cards,
+                        count:count
                     }])
                     // 返回最新的一回合
                     ws_config.teams[room_id].forEach((item,index)=>{
@@ -518,26 +534,80 @@ function MountRouter(dbs,db_config,ws_config){
                     return
                 }
 
+                 // 检测出的牌是否合理
+                let result=await check_card_regular(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-1].cards)
+                
+                if((result.type==result2.type&&result.card<result2.card&&result.length==result2.length)||result.grade<result2.grade){
+                    console.log('可以出');
+                }else{
+                    console.log('不能出');
+                    // 出的牌不合理
+                    ws_config.teams[room_id].forEach((item,index)=>{
+                        if(index>=3)
+                            return
+                        if(item.openid==openid)
+                            item.ws.send(JSON.stringify({
+                                    state:21,
+                                    errMes:'出的牌不合理'
+                                }))
+                    })
+                    return
+                }
+
                 await set_next_out_card_user(room_id)
                 // 扣除cards
-                await decrement_cards(room_id,cards,openid)
+                let count=await decrement_cards(room_id,cards,openid)
 
                 // 回合添加数据
                 ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].push({
                     openid:openid,
-                    cards:cards
+                    cards:cards,
+                    count:count
                 })
+
+                // 如果一个回合内头=尾，那么所有人都又可以出牌了
+                if(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][0].openid==ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-1].openid){
+                    await set_users_out_card_state_all_true()
+                }
+
                 // 将出的牌返回，每次返回2个
-                ws_config.teams[room_id].forEach((item,index)=>{
-                    if(index>=3)
+                if(count>0)
+                    ws_config.teams[room_id].forEach((item,index)=>{
+                        if(index>=3)
+                            return
+                        // 每次返回最新的两条数据
+                        item.ws.send(JSON.stringify({
+                            state:10,
+                            cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),
+                            current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                        }))
+                    })
+                else{
+                    ws_config.teams[room_id].forEach((item,index)=>{
+                        if(index>=3)
+                            return
+                        // 每次返回最新的两条数据
+                        item.ws.send(JSON.stringify({
+                            state:10,
+                            cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),
+                            current_player_openid:''
+                        }))
+                    })
+                    setTimeout(() => {
+                    // 游戏结束
+                        console.log('game over');
+                        ws_config.teams[room_id].forEach((item,index)=>{
+                            if(index>=3)
+                                return
+                            // 每次返回最新的两条数据
+                            item.ws.send(JSON.stringify({
+                                state:14,
+                                winner_openid:openid
+                            }))
+                        })
                         return
-                    // 每次返回最新的两条数据
-                    item.ws.send(JSON.stringify({
-                        state:10,
-                        cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),
-                        current_player_openid:ws_config.teams[room_id][3].current_player_openid
-                    }))
-                })
+                    }, 1000);
+                }
                 
             }else if(msg.state==9){
                 // 不出牌
@@ -556,11 +626,12 @@ function MountRouter(dbs,db_config,ws_config){
                 for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
                     if(i>=3)
                         break
-                    if(ws_config.teams[room_id][3].users[i].openid==current_player_openid){
+                    if(ws_config.teams[room_id][3].users[i].openid==ws_config.teams[room_id][3].current_player_openid){
                         ws_config.teams[room_id][3].users[i].out_card_state=false
                     }
                 }
 
+                // 如果有两个人都不出，那么就结束下一回合
                 let test=await test_users_out_card_state(room_id)
                 // 检测回合是否结束
                 if(test){
@@ -568,12 +639,22 @@ function MountRouter(dbs,db_config,ws_config){
                     ws_config.teams[room_id][3].rounds_state=false
                     ws_config.teams[room_id][3].current_player_openid=test
                     // 通知所有人下一回合开始
-
-                    return
+                }else{
+                    // 设置下一个玩家
+                    await set_next_out_card_user(room_id)
                 }
 
-            // 设置下一个玩家
-                await set_next_out_card_user(room_id)
+
+                ws_config.teams[room_id].forEach((item,index)=>{
+                    if(index>=3)
+                        return
+                // 不出
+                    item.ws.send(JSON.stringify({
+                        state:11,
+                        openid:openid,
+                        current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                    }))
+                })
             }
 
             // 检测牌是否存在
@@ -593,20 +674,136 @@ function MountRouter(dbs,db_config,ws_config){
                     }
                 })
             }
+            // 匹配规则
+            function check_card_regular(cards){
+                return new Promise(res=>{
+                    // 把数字匹配出来
+                    let reg=/(\d)/g
+                    cards=cards.map(a=>{
+                        return Number(a.match(reg).join(''))
+                    }).sort((a,b)=>a-b)
+        
+                    let plane=false
+                    // 规则
+                    // 1单
+                    if(cards.length==1){
+                        res({type:'单',card:cards[0],length:1,grade:0})
+                    }
+                    // 2双
+                    else if(cards.length==2&&cards.indexOf(16)<0){
+                        if(cards[0]!=cards[1]){
+                            res(false)
+                        }
+                        res({type:'双',card:cards[0],length:2,grade:0})
+                    }
+                    // 3 单连
+                    else if(cards.length>=5&&cards[0]==cards[1]-1){
+                        for(let i=0;i<cards.length-1;i++){
+                            if(cards[i]!=cards[++i]-1){
+                                res(false)
+                                return
+                            }
+                        }
+                        // 进行匹配
+                        res({type:'单连',card:cards[cards.length-1],length:cards.length,grade:0})
+                    }
+                    // 4 双连
+                    else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards.length%2==0){
+                        for(let i=0;i<cards.length;i=i+2){
+                            if(cards[i]!=cards[i+1]){
+                                res(false)
+                                return
+                            }
+                        }
+                        res({type:'双连',card:cards[cards.length-1],length:cards.length,grade:0})
+                    }
+                    // 5炸
+                    else if(cards.length==4&&cards[0]==cards[3]){
+                        for(let i=0;i<cards.length-1;i++){
+                            if(cards[i]!=cards[++i]){
+                                res(false)
+                            }
+                        }
+                        res({type:'4炸',card:cards[0],length:cards.length,grade:cards[0]})
+        
+                    }
+                    // 6王炸
+                    else if(cards.indexOf(16)>=0&&cards.indexOf(17)>=0){
+                        res({type:'王炸',card:cards[0],length:cards.length,grade:100})
+                    }
+                    // 7飞机
+                    else if(plane=fn(cards)){
+                        res(plane)
+                    }
+                    // 8三带一
+                    else if(cards.length==4&&cards[0]!=cards[3]){
+                        // 情况一 3334
+                        if(cards[0]==cards[1]&&cards[1]==cards[2]){
+                            res({type:'三带一',card:cards[0],length:cards.length,grade:0})
+                        }
+                        // 情况二 3444
+                        if(cards[1]==cards[2]&&cards[2]==cards[3]){
+                            res({type:'三带一',card:cards[3],length:cards.length,grade:0})
+                        }
+                        res(false)
+                    }
+                    // 0 1 2 3 4
+                    // 3 3 3 4 4
+        
+                    // 4 4 4 3 3
+        
+                    // 9三带二
+                    else if(cards.length==5&&((cards[0]!=cards[3]&&cards[3]==cards[4])||(cards[4]!=cards[0]&&cards[0]==cards[1]))){
+                        // 情况一 33344
+                        if(cards[0]==cards[1]&&cards[1]==cards[2]){
+                            res({type:'三带二',card:cards[0],length:cards.length,grade:0})
+                        }
+                        // 情况二 33444
+                        if(cards[2]==cards[3]&&cards[3]==cards[4]){
+                            res({type:'三带二',card:cards[4],length:cards.length,grade:0})
+                        }
+                        res(false)
+                    }
+                    res(false)
+                })
+            }
+            // 检测是否有两个是3个的
+            function fn(cards){
+                let arr=[]
+                for(let i=0;i<cards.length;i++){
+                    let count=0
+                    for(let j=i;j<cards.length;j++){
+                        if(cards[i]==cards[j]){
+                            count++
+                        }
+                        if(count>=3){
+                            if(arr.indexOf(cards[i])<0){
+                                arr.push(cards[i])
+                            }
+                        }
+                    }
+                }
+                if(arr.length>=2&&(arr.length*3+arr.length)==cards.length&&cards.length%2==0)
+                    return {type:'飞机',card:arr,length:cards.length,grade:0}
+                return false
+            }
 
             // 扣除对应的牌
             function decrement_cards(room_id,cards,openid){
+                let count=0
                 return new Promise(res=>{
                     for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
                         if(ws_config.teams[room_id][3].users[i].openid==openid){
                             for(let j=0;j<cards.length;j++){
                                 for(let k=0;k<ws_config.teams[room_id][3].users[i].cards.length;k++){
-                                    if(cards[j]==ws_config.teams[room_id][3].users[i].cards[k])
+                                    if(cards[j]==ws_config.teams[room_id][3].users[i].cards[k]){
                                         ws_config.teams[room_id][3].users[i].cards.splice(k,1)
+                                        ws_config.teams[room_id][3].users[i].count--
+                                        count=ws_config.teams[room_id][3].users[i].count
+                                    }
                                 }
                             }
-                            console.log(ws_config.teams[room_id][3].users[i].cards);
-                            res()
+                            res(count)
                         }
                     }
                 })

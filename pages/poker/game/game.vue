@@ -414,6 +414,26 @@
 						title:data.errMes,
 						icon:'error'
 					})					
+				}else if(data.state==11){
+					uni.current_this19.users.forEach(item=>{
+						if(item.openid==data.openid){
+							uni.showToast({
+								title:`玩家${item.name}不要`
+							})
+						}
+					})
+					uni.current_this19.rule.current_player_openid=data.current_player_openid
+				}else if(data.state==14){
+					uni.current_this19.users.forEach(item=>{
+						if(item.openid==data.winner_openid){
+							uni.showToast({
+								title:`玩家${item.name}胜利`
+							})
+						}
+					})
+					setTimeout(()=>{
+						uni.navigateBack()
+					},1000)
 				}
 			})
 			let cards=JSON.parse(res.cards)
@@ -543,7 +563,13 @@
 		let container_height=ref(uni.getSystemInfoSync().windowHeight)
 		let container_width=ref(uni.getSystemInfoSync().windowWidth)
 		function no_card(){
-			console.log('不要');
+			uni.sendSocketMessage({
+				data:JSON.stringify({
+					state:9,
+					room_id:rule.room_id,
+					openid:rule.openid
+				})
+			})
 		}
 			// 地主产生后，将所有pre.master=false
 			return {no_card,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
