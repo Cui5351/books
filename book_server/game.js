@@ -537,6 +537,7 @@ function MountRouter(dbs,db_config,ws_config){
                  // 检测出的牌是否合理
                 let result=await check_card_regular(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-1].cards)
                 
+                // 有grade的都是炸弹
                 if((result.type==result2.type&&result.card<result2.card&&result.length==result2.length)||result.grade<result2.grade){
                     console.log('可以出');
                 }else{
@@ -567,7 +568,7 @@ function MountRouter(dbs,db_config,ws_config){
 
                 // 如果一个回合内头=尾，那么所有人都又可以出牌了
                 if(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][0].openid==ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-1].openid){
-                    await set_users_out_card_state_all_true()
+                    await set_users_out_card_state_all_true(room_id)
                 }
 
                 // 将出的牌返回，每次返回2个
@@ -630,6 +631,7 @@ function MountRouter(dbs,db_config,ws_config){
                         ws_config.teams[room_id][3].users[i].out_card_state=false
                     }
                 }
+
 
                 // 如果有两个人都不出，那么就结束下一回合
                 let test=await test_users_out_card_state(room_id)
@@ -763,6 +765,13 @@ function MountRouter(dbs,db_config,ws_config){
                             res({type:'三带二',card:cards[4],length:cards.length,grade:0})
                         }
                         res(false)
+                        // 4带二
+                    }else if(cards.length==6&&((cards[0]==cards[1]&&cards[1]==cards[2]&&cards[2]==cards[3])||(cards[5]==cards[4]&&cards[4]==cards[3]&&cards[3]==cards[2]))){
+                        if(cards[0]==cards[1]&&cards[1]==cards[2]&&cards[2]==cards[3]){
+                            res({type:'四带二',card:cards[0],length:cards.length,grade:0})
+                        }else{
+                            res({type:'四带二',card:cards[5],length:cards.length,grade:0})
+                        }
                     }
                     res(false)
                 })
@@ -784,7 +793,7 @@ function MountRouter(dbs,db_config,ws_config){
                     }
                 }
                 if(arr.length>=2&&(arr.length*3+arr.length)==cards.length&&cards.length%2==0)
-                    return {type:'飞机',card:arr,length:cards.length,grade:0}
+                    return {type:'飞机',card:arr[0],length:arr.length,grade:0}
                 return false
             }
 
@@ -829,8 +838,9 @@ function MountRouter(dbs,db_config,ws_config){
 
             // 将所有人是否能出牌重置为true(每回合开始前调用)
             function set_users_out_card_state_all_true(room_id){
+                console.log(ws_config.teams[room_id],room_id);
                 return new Promise(res=>{
-                for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                for(let i=0;i<3;i++){
                     ws_config.teams[room_id][3].users[i].out_card_state=true
                 }
                 res()
@@ -843,10 +853,10 @@ function MountRouter(dbs,db_config,ws_config){
                             if(i>=3)
                                 break
                             if(ws_config.teams[room_id][3].users[i].openid==ws_config.teams[room_id][3].current_player_openid){
-                                if(((i+1)>=3?ws_config.teams[room_id][3].users[0].out_card_state:ws_config.teams[room_id][3].users[i+1].out_card_state)==false){
+                                // if(((i+1)>=3?ws_config.teams[room_id][3].users[0].out_card_state:ws_config.teams[room_id][3].users[i+1].out_card_state)==false){
                                     // 如果下一个为false，就检测下下个
-                                    i++
-                                }
+                                    // i++
+                                // }
                                 // 设置下一个出牌用户
                                 ws_config.teams[room_id][3].current_player_openid=(i+1)>=3?ws_config.teams[room_id][3].users[0].openid:ws_config.teams[room_id][3].users[i+1].openid
                                 res()

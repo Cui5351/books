@@ -418,19 +418,15 @@
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.openid){
 							uni.showToast({
-								title:`玩家${item.name}不要`
+								title:`${item.name}不要`
 							})
 						}
 					})
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
 				}else if(data.state==14){
-					uni.current_this19.users.forEach(item=>{
-						if(item.openid==data.winner_openid){
 							uni.showToast({
-								title:`玩家${item.name}胜利`
+								title:`${uni.current_this19.rule.master_id==data.winner_openid?'地主':'农民'}胜利`
 							})
-						}
-					})
 					setTimeout(()=>{
 						uni.navigateBack()
 					},1000)
