@@ -210,13 +210,13 @@
 							})
 						}
 					}
-					uni.current_this18.solo_state=true
 					data.current_persons.forEach(item=>{
 						if(item.openid==uni.current_this18.store.getters.user_openid){
 							// 设置房间权限
 							uni.current_this18.room_state=item.privilege
 							if(item.privilege==false){
 								clearInterval(uni.current_this18.timer)
+								console.log('关闭匹配');
 							}
 						}
 					})
@@ -236,6 +236,7 @@
 						uni.current_this18.room_id=-1
 					}
 				}else if(data.state==3){
+					// 有人取消准备
 					data.current_persons_ready.forEach(item=>{
 						uni.current_this18.users.forEach(item2=>{
 							if(item.openid==item2.openid){
@@ -257,7 +258,7 @@
 					uni.current_this18.solo_state=true
 					// 开始游戏
 					uni.navigateTo({
-						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid
+						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid+'&width='+uni.getSystemInfoSync().screenWidth+'&height='+uni.getSystemInfoSync().screenHeight
 					})
 				}else if(data.state==5){
 					clearTimeout(uni.current_this18.p_time.timer)
@@ -335,6 +336,7 @@
 						return
 					}
 					if(count.value>=3){
+						solo_state.value=true
 						clearInterval(timer.value)
 						return
 					}

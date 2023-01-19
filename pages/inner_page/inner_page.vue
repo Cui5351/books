@@ -1,5 +1,5 @@
 <template>
-	<scroll-view scroll-y="true" class="vessel" :style="{marginTop:head_height_child+25+'px',height:(container_height-head_height_child-20)+'px'}">
+	<scroll-view scroll-y="true" class="vessel" :style="{marginTop:head_height_child+25+'px',width:width+'px',height:(container_height-head_height_child-20)+'px'}">
 		<slot></slot>
 	</scroll-view>
 </template>
@@ -12,8 +12,9 @@
 		setup() {
 			let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			let container_height=ref(uni.getSystemInfoSync().windowHeight)
+			let width=ref(uni.getSystemInfoSync().windowWidth)
 			
-			return {head_height_child,container_height}
+			return {head_height_child,container_height,width}
 		}
 	}
 </script>

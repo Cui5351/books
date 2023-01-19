@@ -143,7 +143,7 @@
             {
                 "navigationBarTitleText": "",
                 "enablePullDownRefresh": false,
-                "pageOrientation": "auto" //开启自动旋转屏幕
+                "pageOrientation": "landscape" //开启自动旋转屏幕
             }
             
         }
@@ -194,6 +194,6 @@
         "navigationBarBackgroundColor" : "#F8F8F8",
         "backgroundColor" : "#F8F8F8",
         "navigationStyle" : "custom",
-        "pageOrientation": "auto"
+        "pageOrientation": "portrait"
     }
 }

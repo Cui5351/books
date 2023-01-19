@@ -25,7 +25,6 @@
 		},
 		onLoad(){
 			
-			
 			// 检查版本更新
 			let updateManager=uni.getUpdateManager()
 			updateManager.onCheckForUpdate(function (res) {

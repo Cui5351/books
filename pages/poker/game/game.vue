@@ -19,7 +19,9 @@
 						</view>
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
-						<view class="master">{{item.openid==rule.master_id?'地主':'农民'}}</view>	
+						<view class="master" style="width:50px;height:50px;">
+							<image :src="'https://www.mynameisczy.asia/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
+						</view>	
 						</view>
 					<view class="person_cards">
 						<view v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
@@ -78,8 +80,9 @@
 					</view>
 					<view class="my_name">{{item.name}}</view>
 					<view class="my_count">牌:{{item.count}}</view>
-					<view style="margin-left:10px;">
-						{{rule.master?'地主':'农民'}}
+					<view style="margin-left:10px;width:50px;height:50px;">
+						<!-- {{rule.master?'地主':'农民'}} -->
+						<image :src="'https://www.mynameisczy.asia/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
 					</view>
 				</view>
 				</template>
@@ -101,7 +104,7 @@
 <script>
 	import page from '../../inner_page/inner_page.vue'
 	import navigation from '../../navigation/navigation_all.vue'
-	import {reactive,ref} from 'vue'
+	import {reactive,ref,watch} from 'vue'
 	import {useStore} from 'vuex'
 	export default {
 		components:{
@@ -227,6 +230,9 @@
 			})
 		},
 		onLoad(res) {
+			this.container_height=res.height
+			this.container_width=res.width
+			
 			uni.current_this19=this
 			console.log('进入了');
 			uni.onSocketClose(function(){
@@ -556,8 +562,8 @@
 					})
 			}
 		let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
-		let container_height=ref(uni.getSystemInfoSync().windowHeight)
-		let container_width=ref(uni.getSystemInfoSync().windowWidth)
+		let container_height=ref(0)
+		let container_width=ref(0)
 		function no_card(){
 			uni.sendSocketMessage({
 				data:JSON.stringify({
@@ -818,9 +824,16 @@
 		}
     }
 	.user{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 		max-width:30%;
 		&>view{
-			margin-top:5px;
+			// margin-top:5px;
+		}
+		.name{
+			min-height:20px;
 		}
 		.avatar{
 			max-height:70px;
@@ -846,7 +859,7 @@
 		}
 		&>view{
 			text-align: center;
-			flex-grow: 1;
+			// flex-grow: 1;
 		}
 	}
 </style>
