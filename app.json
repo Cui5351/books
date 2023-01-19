@@ -28,7 +28,7 @@
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8",
     "navigationStyle": "custom",
-    "pageOrientation": "auto"
+    "pageOrientation": "portrait"
   },
   "tabBar": {
     "list": [

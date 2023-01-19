@@ -23,9 +23,10 @@
 							<image :src="'https://www.mynameisczy.asia/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
 						</view>	
 						</view>
-					<view class="person_cards">
-						<view v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
-							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+					<!-- <view class="person_cards" :style="{paddingLeft:(index?(300-item.out_cards.length*30)<0?0:(300-item.out_cards.length*30):10)+'px'}"> -->
+					<view class="person_cards" :style="{paddingLeft:(index?(300-item.out_cards.length*30)<100?100:(300-item.out_cards.length*30):10)+'px'}">
+							<view v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
+								<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
 				</view>
@@ -35,12 +36,14 @@
 							<view class="myself_out_cards">
 							<template v-for="(item,index) in users" :key="index">
 							<template v-for="(item2,index) in item.out_cards" :key="index">
-								<view class="myself_out_card" :style="{transform:`translateX(-${index*55}%`}" v-if="item.openid==rule.openid">
+							<template  v-if="item.openid==rule.openid">
+								<view class="myself_out_card" :style="{transform:`translateX(-${index*55}%`}">
 									<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 								</view>
 							</template>
 							</template>
-							</view>
+							</template>
+								</view>
 						</view>
 						<view class="">
 						<view class="btn2"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
@@ -66,9 +69,11 @@
 						</view>
 				</view> -->
 			</view>
-			<view class="cards">
-				<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
-					<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+			<view class="cards_out">
+				<view class="cards" :style="{width:user_cards.length*35+'px'}">
+					<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+						<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+					</view>
 				</view>
 			</view>
 			<view class="myself">
@@ -346,6 +351,7 @@
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.master_openid){
 							item.master=true
+							item.count+=3
 							uni.showToast({
 								title:`地主是${item.name}`,
 								icon:'none'
@@ -397,10 +403,17 @@
 					// 将牌减去
 					while(data.cards[data.cards.length-1].cards.length>0){
 						let b=data.cards[data.cards.length-1].cards.pop()
-						b=Number(b.match(reg).join(''))
+						// b=Number(b.match(reg).join(''))
+						
+						// for(let i=0;i<uni.current_this19.user_cards.length;i++){
+						// 	if(Number(uni.current_this19.user_cards[i].card.match(reg).join(''))==b){
+						// 		uni.current_this19.user_cards.splice(i,1)
+						// 		break
+						// 	}
+						// }
 						
 						for(let i=0;i<uni.current_this19.user_cards.length;i++){
-							if(Number(uni.current_this19.user_cards[i].card.match(reg).join(''))==b){
+							if(uni.current_this19.user_cards[i].card==b){
 								uni.current_this19.user_cards.splice(i,1)
 								break
 							}
@@ -708,13 +721,17 @@
 				&>view:nth-child(1){
 					display: flex;
 					align-items: flex-end;
+					justify-content: center;
 					&>.myself_out_cards{
-						// border-radius: 10px;
 						display: flex;
-						justify-content: center;
+						padding-left:130px;
+						box-sizing: border-box;
 						&>view{
 							box-shadow:-2px 0px 10px -7px gray;
 							height:55px;
+							&>image{
+								transform: scale(1.3);
+							}
 							max-height:55px;
 							max-width:35px;
 							min-width:35px;
@@ -738,15 +755,18 @@
 				width: 40%;
 				.person_cards{
 					max-width:100%;
+					min-width:100%;
+					overflow:hidden;
 					// background-color: rgba(0,0,0,.1);
 					display: flex;
 					&>view{
-						box-shadow:-2px 0px 10px -7px gray;
-							height:55px;
+							box-shadow:-2px 0px 10px -7px gray;
 							max-height:55px;
 							max-width:35px;
 							min-width:35px;
-							width: 35px;
+							&>image{
+								transform: scale(1.3);
+							}
 					}
 					padding: 10px;
 					box-sizing: border-box;
@@ -761,15 +781,30 @@
 				flex-direction: row-reverse;
 			}
 		}
+		.cards_out{
+			display: flex;
+			justify-content: center;
+			box-sizing: border-box;
+			padding-bottom:10px;
+			align-items:flex-end;
+		}
 		.cards{
 			display: flex;
 			max-height:120px;
 			box-sizing: border-box;
-			padding:0 45px;
+			// padding:0 45px;
+			// width:90%;
 			align-items: flex-end;
 			&>view{
 				max-width:75px;
-				height:100px;
+				height:90px;
+				&>image{
+					max-height:100%;
+					transform: scale(1.3);
+					min-height:100%;
+					max-width: 100%;
+					min-width: 100%;
+				}
 				width:75px;
 				min-width:75px;
 				transition:.1s linear;

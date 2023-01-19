@@ -119,8 +119,16 @@
 			uni.current_this18=this
 			// 连接socket
 			let timer2=setInterval(function(){
-				if(uni.current_this18.store.getters.user_openid.length<=0)
+				if(uni.current_this18.store.getters.user_openid.length<=0){
+					uni.showToast({
+						title:'请先登录',
+						icon:'error'
+					})
+					uni.switchTab({
+						url:'/pages/home/home'
+					})
 					return
+				}
 				clearInterval(timer2)
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
 				success() {
