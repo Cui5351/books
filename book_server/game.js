@@ -13,8 +13,8 @@ const app=express()
 
 app.use(cors())
 const options = {
-  key: readFileSync(resolve(__dirname, 'cert','a.key')),
-  cert: readFileSync(resolve(__dirname, 'cert','a.pem'))
+key: readFileSync(resolve(__dirname, 'cert','a.key')),
+cert: readFileSync(resolve(__dirname, 'cert','a.pem'))
 }
 entry()
 
@@ -36,7 +36,7 @@ function entry(){
                 teams:[] // 队伍
             }
             MountRouter(value,db_config,ws_config)  
-           // 使用express-ws
+        // 使用express-ws
         })
     })
 }
@@ -311,6 +311,7 @@ function MountRouter(dbs,db_config,ws_config){
                     ws_config.teams[room_id][3].users[inde].out_card_state=true
 
                     ws_config.teams[room_id][3].users[inde].cards.push(...ws_config.teams[room_id][3].master_card)
+                    ws_config.teams[room_id][3].users[inde].count+=3
                     // 把地主牌发给地主并公布
                     ws_config.teams[room_id].forEach((item,index)=>{
                         if(index>=3)
@@ -381,7 +382,7 @@ function MountRouter(dbs,db_config,ws_config){
                             ws_config.teams[room_id][3].current_player_openid=flag.openid
                             // 把地主牌发给地主并公布
                             ws_config.teams[room_id][3].users[flag.index].cards.push(...ws_config.teams[room_id][3].master_card)
-                            console.log();
+                            ws_config.teams[room_id][3].users[flag.index].count+=3
                             ws_config.teams[room_id].forEach((item3,index)=>{
                                 if(index>=3)
                                     return
@@ -514,6 +515,8 @@ function MountRouter(dbs,db_config,ws_config){
                     await set_users_out_card_state_all_true(room_id)
                     await set_next_out_card_user(room_id)
                     let count=await decrement_cards(room_id,cards,openid)
+                    console.log(count);
+// 
                     ws_config.teams[room_id][3].rounds_state=true
                     // 扣除cards
                     ws_config.teams[room_id][3].rounds.push([{
@@ -521,20 +524,47 @@ function MountRouter(dbs,db_config,ws_config){
                         cards:cards,
                         count:count
                     }])
+                    if(count>0){
+                        // 返回最新的一回合
+                        ws_config.teams[room_id].forEach((item,index)=>{
+                            if(index>=3)
+                                return
+                            item.ws.send(JSON.stringify({
+                                state:10,
+                                cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1],
+                                current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                            }))
+                        })
+                    }else{
                     // 返回最新的一回合
-                    ws_config.teams[room_id].forEach((item,index)=>{
-                        if(index>=3)
-                            return
-                        item.ws.send(JSON.stringify({
-                            state:10,
-                            cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1],
-                            current_player_openid:ws_config.teams[room_id][3].current_player_openid
-                        }))
-                    })
+                        ws_config.teams[room_id].forEach((item,index)=>{
+                            if(index>=3)
+                                return
+                            item.ws.send(JSON.stringify({
+                                state:10,
+                                cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1],
+                                current_player_openid:''
+                            }))
+                        })
+                        setTimeout(() => {
+                            // 游戏结束
+                                console.log('game over');
+                                ws_config.teams[room_id].forEach((item,index)=>{
+                                    if(index>=3)
+                                        return
+                                    // 每次返回最新的两条数据
+                                    item.ws.send(JSON.stringify({
+                                        state:14,
+                                        winner_openid:openid
+                                    }))
+                                })
+                                return
+                            }, 1000);                        
+                    }
                     return
                 }
 
-                 // 检测出的牌是否合理
+                // 检测出的牌是否合理
                 let result=await check_card_regular(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1][ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-1].cards)
                 
                 // 有grade的都是炸弹
@@ -558,6 +588,7 @@ function MountRouter(dbs,db_config,ws_config){
                 await set_next_out_card_user(room_id)
                 // 扣除cards
                 let count=await decrement_cards(room_id,cards,openid)
+                console.log(count,'count');
 
                 // 回合添加数据
                 ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].push({
@@ -664,8 +695,6 @@ function MountRouter(dbs,db_config,ws_config){
                 return new Promise(res=>{
                     for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
                         if(ws_config.teams[room_id][3].users[i].openid==openid){
-                            console.log(cards);
-                            console.log(ws_config.teams[room_id][3].users[i].cards);
                             for(let j=0;j<cards.length;j++){
                                     if(ws_config.teams[room_id][3].users[i].cards.indexOf(cards[j])<0){
                                         res(false)
@@ -699,7 +728,7 @@ function MountRouter(dbs,db_config,ws_config){
                         res({type:'双',card:cards[0],length:2,grade:0})
                     }
                     // 3 单连
-                    else if(cards.length>=5&&cards[0]==cards[1]-1){
+                    else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1){
                         for(let i=0;i<cards.length-1;i++){
                             if(cards[i]!=cards[++i]-1){
                                 res(false)
@@ -838,7 +867,6 @@ function MountRouter(dbs,db_config,ws_config){
 
             // 将所有人是否能出牌重置为true(每回合开始前调用)
             function set_users_out_card_state_all_true(room_id){
-                console.log(ws_config.teams[room_id],room_id);
                 return new Promise(res=>{
                 for(let i=0;i<3;i++){
                     ws_config.teams[room_id][3].users[i].out_card_state=true
@@ -849,7 +877,7 @@ function MountRouter(dbs,db_config,ws_config){
 
                 function set_next_out_card_user(room_id){
                     return new Promise(res=>{
-                        for(let i=0;i<ws_config.teams[room_id][3].users.length;i++){
+                        for(let i=ws_config.teams[room_id][3].users.length-1;i>=0;i--){
                             if(i>=3)
                                 break
                             if(ws_config.teams[room_id][3].users[i].openid==ws_config.teams[room_id][3].current_player_openid){
@@ -858,7 +886,7 @@ function MountRouter(dbs,db_config,ws_config){
                                     // i++
                                 // }
                                 // 设置下一个出牌用户
-                                ws_config.teams[room_id][3].current_player_openid=(i+1)>=3?ws_config.teams[room_id][3].users[0].openid:ws_config.teams[room_id][3].users[i+1].openid
+                                ws_config.teams[room_id][3].current_player_openid=(i-1)<0?ws_config.teams[room_id][3].users[2].openid:ws_config.teams[room_id][3].users[i-1].openid
                                 res()
                                 return
                         }
@@ -933,7 +961,7 @@ function create(){
         '7red_heart.svg',    '8black_peach.svg',      '8block.svg',
         '8club.svg',         '8red_heart.svg',        '9black_peach.svg',
         '9block.svg',        '9club.svg',             '9red_heart.svg'
-      ]
+    ]
     // 首先是发牌,所谓发牌就是开局时一副牌共有 54 张,分为三份,
         // 一人 17 张,留 3 张做底牌,在确定地主之前玩家不能看底牌。
 
