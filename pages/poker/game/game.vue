@@ -53,7 +53,7 @@
 						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
-						<view class="btn" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="no_card">
+						<view class="btn" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
 						</view>
 						</view>
@@ -384,6 +384,9 @@
 				}else if(data.state==10){
 					let {cards,current_player_openid}=data
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
+					if(uni.current_this19.rule.openid==data.current_player_openid){
+						uni.current_this19.new_round=data.new_round
+					}
 					for(let i=0;i<uni.current_this19.users.length;i++){
 						while(uni.current_this19.users[i].out_cards.length>0){
 							uni.current_this19.users[i].out_cards.pop()
@@ -434,6 +437,9 @@
 						icon:'error'
 					})					
 				}else if(data.state==11){
+					if(uni.current_this19.rule.openid==data.current_player_openid){
+						uni.current_this19.new_round=data.new_round
+					}
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.openid){
 							uni.showToast({
@@ -494,6 +500,7 @@
 			let users=reactive([])
 			let audio=reactive(null)
 			let master_cards=reactive([])
+			let new_round=ref(true)
 			// 默认属性
 			let rule=reactive({
 					room_id:-1,
@@ -587,7 +594,7 @@
 			})
 		}
 			// 地主产生后，将所有pre.master=false
-			return {no_card,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {no_card,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
