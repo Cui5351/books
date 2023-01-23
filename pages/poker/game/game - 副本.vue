@@ -15,26 +15,53 @@
 				<view  v-if='item.openid!==rule.openid'>
 					<view class="user">
 						<view class="avatar">
-							<image style="height: 100%;width:100%;" :src='item.avatar' mode=""></image>
+							<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'red':'white')}" :src='item.avatar' mode=""></image>
 						</view>
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
-						<view class="master">{{rule.current_player_openid==item.openid?'当前玩家':''}}</view>	
+						<view class="master" style="width:50px;height:50px;">
+							<image :src="'https://www.mynameisczy.asia/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
+						</view>	
 						</view>
-					<view class="person_cards">
-						<view v-for="(item2,index) in item.out_cards" :key="index">
-							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+					<!-- <view class="person_cards" :style="{paddingLeft:(index?(300-item.out_cards.length*30)<0?0:(300-item.out_cards.length*30):10)+'px'}"> -->
+					<view class="person_cards" :style="{paddingLeft:(index?(200-item.out_cards.length*30)<100?100:(200-item.out_cards.length*30):10)+'px'}">
+						<view class="state" v-if="item.state.length" >
+							<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.asia/svgs/'+item.state+'.svg'" mode="" ></image>
+						</view>
+							<view class="card" v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
+								<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
 				</view>
 				</template>
-					<view class="btns" >
+					<view class="btns">
+						<view class="">
+							<view class="myself_out_cards">
+							<template v-for="(item,index) in users" :key="index">
+							<template v-for="(item2,index) in item.out_cards" :key="index">
+							<template  v-if="item.openid==rule.openid">
+								<view class="state" v-if="item.state.length" >
+									<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.asia/svgs/'+item.state+'.svg'" mode="" ></image>
+								</view>
+								<view class="myself_out_card" :style="{transform:`translateX(-${index*55}%`}">
+									<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+								</view>
+							</template>
+							</template>
+							</template>
+								</view>
+						</view>
+						<view class="">
 						<view class="btn2"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
-							{{rule.total_count?'抢地主':'叫地主'}}
+							{{master_count?'叫地主':'抢地主'}}
 						</view>
 						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
 						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
+						</view>
+						<view class="btn" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
+							不要
+						</view>
 						</view>
 					</view>
 <!-- 				<view class="person2">
@@ -48,23 +75,25 @@
 						</view>
 				</view> -->
 			</view>
-			<view class="cards">
-				<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
-					<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+			<view class="cards_out">
+				<view class="cards" :style="{width:user_cards.length*35+'px'}">
+					<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+						<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+					</view>
 				</view>
 			</view>
 			<view class="myself">
 				<!-- <view class="user2" v-for="(item,index) in users" :key="index" v-if='item.openid==rule.openid'> -->
 				<template  v-for="(item,index) in users" :key="index" >
 				<view class="user2" v-if='item.openid==rule.openid'>
-						
 					<view class="avatar">
-						<image style="height: 100%;width:100%;" :src='item.avatar' mode=""></image>
+						<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'red':'white')}" :src='item.avatar' mode=""></image>
 					</view>
 					<view class="my_name">{{item.name}}</view>
 					<view class="my_count">牌:{{item.count}}</view>
-					<view style="margin-left:10px;">
-						{{rule.master?'地主':'农民'}}
+					<view style="margin-left:10px;width:50px;height:50px;">
+						<!-- {{rule.master?'地主':'农民'}} -->
+						<image :src="'https://www.mynameisczy.asia/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
 					</view>
 				</view>
 				</template>
@@ -86,7 +115,7 @@
 <script>
 	import page from '../../inner_page/inner_page.vue'
 	import navigation from '../../navigation/navigation_all.vue'
-	import {reactive,ref} from 'vue'
+	import {reactive,ref,watch} from 'vue'
 	import {useStore} from 'vuex'
 	export default {
 		components:{
@@ -212,6 +241,9 @@
 			})
 		},
 		onLoad(res) {
+			this.container_height=res.height
+			this.container_width=res.width
+			
 			uni.current_this19=this
 			console.log('进入了');
 			uni.onSocketClose(function(){
@@ -242,16 +274,23 @@
 			
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
-				console.log(data,'game data');
 				if(data.state==6){
 					// 拿到刚刚抢地主的openid
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.after_player_openid){
-							uni.showToast({
-								title:`${item.name}抢地主了`
-							})			
+							if(uni.current_this19.master_count>0){
+								item.state='get_master'
+							}
+							else{
+								item.state='say_master'
+								// uni.showToast({
+									// title:`${item.name}抢地主了`
+								// })			
+							}
 						}
 					})
+					
+					uni.current_this19.master_count=uni.current_this19.master_count+1
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
 				}else if(data.state==2){
 					uni.current_this18.users.shift()
@@ -303,9 +342,10 @@
 				}else if(data.state==7){
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.after_player_openid){
-							uni.showToast({
-								title:`${item.name}放弃地主了`
-							})
+							item.state='abandon_master'
+							// uni.showToast({
+								// title:`${item.name}放弃地主了`
+							// })
 						}
 					})
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
@@ -324,6 +364,8 @@
 					// 地主产生，地主牌公布
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.master_openid){
+							item.master=true
+							item.count+=3
 							uni.showToast({
 								title:`地主是${item.name}`,
 								icon:'none'
@@ -331,6 +373,7 @@
 						}
 					})
 					uni.current_this19.master_cards.push(...data.master_card)
+					uni.current_this19.rule.master_id=data.master_openid
 					if(uni.current_this19.rule.openid==data.master_openid){
 						uni.current_this19.rule.out_card_state=true
 						// 地主牌给他/她
@@ -355,6 +398,9 @@
 				}else if(data.state==10){
 					let {cards,current_player_openid}=data
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
+					if(uni.current_this19.rule.openid==data.current_player_openid){
+						uni.current_this19.new_round=data.new_round
+					}
 					for(let i=0;i<uni.current_this19.users.length;i++){
 						while(uni.current_this19.users[i].out_cards.length>0){
 							uni.current_this19.users[i].out_cards.pop()
@@ -364,7 +410,9 @@
 					uni.current_this19.users.forEach(item=>{
 						data.cards.forEach(item2=>{
 							if(item2.openid==item.openid){
+								item.state=''
 								item.out_cards.push(...item2.cards)
+								item.count=item2.count
 							}
 						})
 					})
@@ -372,10 +420,9 @@
 						let reg=/(\d)/g
 					// 将牌减去
 					while(data.cards[data.cards.length-1].cards.length>0){
-						let b=data.cards[data.cards.length-1].cards.pop()[0]
-						
+						let b=data.cards[data.cards.length-1].cards.pop()
 						for(let i=0;i<uni.current_this19.user_cards.length;i++){
-							if(Number(uni.current_this19.user_cards[i].card.match(reg).join(''))==b){
+							if(uni.current_this19.user_cards[i].card==b){
 								uni.current_this19.user_cards.splice(i,1)
 								break
 							}
@@ -385,19 +432,52 @@
 					while(uni.current_this19.user_out_cards.length)
 						uni.current_this19.user_out_cards.pop()
 					}
+				}else if(data.state==20){
+					uni.showToast({
+						title:data.errMes,
+						icon:'error'
+					})
+				}else if(data.state==21){
+					uni.showToast({
+						title:data.errMes,
+						icon:'error'
+					})					
+				}else if(data.state==11){
+					if(uni.current_this19.rule.openid==data.current_player_openid){
+						uni.current_this19.new_round=data.new_round
+					}
+					uni.current_this19.users.forEach(item=>{
+						if(item.openid==data.openid){
+							item.state='no_out'
+							// uni.showToast({
+								// title:`${item.name}不要`
+							// })
+						}
+					})
+					uni.current_this19.rule.current_player_openid=data.current_player_openid
+				}else if(data.state==14){
+							uni.showToast({
+								title:`${uni.current_this19.rule.master_id==data.winner_openid?'地主':'农民'}胜利`
+							})
+					setTimeout(()=>{
+						uni.navigateBack()
+					},1000)
 				}
 			})
 			let cards=JSON.parse(res.cards)
 			
 			// 将原用户信息推入
-			this.users.push(...JSON.parse(res.users).map(item=>{item.out_cards=['14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg','14red_heart.svg','15black_peach.svg'];return item}))
+			this.users.push(...JSON.parse(res.users).map(item=>{
+				item.out_cards=[];
+				item.state=''				
+				return item}))
 			console.log(this.users);
 			
 			this.rule.room_id=Number(res.room_id)
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
 			
 			Object.keys(this.rule).forEach(item=>{
-				if(item=='room_id'||item=='openid'||item=='current_player_openid'||item=='game_playing')
+				if(item=='room_id'||item=='openid'||item=='current_player_openid'||item=='game_playing'||item=='master_id')
 					return
 				this.rule[item]=cards[item]
 			})
@@ -430,6 +510,7 @@
 			let users=reactive([])
 			let audio=reactive(null)
 			let master_cards=reactive([])
+			let new_round=ref(true)
 			// 默认属性
 			let rule=reactive({
 					room_id:-1,
@@ -440,7 +521,8 @@
 					master:false,
 					cancel_master:false,
 					game_playing:false,
-					out_card_state:false
+					out_card_state:false,
+					master_id:''
 			})
 			function get_master(){
 				uni.sendSocketMessage({
@@ -509,11 +591,21 @@
 						url:'/pages/home/home'
 					})
 			}
+		let master_count=ref(0)
 		let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
-		let container_height=ref(uni.getSystemInfoSync().windowHeight)
-		let container_width=ref(uni.getSystemInfoSync().windowWidth)
+		let container_height=ref(0)
+		let container_width=ref(0)
+		function no_card(){
+			uni.sendSocketMessage({
+				data:JSON.stringify({
+					state:9,
+					room_id:rule.room_id,
+					openid:rule.openid
+				})
+			})
+		}
 			// 地主产生后，将所有pre.master=false
-			return {user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
@@ -628,6 +720,7 @@
 			height:30%;
 			.btns{
 				position: absolute;
+				flex-direction: column;
 				width:150px;
 				left:50%;
 				top:50%;
@@ -635,10 +728,41 @@
 				align-items: center;
 				justify-content: space-between;
 				&>view{
-					max-width:40%;
+					min-height:45%;
+					flex-grow: 1;
+					max-width:100%;
+					min-width:100%;
 					display: flex;
 					justify-content: center;
 					align-items: center;
+				}
+				&>view:nth-child(1){
+					display: flex;
+					align-items: flex-end;
+					justify-content: center;
+					&>.myself_out_cards{
+						display: flex;
+						padding-left:130px;
+						box-sizing: border-box;
+						&>view{
+							box-shadow:-2px 0px 10px -7px gray;
+							height:55px;
+							&>image{
+								transform: scale(1.3);
+							}
+							max-height:55px;
+							max-width:35px;
+							min-width:35px;
+						}
+					}
+				}
+				&>view:nth-child(2){
+					align-items: flex-start;
+					min-height:55%;
+					justify-content: space-around;
+					&>view{
+						max-width:30%;
+					}
 				}
 				transform: translate(-50%,-50%);
 			}
@@ -649,15 +773,18 @@
 				width: 40%;
 				.person_cards{
 					max-width:100%;
-					display: grid;
-					grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-					overflow: hidden;
-					grid-gap:0px;
-					&>view{
-						height:50px;
-						max-height:50px;
-						max-width:30px;
-						min-width:30px;
+					min-width:100%;
+					overflow:hidden;
+					// background-color: rgba(0,0,0,.1);
+					display: flex;
+					&>.card{
+							box-shadow:-2px 0px 10px -7px gray;
+							max-height:55px;
+							max-width:35px;
+							min-width:35px;
+							&>image{
+								transform: scale(1.3);
+							}
 					}
 					padding: 10px;
 					box-sizing: border-box;
@@ -672,14 +799,30 @@
 				flex-direction: row-reverse;
 			}
 		}
+		.cards_out{
+			display: flex;
+			justify-content: center;
+			box-sizing: border-box;
+			padding-bottom:10px;
+			align-items:flex-end;
+		}
 		.cards{
 			display: flex;
 			max-height:120px;
-			padding:0 50px;
+			box-sizing: border-box;
+			// padding:0 45px;
+			// width:90%;
 			align-items: flex-end;
 			&>view{
 				max-width:75px;
-				height:100px;
+				height:90px;
+				&>image{
+					max-height:100%;
+					transform: scale(1.3);
+					min-height:100%;
+					max-width: 100%;
+					min-width: 100%;
+				}
 				width:75px;
 				min-width:75px;
 				transition:.1s linear;
@@ -699,8 +842,9 @@
 			justify-content: space-around;
 			.back{
 				font-weight: bold;
+				background-color: @border;
 				&:active{
-					background-color: @border;
+					background-color:navajowhite;
 				}
 			}
 			&>.master_card{
@@ -733,9 +877,16 @@
 		}
     }
 	.user{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 		max-width:30%;
 		&>view{
-			margin-top:5px;
+			// margin-top:5px;
+		}
+		.name{
+			min-height:20px;
 		}
 		.avatar{
 			max-height:70px;
@@ -761,7 +912,12 @@
 		}
 		&>view{
 			text-align: center;
-			flex-grow: 1;
+			// flex-grow: 1;
 		}
+	}
+	.state{
+		max-width:100px;
+		min-width:100px;
+		height:60px;
 	}
 </style>
