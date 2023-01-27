@@ -559,6 +559,8 @@
                                             winner_openid:openid
                                         }))
                                     })
+									// 删除裁判
+									ws_config.teams[room_id].splice(3,1)
                                     return
                                 }, 1000);                        
                         }
@@ -639,6 +641,8 @@
                                     winner_openid:openid
                                 }))
                             })
+							// 删除裁判
+							ws_config.teams[room_id].splice(3,1)
                             return
                         }, 1000);
                     }
