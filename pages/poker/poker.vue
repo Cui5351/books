@@ -266,7 +266,7 @@
 					uni.current_this18.solo_state=true
 					// 开始游戏
 					uni.navigateTo({
-						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid+'&width='+uni.getSystemInfoSync().screenWidth+'&height='+uni.getSystemInfoSync().screenHeight
+						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid
 					})
 				}else if(data.state==5){
 					clearTimeout(uni.current_this18.p_time.timer)
@@ -382,8 +382,8 @@
 				data:JSON.stringify({
 					state:3,
 					openid:store.getters.user_openid,
-					room_id:room_id.value,
-					ready:user_state.value
+					room_id:uni.current_this18.room_id,
+					ready:uni.current_this18.user_state
 				})
 			})
 		}
@@ -404,7 +404,7 @@
 			uni.sendSocketMessage({
 				data:JSON.stringify({
 					state:4,
-					room_id:room_id.value
+					room_id:uni.current_this18.room_id
 				})
 			})
 		}

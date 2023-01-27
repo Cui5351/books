@@ -10,10 +10,9 @@
 	import {reactive,ref} from 'vue'
 	export default {
 		setup() {
-			let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
-			let container_height=ref(uni.getSystemInfoSync().windowHeight)
-			let width=ref(uni.getSystemInfoSync().windowWidth)
-			
+			let head_height_child=ref(uni.global.rect*1.7)
+			let container_height=ref(uni.global.height)
+			let width=ref(uni.global.width)
 			return {head_height_child,container_height,width}
 		}
 	}

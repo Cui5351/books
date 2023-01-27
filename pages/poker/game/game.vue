@@ -124,8 +124,6 @@
 		},
 		onUnload() {
 			this.audio.stop()
-			uni.current_this18.room_id=-1
-			uni.onSocketClose(()=>{})
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
 				console.log(data);
@@ -242,8 +240,8 @@
 			})
 		},
 		onLoad(res) {
-			this.container_height=res.height
-			this.container_width=res.width
+			this.container_height=uni.global.height
+			this.container_width=uni.global.width
 			
 			uni.current_this19=this
 			console.log('进入了');
@@ -364,6 +362,8 @@
 				}else if(data.state==9){
 					// 地主产生，地主牌公布
 					uni.current_this19.users.forEach(item=>{
+						// 清空状态
+						item.state=''
 						if(item.openid==data.master_openid){
 							item.master=true
 							item.count+=3
@@ -449,6 +449,9 @@
 					}
 					uni.current_this19.users.forEach(item=>{
 						if(item.openid==data.openid){
+							for(let i=0;item.out_cards.length;i++){
+								item.out_cards.pop()
+							}
 							item.state='no_out'
 							// uni.showToast({
 								// title:`${item.name}不要`
@@ -462,7 +465,7 @@
 							})
 					setTimeout(()=>{
 						uni.navigateBack()
-					},1000)
+					},2000)
 				}
 			})
 			let cards=JSON.parse(res.cards)
@@ -920,12 +923,12 @@
 		}
 		&>view{
 			text-align: center;
-			// flex-grow: 1;
 		}
 	}
 	.state{
-		max-width:100px;
-		min-width:100px;
-		height:60px;
+		max-width:70px;
+		min-width:70px;
+		height:40px;
+		max-height:40px;
 	}
 </style>

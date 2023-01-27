@@ -574,8 +574,9 @@ function MountRouter(port,dbs,db_config){
             }
             
 
-
-            dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}%'`+limit,function(err,result){
+            // dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}% or author like '%${book_name}%''`+limit,function(err,result){
+            dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}%' or author='${book_name}'`+limit,function(err,result){
+                // dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}%'`+limit,function(err,result){
                 if(err){
                     res.send({
                         state:0,
@@ -785,7 +786,7 @@ function MountRouter(port,dbs,db_config){
         }
             
             let {skip,count}=req.body
-            query(dbs,'mynameisczy_asia.books_info','','',{skip:skip,count:count},{order:'desc',by:'score'},true).then(value=>{
+            query(dbs,'mynameisczy_asia.books_info','','',{skip:skip,count:count},{order:'desc',by:'score'}).then(value=>{
                 res.send({
                     state:1,
                     value:value,
