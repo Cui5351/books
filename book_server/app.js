@@ -872,6 +872,66 @@ function MountRouter(port,dbs,db_config){
             })
         })
 
+        // 查看
+        app.get('/get_no_end_books',function(req,res){
+            query(dbs,db_config.database+'.books_info',['book_name'],{book_state:'连载'}).then(e=>{
+                if(e.length<=0){
+                    res.send({
+                        state:0,
+                        error:1
+                    })
+                    return
+                }
+                res.send({
+                    state:1,
+                    error:0,
+                    value:e
+                })
+            }).catch(e=>{
+                res.send({
+                    state:0,
+                    error:1
+                })
+                return
+            })
+        })
+
+
+        // 设置
+        app.post('/set_book_state',function(req,res){
+            let data=req.body
+            if(typeof data === 'string')
+                data=JSON.parse(data)
+            if(!data.hasOwnProperty('book_name')){
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:"缺少参数"
+                })
+                return
+            }
+            if(typeof data.book_name !== 'string'){
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:"参数类型错误"
+                })
+            }
+            const {book_name}=data
+
+            update(dbs,db_config.database+'.books_info',{book_name},'book_state','完结','string').then(()=>{
+                res.send({
+                    state:1,
+                    error:0
+                })
+            }).catch(()=>{
+                res.send({
+                    state:0,
+                    error:1,
+                })
+            })
+        })
+
         app.post('/getCategory',function(req,res){
             query(dbs,db_config.database+'.books_category','book_type').then(value=>{
                 res.send({
@@ -887,7 +947,50 @@ function MountRouter(port,dbs,db_config){
                 })                
             })
         })
+app.post('/get_book_new_passage',function(req,res){
+// SELECT * FROM `books_content` WHERE book_name="仙王的日常生活" order by passage_value desc limit 0,1
+let data=req.body
+if(typeof data === 'string')
+    data=JSON.parse(data)
+            if(!data.hasOwnProperty('book_name')){
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:"缺少参数"
+                })
+                return
+            }
+            if(typeof data.book_name !== 'string'){
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:"参数类型错误"
+                })
+                return
+            }
+            const {book_name}=data
 
+            query(dbs,'books_content','',{book_name:book_name},{skip:0,count:1},{order:'desc',by:'passage_value'}).then(value=>{
+                if(value.length<=0){
+                    res.send({
+                        state:0,
+                        error:1
+                    })
+                    return
+                }
+                res.send({
+                    state:1,
+                    error:0,
+                    data:value[0]
+                })
+            }).catch(e=>{
+                res.send({
+                    state:0,
+                    error:1
+                })
+            })
+
+        })
         // 获取所有的工具
         app.get('/getTools',(req,res)=>{
             query(dbs,db_config.database+'.tools').then(value=>{

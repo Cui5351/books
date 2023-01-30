@@ -1,4 +1,7 @@
 <template>
+	<view class="cover" v-if="load_state>0">
+		
+	</view>
 		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
 			<view class='head'>
 					<view @click="back" class="back">退出</view>
@@ -79,7 +82,7 @@
 			<view class="cards_out">
 				<view class="cards" :style="{width:user_cards.length*35+'px'}">
 					<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
-						<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+						<image @load="load_" :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
 					</view>
 				</view>
 			</view>
@@ -104,7 +107,7 @@
 						倍
 						</view>
 					<view class="bei">
-						0
+						{{score}}
 					</view>
 					</view>
 					<view class="chat2">聊天</view>
@@ -288,6 +291,9 @@
 							}
 						}
 					})
+					console.log(data,'d');
+					uni.current_this19.score=data.score
+					 // 9 10
 					
 					uni.current_this19.master_count=uni.current_this19.master_count+1
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
@@ -373,6 +379,7 @@
 							})
 						}
 					})
+					uni.current_this19.score=data.score
 					uni.current_this19.master_cards.push(...data.master_card)
 					uni.current_this19.rule.master_id=data.master_openid
 					if(uni.current_this19.rule.openid==data.master_openid){
@@ -417,6 +424,7 @@
 							}
 						})
 					})
+					uni.current_this19.score=data.score
 					if(data.cards[data.cards.length-1].openid==uni.current_this19.rule.openid){
 						let reg=/(\d)/g
 					// 将牌减去
@@ -516,9 +524,11 @@
 			})
 		},
 		setup() {
+			let load_state=ref(17)
 			let store=reactive(useStore())
 			let user_cards=reactive([])
 			let users=reactive([])
+			let score=ref(10)
 			let audio=reactive(null)
 			let master_cards=reactive([])
 			let new_round=ref(true)
@@ -614,9 +624,12 @@
 					openid:rule.openid
 				})
 			})
+		}	
+		function load_(){
+			load_state.value--
 		}
 			// 地主产生后，将所有pre.master=false
-			return {no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {score,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
@@ -930,5 +943,8 @@
 		min-width:70px;
 		height:40px;
 		max-height:40px;
+	}
+	.cover{
+		width: 100%;height:100%;background-color: black;position: absolute;z-index:9999;
 	}
 </style>

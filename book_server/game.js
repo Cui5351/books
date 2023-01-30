@@ -276,6 +276,7 @@
                         master_card:obj.others,
                         current_player_openid:'',
                         rounds:[],
+                        score:10,
                         rounds_state:false
                     })
                     console.log('创建裁判');
@@ -285,11 +286,8 @@
         else if(msg.state==5){
                     // 设置抢地主信息
                     const {room_id,openid}=msg.rule
-                    ws_config.teams[room_id].forEach(item=>{
-                        if(item.openid==openid){
-                            console.log(item.user_name,'在抢地主');
-                        }
-                    })
+                    // 有人抢地主
+                    ws_config.teams[room_id][3].score*=2
                     let openid_count_max=openid
                     let count=0;
                     let inde=0
@@ -320,7 +318,8 @@
                                 state:9,
                                 master_openid:ws_config.teams[room_id][3].master_openid,
                                 master_card:ws_config.teams[room_id][3].master_card,
-                                current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                                current_player_openid:ws_config.teams[room_id][3].current_player_openid,
+                                score:ws_config.teams[room_id][3].score
                             }))
                         })
                         return
@@ -344,7 +343,8 @@
                         item.ws.send(JSON.stringify({
                             state:6,
                             after_player_openid:openid, // 当前抢地主的玩家id
-                            current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                            current_player_openid:ws_config.teams[room_id][3].current_player_openid,
+                            score:ws_config.teams[room_id][3].score
                         }))
                     })
         }else if((msg.state==6)){
@@ -473,6 +473,7 @@
                         }))
                     })
                 }else if(msg.state==8){
+        // 出牌
                     const {room_id,openid,cards}=msg
                     if(ws_config.teams[room_id].length<=2){
                         console.log('退出');
@@ -532,7 +533,8 @@
                                     state:10,
                                     new_round:false,
                                     cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1],
-                                    current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                                    current_player_openid:ws_config.teams[room_id][3].current_player_openid,
+                                    score:ws_config.teams[room_id][3].score
                                 }))
                             })
                         }else{
@@ -544,7 +546,8 @@
                                     state:10,
                                     new_round:false,
                                     cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1],
-                                    current_player_openid:''
+                                    current_player_openid:'',
+                                    score:ws_config.teams[room_id][3].score
                                 }))
                             })
                             setTimeout(() => {
@@ -559,8 +562,6 @@
                                             winner_openid:openid
                                         }))
                                     })
-									// 删除裁判
-									ws_config.teams[room_id].splice(3,1)
                                     return
                                 }, 1000);                        
                         }
@@ -573,6 +574,9 @@
                     // 有grade的都是炸弹
                     if((result.type==result2.type&&result.card<result2.card&&result.length==result2.length)||result.grade<result2.grade){
                         console.log('可以出');
+                        // 翻倍
+                        if(result2.type=='4炸'||result2.type=='王炸'||result2.type=='飞机')
+                            ws_config.teams[room_id][3].score*=2
                     }else{
                         console.log('不能出');
                         // 出的牌不合理
@@ -614,7 +618,8 @@
                                 state:10,
                                 new_round:false,
                                 cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),
-                                current_player_openid:ws_config.teams[room_id][3].current_player_openid
+                                current_player_openid:ws_config.teams[room_id][3].current_player_openid,
+                                score:ws_config.teams[room_id][3].score
                             }))
                         })
                     else{
@@ -626,7 +631,8 @@
                                 state:10,
                                 new_round:false,
                                 cards:ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),
-                                current_player_openid:''
+                                current_player_openid:'',
+                                score:ws_config.teams[room_id][3].score
                             }))
                         })
                         setTimeout(() => {
@@ -641,10 +647,8 @@
                                     winner_openid:openid
                                 }))
                             })
-							// 删除裁判
-							ws_config.teams[room_id].splice(3,1)
                             return
-                        }, 1000);
+                        }, 2000);
                     }
                     
                 }else if(msg.state==9){
@@ -745,6 +749,9 @@
                             }
                             res({type:'双',card:cards[0],length:2,grade:0})
                         }
+                        else if(cards.length==3&&cards[0]==cards[1]&&cards[1]==cards[2]){
+                            res({type:'三单',card:cards[0],length:2,grade:0})
+                        }
                         // 3 单连
                         else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1){
                             for(let i=0;i<cards.length-1;i++){
@@ -757,7 +764,7 @@
                             res({type:'单连',card:cards[cards.length-1],length:cards.length,grade:0})
                         }
                         // 4 双连
-                        else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards.length%2==0){
+                        else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards[2]==cards[3]&&cards[3]!=cards[4]&&cards.length%2==0){
                             for(let i=0;i<cards.length;i=i+2){
                                 if(cards[i]!=cards[i+1]){
                                     res(false)
@@ -825,6 +832,7 @@
                 }
                 // 检测是否有两个是3个的
                 function fn(cards){
+                // 78飞机带对三
                     let arr=[]
                     for(let i=0;i<cards.length;i++){
                         let count=0
