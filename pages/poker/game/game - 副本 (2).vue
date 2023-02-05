@@ -1,8 +1,6 @@
 <template>
 	<view class="cover" v-if="load_state>0">
-	</view>
-	<view style="height:1px;width: 1px;overflow: hidden;" v-show="false">
-		<image  @load="load_" v-for="(item,index) in cards" :key="index" :src="'https://www.mynameisczy.asia/cards_svg/'+item"></image>
+		
 	</view>
 		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
 			<view class='head'>
@@ -83,8 +81,8 @@
 			</view>
 			<view class="cards_out">
 				<view class="cards" :style="{width:user_cards.length*35+'px'}">
-					<view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
-						<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+					<view class="card" @click="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+						<image @load="load_" :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
 					</view>
 				</view>
 			</view>
@@ -131,6 +129,7 @@
 			this.audio.stop()
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
+				console.log(data);
 				if(data.state==1){
 					uni.current_this18.position=data.position
 				}else if(data.state==12){
@@ -248,13 +247,18 @@
 			this.container_width=uni.global.width
 			
 			uni.current_this19=this
+			console.log('进入了');
 			uni.onSocketClose(function(){
 				uni.showToast({
 					title:'正在重连',
 					icon:'error'
 				})
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
-				})				
+				success() {
+					console.log('连接成功');
+				},fail() {
+					console.log('连接失败');
+				}})				
 			})
 			uni.onSocketError(function(){
 				uni.showToast({
@@ -262,7 +266,11 @@
 					icon:'error'
 				})
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
-				})
+				success() {
+					console.log('连接成功');
+				},fail() {
+					console.log('连接失败');
+				}})
 			})
 			// 如果发现没有登录，那么退出登录
 			
@@ -283,6 +291,7 @@
 							}
 						}
 					})
+					console.log(data,'d');
 					uni.current_this19.score=data.score
 					 // 9 10
 					
@@ -489,6 +498,7 @@
 					count++
 				}
 				return item}))
+			console.log(this.users);
 			
 			cards.cards=cards.cards.map(item=>{
 				return {
@@ -514,7 +524,7 @@
 			})
 		},
 		setup() {
-			let cards=reactive([
+			let cards2=reactive([
 			        '10black_peach.svg', '10block.svg',           '10club.svg',
 			        '10red_heart.svg',   '11black_peach.svg',     '11block.svg',
 			        '11club.svg',        '11red_heart.svg',       '12black_peach.svg',
@@ -534,7 +544,7 @@
 			        '8club.svg',         '8red_heart.svg',        '9black_peach.svg',
 			        '9block.svg',        '9club.svg',             '9red_heart.svg'
 			    ])
-			let load_state=ref(54)
+			let load_state=ref(17)
 			let store=reactive(useStore())
 			let user_cards=reactive([])
 			let users=reactive([])
@@ -597,6 +607,9 @@
 						                      })
 		}
 		function out_cards_btn(){
+			console.log(user_out_cards.map(item=>{
+						return item.card.card
+					}),'card');
 			uni.sendSocketMessage({
 				data:JSON.stringify({
 					state:8,
@@ -633,16 +646,10 @@
 			})
 		}	
 		function load_(){
-			if(load_state.value-1<=0){
-				setTimeout(()=>{
-					load_state.value--
-				},500)
-				return
-			}
 			load_state.value--
 		}
 			// 地主产生后，将所有pre.master=false
-			return {cards,score,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {score,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>

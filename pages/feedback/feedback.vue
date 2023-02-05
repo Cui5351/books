@@ -24,7 +24,7 @@
 				<view style="max-height: 10%;min-height:10%;font-size: 18px;" class="showAnswer" @click="showAnswer(item.name,item.after_answer)">查看回复</view>
 			</view>
 			<text style="text-align: center;margin-top: 10px;color:gray">小程序作者(任*一)</text>
-			<text style="text-align: center;margin-top: 10px;color:gray">数据来源:(雷*华)——数据来源:(*杰)</text>
+			<text style="text-align: center;margin-top: 10px;color:gray">数据提供商:(雷*华)——数据提供商:(*杰)</text>
 			
 		</view>
 	</view>
@@ -39,24 +39,7 @@
 		components:{
 			navigation_all
 		},
-		onLoad() {
-			// 这里的this是我打算在页面关闭后停止播放，但是页面虽然切换了(Beforedestroy)，但好像不会摧毁
-			this.audio=uni.createInnerAudioContext()
-			this.audio.src="https://www.mynameisczy.asia/audio/lover_boy.mp3"
-			this.audio.autoplay=true
-			this.audio.loop=true
-			this.audio.obeyMuteSwitch=true
-			// this.audio.play()
-			this.audio.title="lover boy来自QQ音乐"
-			this.audio.onError(err=>{
-				console.log(err,'audio err');
-			})
-		},
-		onUnload() {
-			this.audio.stop()
-		},
 		setup() {
-			let audio=reactive(null)
 			let store=useStore()
 			let head_height=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			let body_height=ref(uni.getSystemInfoSync().windowHeight/1.4)
@@ -127,7 +110,7 @@
 				})
 			}
 			return {
-				head_height,body_height,person,submit,showAnswer,audio
+				head_height,body_height,person,submit,showAnswer
 			}
 		}
 	}

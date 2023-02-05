@@ -14,35 +14,6 @@
 	export default {
 		name:"search",
 		props:['head_height','book_wh','head_width'],
-		mounted() {
-			uni.current_this_1=this
-			uni.request({
-				url:'https://www.mynameisczy.asia:5000/small_program_state',
-				method:'POST',
-				data:{
-					small_program_name:'book_small_program'
-				},success(value) {
-					// 登录失败
-					if(!value.data.value){
-						uni.reLaunch({
-							url:'/pages/service_stop_page/service_stop_page',
-						})
-					}
-					if(value.data.value==2)
-						uni.current_this_1.to_hid=2
-				},fail(e) {
-					// 加载失败
-					if(!value.data.value){
-						uni.reLaunch({
-							url:'/pages/service_stop_page/service_stop_page',
-							fail(e) {
-								console.log('fail',e)
-							}
-						})
-					}
-				}
-			})
-		},
 		setup(props){
 				let size=ref(32)
 				let to_hid=ref(0)

@@ -124,6 +124,7 @@
 						title:'请先登录',
 						icon:'error'
 					})
+					clearInterval(timer2)
 					uni.switchTab({
 						url:'/pages/home/home'
 					})

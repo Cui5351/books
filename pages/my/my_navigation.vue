@@ -95,7 +95,7 @@
 					})
 					return
 				}
-				uni.getUserProfile({
+				uni.getUserInfo({
 					desc:'hello',
 					success(res) {
 						// 登录成功后拿到数据

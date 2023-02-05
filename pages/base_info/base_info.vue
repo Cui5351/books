@@ -12,7 +12,7 @@
 			<view class="item">
 				<view class="title">姓名</view>
 				<view>
-					<input type="text" class='user_name' v-model='userInfo_.name' placeholder="name" />
+					<input type="nickname"  class='user_name' v-model='userInfo_.name' placeholder="name" />
 				</view>
 			</view>
 			<view class="item">

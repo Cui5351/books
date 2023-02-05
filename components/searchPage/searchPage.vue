@@ -95,7 +95,6 @@
 						item.push(...val.data.value)
 						uni.hideLoading()
 					},fail(err) {
-						console.log(err)
 					}
 				})
 			}
@@ -142,7 +141,6 @@
 						uni.current_this4.skip+=uni.current_this4.count
 						uni.hideLoading()
 					},fail(e) {
-						console.log(e);
 						uni.hideLoading()
 						uni.showToast({
 							icon:'error',
@@ -200,7 +198,6 @@
 						uni.current_this4.skip+=uni.current_this4.count
 						uni.hideLoading()
 					},fail(e) {
-						console.log(e);
 						uni.hideLoading()
 						uni.showToast({
 							icon:'error',
