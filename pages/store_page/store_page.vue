@@ -52,9 +52,7 @@
 		onLoad(){
 			// 连接
 			uni.connectSocket({url:'wss://www.mynameisczy.asia:5000/store_info',fail(e) {
-				console.log('fail',e);	
 			},success(e) {
-				console.log('success',e);
 				
 			}})
 			// 打开连接
@@ -65,7 +63,6 @@
 							name:'狗子'
 						})
 					})
-				console.log('e');
 			})
 			// 关闭连接
 			uni.onSocketError(function(){
@@ -204,7 +201,6 @@
 										}
 									})
 								},fail() {
-									console.log('error');
 								},
 								complete() {
 									uni.hideLoading()

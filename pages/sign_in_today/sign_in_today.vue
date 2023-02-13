@@ -89,7 +89,6 @@
 					uni.current_this10.week.forEach((item,index)=>{
 						item.date=uni.current_this10.format(new Date(monday+1000*(index+1)*60*60*24))
 					})
-					console.log(uni.current_this10.week);
 					
 					uni.current_this10.date_date.date_date.forEach(item=>{
 						uni.current_this10.week.forEach(item2=>{
@@ -175,7 +174,10 @@
 					data:{
 						openid:openid._value
 					},success(res) {
-						if(res.data.error){
+						if(res.data.error==3){
+							uni.showToast({
+								title:'请重新登录'
+							})
 							throw 'err'
 						}
 						uni.current_this10.date_date.date_date.push(uni.current_this10.format(new Date()))
@@ -193,7 +195,6 @@
 							title:'签到成功'
 						})
 					},fail(e) {
-						console.log('fail',e);
 						uni.showToast({
 							icon:'error',
 							title:'签到失败'

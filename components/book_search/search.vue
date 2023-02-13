@@ -28,7 +28,6 @@
 						})
 						return
 					}
-					console.log(to_hid.value);
 					if(to_hid.value!==2)
 						uni.navigateTo({
 							url:'/components/searchPage/searchPage?head_height='+props.head_height_child+'&book_wh='+props.book_wh+'&default_search_text='+suggest_book.value
@@ -49,7 +48,6 @@
 						},success(val) {
 							suggest_book.value=val.data.value[0].book_name
 						},fail(err) {
-							console.log(err);
 						}
 					})
 			return {

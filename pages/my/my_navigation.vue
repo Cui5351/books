@@ -73,7 +73,6 @@
 									})
 						},fail(e) {
 							uni.hideLoading()
-							console.log(e)
 						}
 					})
 				}
@@ -173,7 +172,6 @@
 										}
 									})
 									},fail(e) {
-										console.log(e,'my_navigation162');
 									}
 								})
 							}

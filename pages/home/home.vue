@@ -133,7 +133,6 @@
 						uni.reLaunch({
 							url:'/pages/service_stop_page/service_stop_page',
 							fail(e) {
-								console.log('fail',e)
 							}
 						})
 					}
@@ -185,7 +184,6 @@
 				this.$refs.popup.open()
 			},
 			goto1(){
-				console.log('goto');
 				this.scroll_top = this.old.scrollTop
 				this.left_distance=150
 				this.$nextTick(function() {
@@ -387,7 +385,6 @@
 				uni.current_this2.refresh_state_info='checkbox'
 				setTimeout(()=>{
 					load_state.value=0
-					console.log('加载完成')
 				},1500)
 				uni.hideLoading()
 			}
@@ -417,10 +414,8 @@
 				});
 			}
 				function fav_book(book){
-					console.log('收藏',book.book_name)
 					// 等加载
 					if(load_state.value){
-						console.log('wait load');
 						return
 					}
 					if(store.getters.login_state)

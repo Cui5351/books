@@ -104,9 +104,7 @@
 					'content-type': 'application/json'
 				}
 			,fail(e) {
-				console.log('fail',e);	
 			},success(e) {
-				console.log('success',e);
 			}})
 			uni.current_this15=this
 		// 关闭连接
@@ -270,7 +268,6 @@
 					}
 					
 				}
-				console.log('data',data);
 				
 				uni.current_this15.message.push({
 					name:data.name,
@@ -329,7 +326,6 @@
 						}
 						uni.current_this15.sendData_(2,uni.current_this15.msg_data)
 					},fail() {
-						console.log('fail');
 					}
 				})
 			}

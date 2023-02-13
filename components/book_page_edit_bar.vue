@@ -75,7 +75,6 @@
 							count:100
 						}
 					}).then(value=>{
-						console.log('拿到第一个作为索引',uni.current_this.total_passage);
 						uni.current_this.directory_list.push({
 							index:value.data.value[0].passage_value,
 							passage:[...value.data.value]
@@ -85,7 +84,6 @@
 							data:uni.current_this.directory_list
 						})
 					}).catch(e=>{
-						console.log(e)
 					})
 				}
 			})
@@ -139,7 +137,6 @@
 								
 					},fail(e) {
 						uni.current_this.search_state=1
-						console.log(e)
 						uni.skip-=100
 					},
 					})

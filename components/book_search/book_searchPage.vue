@@ -96,7 +96,6 @@
 				if(err_image.indexOf(item.book_name)<0){
 					err_image.push(item.book_name)
 				}
-				console.log(err_image);
 				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
 			}
 			return {image_load_err,fn,request_book_info,fav_book,content,info,container_margin}

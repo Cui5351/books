@@ -80,7 +80,6 @@
 				}
 			}).catch(e => {
 				uni.hideLoading()
-				console.log(e, '出现错误')
 			})
 			// 拿到保存的字号和颜色值
 			uni.getStorage({

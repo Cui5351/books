@@ -19,7 +19,6 @@
 		name:"advertisament",
 		props:['height_each'],
 		setup(){
-			console.log(ad_data);
 			return {}
 		}
 	}

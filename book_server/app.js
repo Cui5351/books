@@ -22,10 +22,9 @@ const options = {
 }
 app.use((req,res,next)=>{
     const referer=req.get('referer')
-    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
         res.status(403).send('权限不够')
     }else{
-        console.log('next')
         next()
     }
 })
@@ -73,10 +72,6 @@ function MountRouter(port,dbs,db_config){
                 echostr:echostr
             })
         }
-    })
-
-    app.post('/check_',function(req,res){
-
     })
 
         app.post('/setBookshelf',function(req,res){
@@ -723,7 +718,6 @@ function MountRouter(port,dbs,db_config){
                     error:0
                 })
             }).catch(e=>{
-                console.log('error',e);
             })
         })
 

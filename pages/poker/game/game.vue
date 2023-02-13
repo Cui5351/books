@@ -510,7 +510,6 @@
 			// this.audio.play()
 			this.audio.title="斗地主来自QQ音乐"
 			this.audio.onError(err=>{
-				console.log(err,'audio err');
 			})
 		},
 		setup() {

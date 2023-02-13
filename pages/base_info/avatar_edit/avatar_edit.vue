@@ -64,7 +64,6 @@ import {useStore} from 'vuex'
 										})									
 								},fail(e) {
 									uni.hideLoading()
-									console.log('fail',e);
 								}
 							})
 			}

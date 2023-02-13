@@ -16,7 +16,6 @@
 						let updateManager=uni.getUpdateManager()
 						updateManager.onCheckForUpdate(function (res) {
 						  // 请求完新版本信息的回调
-						  console.log(res.hasUpdate);
 						})
 						
 						updateManager.onUpdateReady(function (res) {
@@ -135,7 +134,6 @@
 									uni.reLaunch({
 										url:'/pages/service_stop_page/service_stop_page',
 										fail(e) {
-											console.log('fail',e)
 										}
 									})
 								}
@@ -152,17 +150,6 @@
 			//   	console.log(e)
 			//   }
 			// })
-		},
-		onShow: function() {
-			
-		},
-		onUnload() {
-			console.log('exit');
-		},
-		onLoad(){
-			
-			
-			
 		}
 	}
 </script>

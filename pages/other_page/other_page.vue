@@ -38,7 +38,6 @@
 				url:'https://www.mynameisczy.asia:5351/getTools',
 				method:'get',
 				success(e) {
-					console.log(e);
 					e.data.value.forEach((item,index)=>{
 						item.src=`https://www.mynameisczy.asia/dog_collection/dog${index+1}.jpeg`
 						uni.this7.tools.push(item)

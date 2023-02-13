@@ -277,7 +277,7 @@ function MountRouter(dbs,db_config,ws_config){
                 // master:false,
                 // total_count:0
 
-                // 裁判
+                // 创建裁判
                 ws_config.teams[room_id].push({
                     order:master,
                     master_openid:'',
@@ -763,7 +763,7 @@ function MountRouter(dbs,db_config,ws_config){
                         res({type:'三单',card:cards[0],length:2,grade:0})
                     }
                     // 3 单连
-                    else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1){
+                    else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1&&cards[2]==cards[3]-1&&cards[3]==cards[4]-1){
                         for(let i=0;i<cards.length-1;i++){
                             if(cards[i]!=cards[++i]-1){
                                 res(false)

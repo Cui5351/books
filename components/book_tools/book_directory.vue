@@ -95,7 +95,6 @@ export default {
 							// data:directory_list
 						// })
 					},fail(e) {
-						console.log(e)
 					},
 					})
 		}
@@ -135,7 +134,6 @@ export default {
 					// 找到了
 			// 这里进行判断，是否包含--------------------------------------------
 					if(item2.index<=result.data.passage&&(item2.index+100)>=result.data.passage){
-						console.log('find');
 						// 清空
 						let length=uni.current_this9.current_passage.length
 						for(let i=0;i<length;i++)
