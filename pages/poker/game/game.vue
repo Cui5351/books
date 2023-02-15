@@ -31,7 +31,14 @@
 					<!-- <view class="person_cards" :style="{paddingLeft:(index?(300-item.out_cards.length*30)<0?0:(300-item.out_cards.length*30):10)+'px'}"> -->
 					<!-- 如果index1=0,index2=1 -->
 					<view class="person_cards" :style="{paddingLeft:(item.order==1?(200-item.out_cards.length*30)<100?100:(200-item.out_cards.length*30):10)+'px'}">
-						<view class="state" v-if="item.state.length" >
+						<view v-if="interval.openid==item.openid" style="position: absolute;font-size:30px;height:70px;width:70px;margin-top:-20px;">
+							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
+								{{interval.count}}
+							</view>
+							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
+							</image>
+						</view>
+						<view class="state" v-if="item.state.length&&!(interval.openid==item.openid)" >
 							<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.asia/svgs/'+item.state+'.svg'" mode="" ></image>
 						</view>
 							<view class="card" v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
@@ -62,18 +69,25 @@
 							{{master_count<=0?'叫地主':'抢地主'}}
 						</view>
 						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
-							出牌
-						</view>
 						<view class="btn" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
+						</view>
+						<view v-if="interval.openid==rule.openid" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-20px;">
+							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
+								{{interval.count}}
+							</view>
+							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
+							</image>
+						</view>
+						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
+							出牌
 						</view>
 						</view>
 					</view>
 <!-- 				<view class="person2">
 					<view class="user">
 						<view class="avatar">
-							<image style="height: 100%;width:100%;" src='../../static/back_img/back1.jpg' mode=""></image>
+							<image style="height: 10[]0%;width:100%;" src='../../static/back_img/back1.jpg' mode=""></image>
 						</view>
 						<view class="name">name</view>
 						<view class="count">count</view>
@@ -465,6 +479,10 @@
 					setTimeout(()=>{
 						uni.navigateBack()
 					},2000)
+				}else if(data.state==15){
+					uni.current_this19.interval.count=data.count
+					if(data.current_player_openid!=uni.current_this19.interval.openid)
+						uni.current_this19.interval.openid=data.current_player_openid
 				}
 			})
 			let cards=JSON.parse(res.cards)
@@ -533,6 +551,10 @@
 			        '8club.svg',         '8red_heart.svg',        '9black_peach.svg',
 			        '9block.svg',        '9club.svg',             '9red_heart.svg'
 			    ])
+			let interval=reactive({
+				openid:'',
+				count:30
+			})
 			let load_state=ref(54)
 			let store=reactive(useStore())
 			let user_cards=reactive([])
@@ -641,10 +663,25 @@
 			load_state.value--
 		}
 			// 地主产生后，将所有pre.master=false
-			return {cards,score,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {interval,cards,score,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
+<style>
+	@keyframes clock{
+		from{
+			transform: rotate(0deg);
+		}35%{
+			transform: rotate(30deg);
+		}
+		85%{
+			transform: rotate(-30deg);
+		}
+		to{
+			transform: rotate(0deg);
+		}
+	}
+</style>
 <style scoped lang="less">
 @import url('/general.less');
       /*竖屏样式*/

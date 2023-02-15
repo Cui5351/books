@@ -280,13 +280,91 @@ function MountRouter(dbs,db_config,ws_config){
                 // 创建裁判
                 ws_config.teams[room_id].push({
                     order:master,
+                    room_id:room_id,
                     master_openid:'',
                     users:obj.user_cards,
                     master_card:obj.others,
                     current_player_openid:'',
                     rounds:[],
                     score:10,
-                    rounds_state:false
+                    rounds_state:false,
+                    interval_flag:'',
+                    stop_interval_flag:function(){
+                        clearInterval(this.interval_flag)
+                    },
+                    interval:function(){
+                        this.stop_interval_flag()
+                        let count=30
+                        this.interval_flag=setInterval(() => {
+                            if(count<=0){
+                                // 下一个玩家
+                                this.stop_interval_flag()
+                                next_player()
+                            }
+                            ws_config.teams[this.room_id].forEach((item,index)=>{
+                                if(index>=3)
+                                    return
+                                item.ws.send(JSON.stringify({
+                                    state:15,
+                                    current_player_openid:this.current_player_openid,
+                                    count:count
+                                }))
+                            })
+                            count--
+                            // 每次将count发送给current_player_openid
+                        }, 1000)
+                        next_player=async()=>{
+                            for(let i=0;this.users.length;i++){
+                                if(i>=3)
+                                    break
+                                if(this.users[i].openid==this.current_player_openid){
+                                    this.users[i].out_card_state=false
+                                }
+                            }
+            
+            
+                            // 如果有两个人都不出，那么就结束下一回合
+                            let openid=this.current_player_openid
+                            let test=await test_users_out_card_state(this.room_id)
+                            // 检测回合是否结束
+                            if(test){
+                                // 回合结束:test是可以出牌的openid
+                                this.rounds_state=false
+                                this.current_player_openid=test
+                                // 通知所有人下一回合开始
+                                ws_config.teams[this.room_id].forEach((item,index)=>{
+                                    if(index>=3)
+                                        return
+                                // 不出
+                                    item.ws.send(JSON.stringify({
+                                        state:11,
+                                        openid:openid,
+                                        new_round:true,
+                                        current_player_openid:this.current_player_openid
+                                    }))
+                                })
+                            }else{
+                                // 设置下一个玩家
+                                await set_next_out_card_user(this.room_id)
+                                ws_config.teams[this.room_id].forEach((item,index)=>{
+                                    if(index>=3)
+                                        return
+                                // 不出
+                                    item.ws.send(JSON.stringify({
+                                        state:11,
+                                        openid:openid,
+                                        new_round:false,
+                                        current_player_openid:this.current_player_openid
+                                    }))
+                                })
+                            }    
+
+                        this.interval()
+                }
+
+                                        
+                    }
+                    
                 })
             }
             // 抢地主
@@ -329,6 +407,9 @@ function MountRouter(dbs,db_config,ws_config){
                             score:ws_config.teams[room_id][3].score
                         }))
                     })
+                    setTimeout(() => {
+                        ws_config.teams[room_id][3].interval()
+                    }, 1000);
                     return
                 }
                 // 裁判判断
@@ -400,6 +481,9 @@ function MountRouter(dbs,db_config,ws_config){
                                     current_player_openid:ws_config.teams[room_id][3].current_player_openid
                                 }))
                             })
+                            setTimeout(() => {
+                                ws_config.teams[room_id][3].interval()
+                            }, 1000);
                             return                            
                     }
                     }
@@ -516,14 +600,12 @@ function MountRouter(dbs,db_config,ws_config){
                     })
                     return
                 }
-                
-
                 // 创建(第一回合或开始新的回合)
                 if(ws_config.teams[room_id][3].rounds.length<=0||ws_config.teams[room_id][3].rounds_state==false){
                     await set_users_out_card_state_all_true(room_id)
                     await set_next_out_card_user(room_id)
                     let count=await decrement_cards(room_id,cards,openid)
-// 
+
                     ws_config.teams[room_id][3].rounds_state=true
                     // 扣除cards
                     ws_config.teams[room_id][3].rounds.push([{
@@ -574,6 +656,10 @@ function MountRouter(dbs,db_config,ws_config){
                                 // 删除裁判
                             }, 1000);                        
                     }
+                    // 开始计数
+                    setTimeout(() => {
+                        ws_config.teams[room_id][3].interval()
+                    }, 500);
                     return
                 }
 
@@ -600,7 +686,6 @@ function MountRouter(dbs,db_config,ws_config){
                     })
                     return
                 }
-
                 await set_next_out_card_user(room_id)
                 // 扣除cards
                 let count=await decrement_cards(room_id,cards,openid)
@@ -618,7 +703,8 @@ function MountRouter(dbs,db_config,ws_config){
                 }
 
                 // 将出的牌返回，每次返回2个
-                if(count>0)
+                if(count>0){
+
                     ws_config.teams[room_id].forEach((item,index)=>{
                         if(index>=3)
                             return
@@ -631,6 +717,11 @@ function MountRouter(dbs,db_config,ws_config){
                             score:ws_config.teams[room_id][3].score
                         }))
                     })
+                    // 开始计数
+                    setTimeout(() => {
+                        ws_config.teams[room_id][3].interval()
+                    }, 500);                    
+                }
                 else{
                     ws_config.teams[room_id].forEach((item,index)=>{
                         if(index>=3)
@@ -718,8 +809,9 @@ function MountRouter(dbs,db_config,ws_config){
                         }))
                     })
                 }
-
-
+                setTimeout(() => {
+                    ws_config.teams[room_id][3].interval()
+                }, 500);
             }
 
             // 检测牌是否存在
