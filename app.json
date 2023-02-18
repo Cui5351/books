@@ -20,7 +20,9 @@
     "pages/poker/poker",
     "pages/poker/game/game",
     "pages/inner_page_reverse/inner_page_reverse",
-    "pages/reverse/reverse"
+    "pages/reverse/reverse",
+    "pages/author_info/author_info",
+    "pages/author_info/author_inner_info/author_inner_info"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -82,6 +82,7 @@
 			function getHotBook(count,item){
 				uni.showLoading({
 					title:'数据加载中',
+				mask:true
 				})
 				uni.request({
 					url:'https://www.mynameisczy.asia:5351/getRandomBook',
@@ -105,7 +106,8 @@
 				skip.value=0
 				count.value=6
 				uni.showLoading({
-					title: '书籍加载中'
+					title: '书籍加载中',
+				mask:true
 				})
 				let text=search_text.t.length?search_text.t:default_search_text.value
 				if(typeof t === 'string')
@@ -157,7 +159,8 @@
 			
 			function search(t){
 				uni.showLoading({
-					title: '书籍加载中'
+					title: '书籍加载中',
+				mask:true
 				});
 				let text=search_text.t.length?search_text.t:default_search_text.value
 				if(typeof t === 'string')

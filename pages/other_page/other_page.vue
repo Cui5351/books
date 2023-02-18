@@ -31,7 +31,8 @@
 		},
 		beforeMount() {
 			uni.showLoading({
-				title:'加载中'
+				title:'加载中',
+				mask:true
 			})
 			uni.this7=this
 			uni.request({

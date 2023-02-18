@@ -41,7 +41,7 @@
 						<view class="state" v-if="item.state.length&&!(interval.openid==item.openid)" >
 							<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.asia/svgs/'+item.state+'.svg'" mode="" ></image>
 						</view>
-							<view class="card" v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
+							<view v-if='!(interval.openid==item.openid)||item<=0' class="card" v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
 								<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
@@ -65,21 +65,21 @@
 								</view>
 						</view>
 						<view class="">
-						<view class="btn2"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
+						<view class="btn2" style="position: relative;z-index: 1000000000000" @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							{{master_count<=0?'叫地主':'抢地主'}}
 						</view>
-						<view class="btn"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
+						<view class="btn" style="position: relative;z-index: 1000000000000"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
+						<view class="btn" style="position: relative;z-index: 1000000000000" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
 						</view>
-						<view v-if="interval.openid==rule.openid" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-20px;">
+						<view v-if="interval.openid==rule.openid&&interval.count>0" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-20px;">
 							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
 								{{interval.count}}
 							</view>
 							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
 							</image>
 						</view>
-						<view class="btn2" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
+						<view class="btn2" style="position: relative;z-index: 1000000000000" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
 						</view>
@@ -410,7 +410,7 @@
 					uni.current_this19.rule.game_playing=true
 				}else if(data.state==10){
 					let {cards,current_player_openid}=data
-					uni.current_this19.rule.current_player_openid=data.current_player_openid
+					console.log(cards,'cards');
 					if(uni.current_this19.rule.openid==data.current_player_openid){
 						uni.current_this19.new_round=data.new_round
 					}
@@ -429,6 +429,7 @@
 							}
 						})
 					})
+					console.log(uni.current_this19.users,'users');
 					uni.current_this19.score=data.score
 					if(data.cards[data.cards.length-1].openid==uni.current_this19.rule.openid){
 						let reg=/(\d)/g
@@ -446,6 +447,7 @@
 					while(uni.current_this19.user_out_cards.length)
 						uni.current_this19.user_out_cards.pop()
 					}
+					uni.current_this19.rule.current_player_openid=data.current_player_openid
 				}else if(data.state==20){
 					uni.showToast({
 						title:data.errMes,
@@ -563,6 +565,7 @@
 			let audio=reactive(null)
 			let master_cards=reactive([])
 			let new_round=ref(true)
+			let get_master_state=ref(true)
 			// 默认属性
 			let rule=reactive({
 					room_id:-1,
@@ -577,12 +580,20 @@
 					master_id:''
 			})
 			function get_master(){
-				uni.sendSocketMessage({
-					data:JSON.stringify({
-						state:5,
-						rule:rule
+				if(get_master_state.value){
+					get_master_state.value=false
+					uni.sendSocketMessage({
+						data:JSON.stringify({
+							state:5,
+							rule:rule
+						}),
+						success(){
+							setTimeout(()=>{
+								get_master_state.value=true							
+							},1000)
+						}
 					})
-				})
+				}
 			}
 			
 		// 放弃抢地主
@@ -663,7 +674,7 @@
 			load_state.value--
 		}
 			// 地主产生后，将所有pre.master=false
-			return {interval,cards,score,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {interval,cards,score,get_master_state,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
@@ -795,6 +806,7 @@
 				position: absolute;
 				flex-direction: column;
 				width:150px;
+				z-index:1000000000;
 				left:50%;
 				top:50%;
 				display: flex;

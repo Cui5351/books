@@ -126,7 +126,8 @@
 		
 			
 			uni.showLoading({
-				title:'进入中'
+				title:'进入中',
+				mask:true
 			})
 		// 打开连接
 			uni.onSocketOpen(function(res){
@@ -348,7 +349,8 @@
 					return
 				}
 				uni.showLoading({
-					title:'发送中'
+					title:'发送中',
+					mask:true
 				})
 				uni.sendSocketMessage({
 					data:JSON.stringify({

@@ -82,7 +82,8 @@
 				// 	}
 				// })
 				uni.showLoading({
-					title:'图片下拉中!'
+					title:'图片下拉中!',
+					mask:true
 				})
 				uni.downloadFile({
 					url:url,

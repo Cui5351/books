@@ -44,7 +44,8 @@
 					this.portraitW=data.height-25
 				}).exec()
 				uni.showLoading({
-					title:'加载中'
+					title:'加载中',
+				mask:true
 				})
 				if(this.user_info.openid&&this.login_state){
 					uni.request({
@@ -101,7 +102,8 @@
 						// 并获取openid
 					// 通过openid拿到answer
 						uni.showLoading({
-							title:'加载中'
+							title:'加载中',
+				mask:true
 						})
 						uni.login({
 							provider:'weixin',

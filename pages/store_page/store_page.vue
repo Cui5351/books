@@ -84,7 +84,8 @@
 		},
 		mounted() {
 			uni.showLoading({
-				title:'加载商品中'
+				title:'加载商品中',
+				mask:true
 			})
 			uni.request({
 				url:'https://www.mynameisczy.asia:5000/get_shops',
@@ -166,7 +167,8 @@
 					success(res) {
 						if (res.confirm) {
 							uni.showLoading({
-								title:'购买中'
+								title:'购买中',
+								mask:true
 							})
 							// 发送请求
 							uni.request({
@@ -256,7 +258,6 @@
 		display: flex;
 		column-count: 2;
 		width:100%;
-		// height:100%;
 		flex-wrap: wrap;
 		box-sizing: border-box;
 		.shop{

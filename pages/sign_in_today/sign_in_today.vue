@@ -47,7 +47,8 @@
 		},
 		mounted() {
 			uni.showLoading({
-				title:'加载中'
+				title:'加载中',
+				mask:true
 			})
 			uni.current_this10=this
 			let date=new Date()

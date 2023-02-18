@@ -26,7 +26,7 @@
 				text="新 年 到 了 ! 小 程 序 3.0 也 正 式 上 线 啦 ! 在 这 里 祝 大 家 新 年 快 乐 , 心 想 事 成~" />
 			<!-- </view> -->
 		</view>
-		<view class="fixed" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}">
+		<view class="fixed" :style="{minHeight:fixed*1.2+'rpx',maxHeight:fixed*1.2+'rpx'}">
 			<scroll-view scroll-x="true" class="other">
 				<view type="default" @click.stop="category_list(a)" v-for="a in list_btn" :key='a' :style="{minHeight:fixed*0.7+'rpx',lineHeight:fixed*0.7+'rpx',backgroundColor: 'white',display: 'inline-block',width:info.windowWidth/4+'px', marginRight:10+'px',borderRadius:10+'px',textAlign: 'center',color:'rgb(77,78,79)'}">{{a}}
 				</view>
@@ -139,7 +139,8 @@
 				}
 			})
 			uni.showLoading({
-				title:'数据加载中'
+				title:'数据加载中',
+				mask:true
 			})			
 			uni.request({
 				method:'POST',
@@ -254,7 +255,8 @@
 				return
 			}
 			uni.showLoading({
-				title:'书籍加载中'
+				title:'书籍加载中',
+				mask:true
 			})
 			load_state.value=1
 			this.refresh_info="正在加载过程中"
@@ -317,7 +319,8 @@
 		}
 			function request_book_info(book){
 				uni.showLoading({
-					title:'书籍加载中'
+					title:'书籍加载中',
+					mask:true
 				})
 				if(store.getters.login_state<=0){
 					uni.showToast({

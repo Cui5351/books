@@ -105,7 +105,8 @@
 			// 触底增加数据
 			function request_tolower1(){
 				uni.showLoading({
-					title:'加载中'
+					title:'加载中',
+				mask:true
 				})
 				uni.request({
 						url:"https://www.mynameisczy.asia:5351/getBookDirectory",

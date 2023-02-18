@@ -107,7 +107,8 @@
 				atb.forEach(item=>{
 					if(userInfo[item]!=userInfo_[item]){
 						uni.showLoading({
-							title:'修改中'
+							title:'修改中',
+							mask:true
 						})
 						uni.request({
 							url:'https://www.mynameisczy.asia:5000/set_user_property',

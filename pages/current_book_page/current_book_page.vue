@@ -53,7 +53,8 @@
 				method: 'POST'
 			})
 			uni.showLoading({
-				title: '书籍加载中'
+				title: '书籍加载中',
+				mask:true
 			});
 			// 拿到本地书的列表
 			uni.getStorage({
@@ -161,7 +162,8 @@
 			//章节信息
 			toggle_passage: function(book) {
 				uni.showLoading({
-					title: '加载中'
+					title: '加载中',
+				mask:true
 				})
 
 				// 检查book_storage_array里是否包含这个数据

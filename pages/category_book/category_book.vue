@@ -36,7 +36,8 @@
 			let container_margin=ref(uni.getMenuButtonBoundingClientRect().height*1.7)
 			function getCategoryBook(){
 				uni.showLoading({
-					title:'书籍加载中'
+					title:'书籍加载中',
+					mask:true
 				})
 				load_state.state=1
 				uni.request({
@@ -80,9 +81,6 @@
 				console.log(e);
 			}
 			return {scroll_fun,container_height,load_state,count,book_wh,title,tolower,getCategoryBook,container_margin,store_infos,store}
-		},
-		methods: {
-			
 		}
 	}
 </script>

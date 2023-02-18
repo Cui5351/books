@@ -165,6 +165,23 @@
             }
             
         }
+        ,{
+            "path" : "pages/author_info/author_info",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }        ,{
+            "path" : "pages/author_info/author_inner_info/author_inner_info",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
     "tabBar" : {
         "list" : [

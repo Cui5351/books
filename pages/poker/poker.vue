@@ -132,11 +132,7 @@
 				}
 				clearInterval(timer2)
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
-				success() {
-					console.log('连接成功');
-				},fail() {
-					console.log('连接失败');
-				}})
+				})
 			},200)
 			
 			uni.onSocketClose(function(){
@@ -145,11 +141,7 @@
 					icon:'error'
 				})
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
-				success() {
-					console.log('连接成功');
-				},fail() {
-					console.log('连接失败');
-				}})				
+				})				
 			})
 			
 			uni.onSocketError(function(){
@@ -158,16 +150,11 @@
 					icon:'error'
 				})
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
-				success() {
-					console.log('连接成功');
-				},fail() {
-					console.log('连接失败');
-				}})
+				})
 			})
 			
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
-				console.log(data);
 				if(data.state==1){
 					uni.current_this18.position=data.position
 				}else if(data.state==12){
@@ -225,7 +212,6 @@
 							uni.current_this18.room_state=item.privilege
 							if(item.privilege==false){
 								clearInterval(uni.current_this18.timer)
-								console.log('关闭匹配');
 							}
 						}
 					})
@@ -282,7 +268,8 @@
 				}
 			})
 			uni.showLoading({
-				title:'进入中'
+				title:'进入中',
+				mask:true
 			})
 			await this.await_position()
 			
@@ -290,11 +277,6 @@
 		},
 		onUnload() {
 			uni.closeSocket()
-			console.log('关闭');
-			uni.showToast({
-				title:'close',
-				icon:'none'
-			})
 			uni.onSocketClose(()=>{})
 			clearInterval(this.timer)
 		},
@@ -352,7 +334,6 @@
 				// 匹配人
 				// 多人匹配：3
 				// 单人匹配：2
-				console.log('正在匹配');
 				uni.sendSocketMessage({
 					data:JSON.stringify({
 						openid:store.getters.user_openid,
@@ -370,7 +351,6 @@
 				if(item.openid.length>=10)
 					return
 			}
-			console.log('邀请好友~');
 			uni.showToast({
 				title:'发送邀请',
 				icon:'success'

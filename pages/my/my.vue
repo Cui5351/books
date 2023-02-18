@@ -2,7 +2,7 @@
 	<view class="container">
 		<navigation  :head_height='head_height_child' :user_info="user_info" :login_state="login_state" ></navigation>
 		<scroll-view scroll-y="true" class="eidt_bar" :style="{marginTop:head_height_child*3.2+'px'}">
-			<view class="eidts" :style="{maxHegiht:info+'px',minHeight:info+'px'}">
+			<view class="eidts" :style="{maxHegiht:info*1.1+'px',minHeight:info*1.1+'px'}">
 				<view class="edit_item" @click="sign_in_today">
 					<view>
 						<uni-icons type="calendar"></uni-icons>
@@ -21,6 +21,13 @@
 					<view>
 						<uni-icons type="person"></uni-icons>
 						基本信息
+					</view>
+					<uni-icons type="right"></uni-icons>
+				</view>
+				<view class="edit_item" @click='gotoPage("/pages/author_info/author_info")'>
+					<view>
+						<uni-icons type="flag"></uni-icons>
+						作者集
 					</view>
 					<uni-icons type="right"></uni-icons>
 				</view>
