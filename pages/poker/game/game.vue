@@ -65,11 +65,11 @@
 								</view>
 						</view>
 						<view class="">
-						<view class="btn2" style="position: relative;z-index: 1000000000000" @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
+						<view class="btn2" style="margin-top:-40px"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							{{master_count<=0?'叫地主':'抢地主'}}
 						</view>
-						<view class="btn" style="position: relative;z-index: 1000000000000"  v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn" style="position: relative;z-index: 1000000000000" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
+						<view class="btn" style="margin-top:-40px"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
+						<view class="btn" style="margin-top:-40px" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
 						</view>
 						<view v-if="interval.openid==rule.openid&&interval.count>0" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-20px;">
@@ -79,7 +79,7 @@
 							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
 							</image>
 						</view>
-						<view class="btn2" style="position: relative;z-index: 1000000000000" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
+						<view class="btn2" style="margin-top:-40px" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
 						</view>
@@ -408,9 +408,14 @@
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
 					// 开始游戏
 					uni.current_this19.rule.game_playing=true
+					
+					uni.current_this19.user_cards.forEach(item=>{
+						item.flag=0
+					})
+					for(let i=0;i<uni.current_this19.user_out_cards.length;i++)
+						uni.current_this19.user_out_cards.pop()
 				}else if(data.state==10){
 					let {cards,current_player_openid}=data
-					console.log(cards,'cards');
 					if(uni.current_this19.rule.openid==data.current_player_openid){
 						uni.current_this19.new_round=data.new_round
 					}
@@ -806,7 +811,6 @@
 				position: absolute;
 				flex-direction: column;
 				width:150px;
-				z-index:1000000000;
 				left:50%;
 				top:50%;
 				display: flex;
