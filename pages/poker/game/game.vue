@@ -15,7 +15,6 @@
 				<view>12</view>
 			</view>
 			<view class="others">
-				<!-- <view  v-for="(item,index) in users" :key="index" v-if='item.openid!=rule.openid'> -->
 				<template  v-for="(item,index) in users" :key="index" >
 				<view  v-if='item.openid!==rule.openid'>
 					<view class="user">
@@ -28,8 +27,6 @@
 							<image :src="'https://www.mynameisczy.asia/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
 						</view>	
 						</view>
-					<!-- <view class="person_cards" :style="{paddingLeft:(index?(300-item.out_cards.length*30)<0?0:(300-item.out_cards.length*30):10)+'px'}"> -->
-					<!-- 如果index1=0,index2=1 -->
 					<view class="person_cards" :style="{paddingLeft:(item.order==1?(200-item.out_cards.length*30)<100?100:(200-item.out_cards.length*30):10)+'px'}">
 						<view v-if="interval.openid==item.openid" style="position: absolute;font-size:30px;height:70px;width:70px;margin-top:-20px;">
 							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
@@ -65,35 +62,25 @@
 								</view>
 						</view>
 						<view class="">
-						<view class="btn2" style="margin-top:-40px"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
+						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							{{master_count<=0?'叫地主':'抢地主'}}
 						</view>
-						<view class="btn" style="margin-top:-40px"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn" style="margin-top:-40px" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
+						<view class="btn" style="margin-top:-20px;position:relative;z-index: 200;"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
+						<view class="btn" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
 						</view>
-						<view v-if="interval.openid==rule.openid&&interval.count>0" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-20px;">
+						<view v-if="interval.openid==rule.openid&&interval.count>0" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-70px;">
 							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
 								{{interval.count}}
 							</view>
 							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
 							</image>
 						</view>
-						<view class="btn2" style="margin-top:-40px" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
+						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
 						</view>
 					</view>
-<!-- 				<view class="person2">
-					<view class="user">
-						<view class="avatar">
-							<image style="height: 10[]0%;width:100%;" src='../../static/back_img/back1.jpg' mode=""></image>
-						</view>
-						<view class="name">name</view>
-						<view class="count">count</view>
-						<view class="master">master</view>
-						</view>
-				</view> -->
 			</view>
 			<view class="cards_out">
 				<view class="cards" :style="{width:user_cards.length*35+'px'}">
@@ -264,11 +251,10 @@
 			uni.current_this19=this
 			uni.onSocketClose(function(){
 				uni.showToast({
-					title:'正在重连',
+					title:'退出',
 					icon:'error'
 				})
-				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
-				})				
+				uni.navigateBack()
 			})
 			uni.onSocketError(function(){
 				uni.showToast({
@@ -416,6 +402,9 @@
 						uni.current_this19.user_out_cards.pop()
 				}else if(data.state==10){
 					let {cards,current_player_openid}=data
+					if(current_player_openid.length<=0){
+						uni.current_this19.interval.openid=''
+					}
 					if(uni.current_this19.rule.openid==data.current_player_openid){
 						uni.current_this19.new_round=data.new_round
 					}
@@ -434,7 +423,6 @@
 							}
 						})
 					})
-					console.log(uni.current_this19.users,'users');
 					uni.current_this19.score=data.score
 					if(data.cards[data.cards.length-1].openid==uni.current_this19.rule.openid){
 						let reg=/(\d)/g

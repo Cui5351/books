@@ -510,6 +510,8 @@ function MountRouter(dbs,db_config,ws_config){
                             state:8
                         }))
                     })
+                    ws_config.teams[room_id][3].stop_interval_flag()
+                    ws_config.teams[room_id].pop()
                     return
                 }
                 
@@ -629,8 +631,25 @@ function MountRouter(dbs,db_config,ws_config){
                     }else{
                     // 返回最新的一回合
                         ws_config.teams[room_id].forEach((item,index)=>{
-                            if(index>=3)
+                            if(index>=3){
+                                ws_config.teams[room_id][3].stop_interval_flag()
+                                setTimeout(() => {
+                                    // 游戏结束
+                                        console.log('game over');
+                                        ws_config.teams[room_id].forEach((item,index)=>{
+                                            if(index>=3)
+                                                return
+                                            // 每次返回最新的两条数据
+                                            item.ws.send(JSON.stringify({
+                                                state:14,
+                                                winner_openid:openid
+                                            }))
+                                        })
+                                        ws_config.teams[room_id].pop()
+                                        // 删除裁判
+                                    }, 3000);   
                                 return
+                            }
                             item.ws.send(JSON.stringify({
                                 state:10,
                                 new_round:false,
@@ -638,23 +657,8 @@ function MountRouter(dbs,db_config,ws_config){
                                 current_player_openid:'',
                                 score:ws_config.teams[room_id][3].score
                             }))
-                        })
-                        setTimeout(() => {
-                            // 游戏结束
-                                console.log('game over');
-                                ws_config.teams[room_id].forEach((item,index)=>{
-                                    if(index>=3)
-                                        return
-                                    // 每次返回最新的两条数据
-                                    item.ws.send(JSON.stringify({
-                                        state:14,
-                                        winner_openid:openid
-                                    }))
-                                })
-                                ws_config.teams[room_id].pop()
-                                return
-                                // 删除裁判
-                            }, 1000);                        
+                        }) 
+                        return                    
                     }
                     // 开始计数
                     setTimeout(() => {
@@ -724,8 +728,24 @@ function MountRouter(dbs,db_config,ws_config){
                 }
                 else{
                     ws_config.teams[room_id].forEach((item,index)=>{
-                        if(index>=3)
+                        if(index>=3){
+                            ws_config.teams[room_id][3].stop_interval_flag()
+                            setTimeout(() => {
+                            // 游戏结束
+                                ws_config.teams[room_id].forEach((item,index)=>{
+                                    if(index>=3)
+                                        return
+                                    // 每次返回最新的两条数据
+                                    item.ws.send(JSON.stringify({
+                                        state:14,
+                                        winner_openid:openid
+                                    }))
+                                })
+                                ws_config.teams[room_id].pop()
+                            }, 3000);
                             return
+                        }
+                        console.log(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length-2,ws_config.teams[room_id][3].rounds[ws_config.teams[room_id][3].rounds.length-1].length),'732');
                         // 每次返回最新的两条数据
                         item.ws.send(JSON.stringify({
                             state:10,
@@ -735,21 +755,6 @@ function MountRouter(dbs,db_config,ws_config){
                             score:ws_config.teams[room_id][3].score
                         }))
                     })
-                    setTimeout(() => {
-                    // 游戏结束
-                        console.log('game over');
-                        ws_config.teams[room_id].forEach((item,index)=>{
-                            if(index>=3)
-                                return
-                            // 每次返回最新的两条数据
-                            item.ws.send(JSON.stringify({
-                                state:14,
-                                winner_openid:openid
-                            }))
-                        })
-                        ws_config.teams[room_id].pop()
-                        return
-                    }, 2000);
                 }
                 
             }else if(msg.state==9){
@@ -855,7 +860,7 @@ function MountRouter(dbs,db_config,ws_config){
                         res({type:'三单',card:cards[0],length:2,grade:0})
                     }
                     // 3 单连
-                    else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1&&cards[2]==cards[3]-1&&cards[3]==cards[4]-1){
+                    else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1&&cards[2]==cards[3]-1&&cards[3]==cards[4]-1&&cards[cards.length-1]!='15'){
                         for(let i=0;i<cards.length-1;i++){
                             if(cards[i]!=cards[++i]-1){
                                 res(false)
@@ -866,7 +871,7 @@ function MountRouter(dbs,db_config,ws_config){
                         res({type:'单连',card:cards[cards.length-1],length:cards.length,grade:0})
                     }
                     // 4 双连
-                    else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards[2]==cards[3]&&cards[3]!=cards[4]&&cards.length%2==0){
+                    else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards[2]==cards[3]&&cards[3]!=cards[4]&&cards.length%2==0&&cards[cards.length-1]!='14'){
                         for(let i=0;i<cards.length;i=i+2){
                             if(cards[i]!=cards[i+1]){
                                 res(false)
@@ -911,7 +916,7 @@ function MountRouter(dbs,db_config,ws_config){
                     // 4 4 4 3 3
         
                     // 9三带二
-                    else if(cards.length==5&&((cards[0]!=cards[3]&&cards[3]==cards[4])||(cards[4]!=cards[0]&&cards[0]==cards[1]))){
+                    else if(cards.length==5&&((cards[0]!=cards[3]&&cards[3]==cards[4]&&cards[0]==cards[1]&&cards[2]==cards[3])||(cards[4]!=cards[0]&&cards[0]==cards[1]&&cards[1]==cards[2]&&cards[3]==cards[4]))){
                         // 情况一 33344
                         if(cards[0]==cards[1]&&cards[1]==cards[2]){
                             res({type:'三带二',card:cards[0],length:cards.length,grade:0})
@@ -1048,13 +1053,18 @@ function MountRouter(dbs,db_config,ws_config){
                             }
                             if(!item2.hasOwnProperty('openid'))
                                 return
-                        // 移除裁判
                             item2.ws.send(JSON.stringify({
                                 state:2,
                                 lost:true,
                                 current_persons:ws_config.teams[index].map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                             }))
                         })
+                        // 移除裁判
+                        if(item.length>0&&item[item.length].hasOwnProperty('current_player_openid')){
+                            // 裁判存在，移除裁判
+                            item[item.length].stop_interval_flag()
+                            item.splice(item.length,1)
+                        }
                         if(item.length<=1){
                             // 解散
                             ws_config.teams.splice(index,1)

@@ -55,7 +55,6 @@ function entry(){
 
 // 路由注入
 function MountRouter(port,dbs,db_config){
-    
     // 微信接口测试
     app.get('/test_interface',(req,res)=>{
         const token='czyishandsome'
@@ -546,10 +545,6 @@ function MountRouter(port,dbs,db_config){
             })
         })
 
-        app.get('/home',(req,res)=>{
-            res.send("<h1>Welcome to my home</h1>")
-        })
-
         app.post('/SearchBookInfo',function(req,res){
 
             if(typeof req.body === 'string')
@@ -1010,4 +1005,119 @@ if(typeof data === 'string')
                 }) 
             })
         })
+
+        app.post('/get_author_info',(req,res)=>{
+            let data=req.body
+            if(typeof data === 'string')
+                data=JSON.parse(data)
+            if(!data.hasOwnProperty('count')||!data.hasOwnProperty('skip')){
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:"缺少参数"
+                })
+                return
+            }
+            query(dbs,db_config.database+'.author_info',null,null,{skip:data.skip,count:data.count}).then(result=>{
+                if(result.length>=1){
+                    res.send({
+                        state:1,
+                        error:0,
+                        value:result
+                    })
+                    return
+                }
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:'没有数据'
+                })
+            }).catch(()=>{
+                res.send({
+                    state:0,
+                    error:2
+                })
+            })
+        })
+
+
+        app.post('/upload_author_info',function(req,res){
+            let data=req.body
+            if(typeof data === 'string')
+                data=JSON.parse(data)
+            if(!data.hasOwnProperty('name')||!data.hasOwnProperty('avatar')||!data.hasOwnProperty('description')){
+                res.send({
+                    state:0,
+                    error:1,
+                    errMes:"缺少参数"
+                })
+                return
+            }
+
+            const {name,avatar,description}=data
+            // 查询是否存在
+            query(dbs,db_config.database+'.author_info','name',{name:name}).then(e=>{
+                if(e.length>=1){
+                    res.send({
+                        state:0,
+                        error:1,
+                        errMes:'数据存在'
+                    })
+                    return
+                }
+                insertData(dbs,db_config.database+'.author_info',JSON.stringify({name,avatar,description})).then(result=>{
+                    res.send({
+                        state:1,
+                        error:0,
+                        message:'插入成功'
+                    })                
+                }).catch(e=>{
+                    res.send({
+                        state:0,
+                        error:1,
+                        errMes:'插入失败'
+                    })
+                })
+            })
+        })
+
+        app.post('/SearchAuthorBooks',function(req,res){
+
+            if(typeof req.body === 'string')
+                req.body=JSON.parse(req.body)
+
+            if(!req.body.hasOwnProperty('author')){
+                res.send({
+                    state:0,
+                    error:1,
+                    errorMes:'缺少参数'
+                })
+                return 
+            }
+            if(typeof req.body.author !== 'string'||req.body.author.length<1){
+                res.send({
+                    state:0,
+                    error:2,
+                    errorMes:"数据值无效(上传数据为空|长度小于1)"
+                })
+                return
+            }
+            const {author}=req.body
+
+            query(dbs,db_config.database+'.books_info',['book_name','passage_count'],{author}).then((result)=>{
+                res.send({
+                    state:1,
+                    error:0,
+                    value:result
+                })
+            }).catch(err=>{
+                res.send({
+                    state:0,
+                    error:1,
+                    errorMes:err
+                })
+            })
+
+        })
+
 }

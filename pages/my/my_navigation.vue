@@ -103,7 +103,7 @@
 					// 通过openid拿到answer
 						uni.showLoading({
 							title:'加载中',
-				mask:true
+							mask:true
 						})
 						uni.login({
 							provider:'weixin',
