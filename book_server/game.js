@@ -18,7 +18,8 @@ cert: readFileSync(resolve(__dirname, 'cert','a.pem'))
 }
 app.use((req,res,next)=>{
     const referer=req.get('referer')
-    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+    console.log(referer,'referer')
+    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
         res.status(403).send('权限不够')
     }else{
         console.log('next')

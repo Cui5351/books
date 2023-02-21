@@ -22,7 +22,7 @@ const options = {
 }
 app.use((req,res,next)=>{
     const referer=req.get('referer')
-    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
         res.status(403).send('权限不够')
     }else{
         next()

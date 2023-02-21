@@ -1,0 +1,17 @@
+{
+    "server_config":{
+        "port":"5351"
+    },
+    "jwt_config":{
+        "secretKey":"czyIsHandsome",
+        "expire":80000
+    },
+    "db_config":{
+        "protocol":"mysql",
+        "version":"8.0",
+        "database":"mynameisczy_asia",
+        "host":"127.0.0.1",
+        "user":"mynameisczy_asia",
+        "password":"W7LEnpxjTdHCcXsL"
+    }
+}                                                                                                                                                                                                                                                           
