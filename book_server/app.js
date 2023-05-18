@@ -1,8 +1,8 @@
 const express=require('express')
 const cors=require('cors')
-const {readFile, readFileSync,writeFile}=require('fs')
-const {query} =require('./query')
-const {connectionMysql,insertData,update}=require('./dbs')
+const {readFile, readFileSync}=require('fs')
+const {query} =require('../db_config/query')
+const {connectionMysql,insertData,update}=require('../db_config/dbs')
 const { resolve } = require('path')
 const https=require('https')
 const axios= require('axios')
@@ -17,17 +17,17 @@ app.use(express.json({limit : '21000000kb'}));
 
 app.use(cors())
 const options = {
-  key: readFileSync(resolve(__dirname, 'cert','a.key')),
-  cert: readFileSync(resolve(__dirname, 'cert','a.pem'))
+  key: readFileSync(resolve(__dirname,'..', 'cert','a.key')),
+  cert: readFileSync(resolve(__dirname,'..', 'cert','a.pem'))
 }
-app.use((req,res,next)=>{
-    const referer=req.get('referer')
-    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
-        res.status(403).send('权限不够')
-    }else{
-        next()
-    }
-})
+// app.use((req,res,next)=>{
+//     const referer=req.get('referer')
+//     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+//         res.status(403).send('权限不够')
+//     }else{
+//         next()
+//     }
+// })
 entry()
 
 function entry(){
@@ -35,7 +35,7 @@ function entry(){
     readFile('./base_config.json',async function(err,data){   
         if(err) return 
         data=JSON.parse(data.toString())
-        const {server_config,db_config}=data
+        const {db_config}=data
 
 // 这是机制问题，当没有操作数据的时候，就断开连接了 在网站stackoverflow看到了解决方案 强制连接,让数据库每1hours查询一次        
         
@@ -45,7 +45,7 @@ function entry(){
                 value.query('select 1')
                 n++
             },3600000)
-            MountRouter(server_config.port,value,db_config)  
+            MountRouter(value,db_config)  
             https.createServer(options,app).listen('5351',function(){
             })  
         })
@@ -54,7 +54,11 @@ function entry(){
 
 
 // 路由注入
-function MountRouter(port,dbs,db_config){
+function MountRouter(dbs,db_config){
+    
+    app.get('/home',(req,res)=>{
+        res.send("<h>hello world</h>")
+    })
     // 微信接口测试
     app.get('/test_interface',(req,res)=>{
         const token='czyishandsome'
@@ -117,7 +121,7 @@ function MountRouter(port,dbs,db_config){
                     if(e.data.data[i]==book_name){
                         // 将其删除
                         e.data.data.splice(i,1)
-                        update(dbs,'mynameisczy_asia.user_info',{openid:openid},'bookshelf',JSON.stringify(e.data.data),'string')
+                        update(dbs,'books.user_info',{openid:openid},'bookshelf',JSON.stringify(e.data.data),'string')
                         res.send({
                             state:1,
                             error:0,
@@ -133,7 +137,7 @@ function MountRouter(port,dbs,db_config){
                         // 添加
                 // 返回的数组
                 e.data.data.push(book_name)
-                update(dbs,'mynameisczy_asia.user_info',{openid:openid},'bookshelf',JSON.stringify(e.data.data),'string').then(e=>{
+                update(dbs,'books.user_info',{openid:openid},'bookshelf',JSON.stringify(e.data.data),'string').then(e=>{
                     res.send({
                         state:1,
                         error:0
@@ -183,7 +187,7 @@ function MountRouter(port,dbs,db_config){
             const {openid}=req.body
 
             // 通过openid拿到用户信息
-            query(dbs,'mynameisczy_asia.user_info',['bookshelf'],{openid:openid}).then(value=>{
+            query(dbs,'books.user_info',['bookshelf'],{openid:openid}).then(value=>{
                 if(!value.length){
                     res.send({
                         state:0,
@@ -197,7 +201,7 @@ function MountRouter(port,dbs,db_config){
                     bookshelf=JSON.parse(bookshelf)
                 if(typeof bookshelf === 'string'){
                     // 更新bookshelf（设置值"[]"）
-                    update(dbs,'mynameisczy_asia.user_info',{openid:openid},'bookshelf',"'[]'").then(e=>{
+                    update(dbs,'books.user_info',{openid:openid},'bookshelf',"'[]'").then(e=>{
                         res.send({
                             state:1,
                             error:0,
@@ -285,7 +289,7 @@ function MountRouter(port,dbs,db_config){
             // 对数据库进行操作
 
             // 1先查询books_info里的book_name是否包含book_name
-                query(dbs,"mynameisczy_asia.books_info",'book_name',{book_name:book_name},null).then(result=>{
+                query(dbs,"books.books_info",'book_name',{book_name:book_name},null).then(result=>{
                     // 1.2不包含：添加数据：1{给books_info中book_name添加book_name数据} 2{给books_content里添加{book_name和passage_value和passage_name和content}数据}
                 if(!result.length){
                     // 不包含(返回上传指令)
@@ -297,7 +301,7 @@ function MountRouter(port,dbs,db_config){
                     return
                 }else{
                     // 包含：查询books_content中的章节名是否包含
-                    query(dbs,'mynameisczy_asia.books_content',['book_name','passage_name','passage_value'],{book_name,passage_name,passage_value},null).then(value=>{
+                    query(dbs,'books.books_content',['book_name','passage_name','passage_value'],{book_name,passage_name,passage_value},null).then(value=>{
                         if(value.length>=1){
                             // 包含：不保存
                             res.send({
@@ -307,7 +311,7 @@ function MountRouter(port,dbs,db_config){
                             })
                         return
                         }else{
-                            insertData(dbs,'mynameisczy_asia.books_content',JSON.stringify({book_name,passage_name,passage_value,content})).then(()=>{
+                            insertData(dbs,'books.books_content',JSON.stringify({book_name,passage_name,passage_value,content})).then(()=>{
                                 res.send({
                                     state:1,
                                     error:0,
@@ -386,7 +390,7 @@ function MountRouter(port,dbs,db_config){
 
             const {nickName,avatarUrl,content,feedback_to,openid}=req.body
 
-            insertData(dbs,'mynameisczy_asia.user_feedback',JSON.stringify({
+            insertData(dbs,'books.user_feedback',JSON.stringify({
                 nickName,avatarUrl,content,feedback_to,gender,openid
             })).then(e=>{
                 res.send({
@@ -453,7 +457,7 @@ function MountRouter(port,dbs,db_config){
 
 
             // 查询上传的数据在数据库中是否存在
-            query(dbs,'mynameisczy_asia.books_info','book_name',{book_name:book_name},null,null).then(value=>{
+            query(dbs,'books.books_info','book_name',{book_name:book_name},null,null).then(value=>{
                 // 查询是否已经含有
                 if(value.length>=1){
                     res.send({
@@ -464,7 +468,7 @@ function MountRouter(port,dbs,db_config){
                     return;
                 }else{
                     // 书不存在(可以上传)
-                    insertData(dbs,'mynameisczy_asia.books_info',JSON.stringify({
+                    insertData(dbs,'books.books_info',JSON.stringify({
                         book_name,author,score,book_type,book_introduce,book_state
                     })).then(()=>{
                         res.send({
@@ -505,12 +509,12 @@ function MountRouter(port,dbs,db_config){
             }
             const {count}=req.body
             // 先拿到books_info里的所有书的值
-            query(dbs,'mynameisczy_asia.books_info','count(*)').then(value=>{
+            query(dbs,'books.books_info','count(*)').then(value=>{
                 let c=value[0]['count(*)']
                 if(c<=count){
                     // 1发送网络请求(得到书的内容)
                         // 将所有数据全部返回
-                        query(dbs,'mynameisczy_asia.books_info','book_name').then(value=>{
+                        query(dbs,'books.books_info','book_name').then(value=>{
                             res.send({
                                 state:1,
                                 error:0,
@@ -520,7 +524,7 @@ function MountRouter(port,dbs,db_config){
                     return 
                 }else{
                     // 2这里随机获取几个数值(数值的个数=count)
-                    query(dbs,'mynameisczy_asia.books_info','book_name').then(value=>{
+                    query(dbs,'books.books_info','book_name').then(value=>{
                     let arr=[-2]
                     let random
                     while(arr.length<=count){
@@ -573,9 +577,9 @@ function MountRouter(port,dbs,db_config){
             }
             
 
-            // dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}% or author like '%${book_name}%''`+limit,function(err,result){
-            dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}%' or author='${book_name}'`+limit,function(err,result){
-                // dbs.query(`select * from mynameisczy_asia.books_info where book_name like '%${book_name}%'`+limit,function(err,result){
+            // dbs.query(`select * from books.books_info where book_name like '%${book_name}% or author like '%${book_name}%''`+limit,function(err,result){
+            dbs.query(`select * from books.books_info where book_name like '%${book_name}%' or author='${book_name}'`+limit,function(err,result){
+                // dbs.query(`select * from books.books_info where book_name like '%${book_name}%'`+limit,function(err,result){
                 if(err){
                     res.send({
                         state:0,
@@ -622,7 +626,7 @@ function MountRouter(port,dbs,db_config){
 
             const {category,skip,count}=req.body
 
-            query(dbs,'mynameisczy_asia.books_info','',{book_type:category},{
+            query(dbs,'books.books_info','',{book_type:category},{
                 skip:skip,count:count
             },{order:'desc',by:'score'}).then(value=>{
                 res.send({
@@ -743,7 +747,7 @@ function MountRouter(port,dbs,db_config){
                 if(req.body.book_names instanceof Array){
                 new Promise((res,rej)=>{
                     for(let i=0;i<req.body.book_names.length;i++){
-                        query(dbs,'mynameisczy_asia.books_info','',{book_name:req.body.book_names[i]}).then(e=>{
+                        query(dbs,'books.books_info','',{book_name:req.body.book_names[i]}).then(e=>{
                             data.book_info.push(e[0])
                             if(i==req.body.book_names){
                                 res(data)
@@ -784,7 +788,7 @@ function MountRouter(port,dbs,db_config){
         }
             
             let {skip,count}=req.body
-            query(dbs,'mynameisczy_asia.books_info','','',{skip:skip,count:count},{order:'desc',by:'score'}).then(value=>{
+            query(dbs,'books.books_info','','',{skip:skip,count:count},{order:'desc',by:'score'}).then(value=>{
                 res.send({
                     state:1,
                     value:value,
@@ -819,7 +823,7 @@ function MountRouter(port,dbs,db_config){
                     errMes:"参数类型错误"
                 })
             }
-                query(dbs,'mynameisczy_asia.books_content',['book_name','passage_name','passage_value'],{book_name:data.book_name},{skip:data.skip,count:data.count},{order:'asc',by:'passage_value'}).then(value=>{
+                query(dbs,'books.books_content',['book_name','passage_name','passage_value'],{book_name:data.book_name},{skip:data.skip,count:data.count},{order:'asc',by:'passage_value'}).then(value=>{
                     res.send({
                         state:1,
                         error:0,
@@ -856,7 +860,7 @@ function MountRouter(port,dbs,db_config){
             }
 
             // 在数据库中查找章节(默认取10条)
-            query(dbs,'mynameisczy_asia.books_content',['content','passage_name','passage_value'],{book_name:data.book_name},{skip:data.skip,count:data.count},{order:'asc',by:'passage_value'}).then(value=>{
+            query(dbs,'books.books_content',['content','passage_name','passage_value'],{book_name:data.book_name},{skip:data.skip,count:data.count},{order:'asc',by:'passage_value'}).then(value=>{
                 res.send({
                     mes:"success",
                     value:value

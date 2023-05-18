@@ -1,8 +1,8 @@
 const express=require('express')
 const cors=require('cors')
-const {readFile, readFileSync,writeFile}=require('fs')
-const {query} =require('./query')
-const {connectionMysql,insertData, update}=require('./dbs')
+const {readFile, readFileSync}=require('fs')
+const {query} =require('../db_config/query')
+const {connectionMysql}=require('../db_config/dbs')
 const { resolve } = require('path')
 const https=require('https')
 const expressWS=require('express-ws')
@@ -13,19 +13,18 @@ const app=express()
 
 app.use(cors())
 const options = {
-key: readFileSync(resolve(__dirname, 'cert','a.key')),
-cert: readFileSync(resolve(__dirname, 'cert','a.pem'))
+key: readFileSync(resolve(__dirname,'..', 'cert','a.key')),
+cert: readFileSync(resolve(__dirname,'..', 'cert','a.pem'))
 }
-app.use((req,res,next)=>{
-    const referer=req.get('referer')
-    console.log(referer,'referer')
-    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
-        res.status(403).send('权限不够')
-    }else{
-        console.log('next')
-        next()
-    }
-})
+// app.use((req,res,next)=>{
+//     const referer=req.get('referer')
+//     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+//         res.status(403).send('权限不够')
+//     }else{
+//         console.log('next')
+//         next()
+//     }
+// })
 entry()
 
 function entry(){
@@ -38,6 +37,11 @@ function entry(){
 // 这是机制问题，当没有操作数据的时候，就断开连接了 在网站stackoverflow看到了解决方案 强制连接,让数据库每1hours查询一次        
         
         await connectionMysql(db_config).then(value=>{
+            let n=0
+            setInterval(()=>{
+                value.query('select 1')
+                n++
+            },3600000)            
             let server=https.createServer(options,app).listen('7086',function(){
             })
             let ws_config={
@@ -53,6 +57,7 @@ function entry(){
 
 function MountRouter(dbs,db_config,ws_config){
     app.ws('/poker',function(ws,req){
+        console.log(req,'连接成功');
         // 每个人已进入都是单独一个数组房间
         req.query.ws=ws
 
