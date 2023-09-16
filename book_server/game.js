@@ -16,16 +16,16 @@ const options = {
 key: readFileSync(resolve(__dirname, 'cert','a.key')),
 cert: readFileSync(resolve(__dirname, 'cert','a.pem'))
 }
-app.use((req,res,next)=>{
-    const referer=req.get('referer')
-    console.log(referer,'referer')
-    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
-        res.status(403).send('权限不够')
-    }else{
-        console.log('next')
-        next()
-    }
-})
+// app.use((req,res,next)=>{
+//     const referer=req.get('referer')
+//     console.log(referer,'referer')
+//     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.cn/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+//         res.status(403).send('权限不够')
+//     }else{
+//         console.log('next')
+//         next()
+//     }
+// })
 entry()
 
 function entry(){
@@ -54,8 +54,8 @@ function entry(){
 function MountRouter(dbs,db_config,ws_config){
     app.ws('/poker',function(ws,req){
         // 每个人已进入都是单独一个数组房间
+        req.query.game_state='pending'
         req.query.ws=ws
-
         // 是否在进行匹配
         req.query.state=0
         // 是否正在游戏

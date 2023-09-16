@@ -2,14 +2,14 @@
 	<view class="cover" v-if="load_state>0">
 	</view>
 	<view style="height:1px;width: 1px;overflow: hidden;" v-show="false">
-		<image  @load="load_" v-for="(item,index) in cards" :key="index" :src="'https://www.mynameisczy.asia/cards_svg/'+item"></image>
+		<image  @load="load_" v-for="(item,index) in cards" :key="index" :src="'https://www.mynameisczy.cn/cards_svg/'+item"></image>
 	</view>
 		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
 			<view class='head'>
 					<view @click="back" class="back">退出</view>
 					<view class="master_card">
 						<view v-for="(item,index) in master_cards" :key="index">
-							<image :src="'https://www.mynameisczy.asia/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
+							<image :src="'https://www.mynameisczy.cn/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
 				<view>12</view>
@@ -24,7 +24,7 @@
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
 						<view class="master" style="width:50px;height:50px;">
-							<image :src="'https://www.mynameisczy.asia/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
+							<image :src="'https://www.mynameisczy.cn/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
 						</view>	
 						</view>
 					<view class="person_cards" :style="{paddingLeft:(item.order==1?(200-item.out_cards.length*30)<100?100:(200-item.out_cards.length*30):10)+'px'}">
@@ -32,14 +32,14 @@
 							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
 								{{interval.count}}
 							</view>
-							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
+							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.cn/svgs/clock.svg" mode="">
 							</image>
 						</view>
 						<view class="state" v-if="item.state.length&&!(interval.openid==item.openid)" >
-							<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.asia/svgs/'+item.state+'.svg'" mode="" ></image>
+							<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.cn/svgs/'+item.state+'.svg'" mode="" ></image>
 						</view>
 							<view v-if='!(interval.openid==item.openid)||item<=0' class="card" v-for="(item2,index) in item.out_cards" :key="index" :style="{transform:`translateX(-${index*55}%`}">
-								<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+								<image :src="'https://www.mynameisczy.cn/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
 				</view>
@@ -51,10 +51,10 @@
 							<template v-for="(item2,index) in item.out_cards" :key="index">
 							<template  v-if="item.openid==rule.openid">
 								<view class="state" v-if="item.state.length" >
-									<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.asia/svgs/'+item.state+'.svg'" mode="" ></image>
+									<image style="width:100%;height:100%;" :src="'https://www.mynameisczy.cn/svgs/'+item.state+'.svg'" mode="" ></image>
 								</view>
 								<view class="myself_out_card" :style="{transform:`translateX(-${index*55}%`}">
-									<image :src="'https://www.mynameisczy.asia/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
+									<image :src="'https://www.mynameisczy.cn/cards_svg/'+item2" style="width:100%;height:100%;" mode=""></image>
 								</view>
 							</template>
 							</template>
@@ -73,7 +73,7 @@
 							<view style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%);z-index: 100;">
 								{{interval.count}}
 							</view>
-							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.asia/svgs/clock.svg" mode="">
+							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.cn/svgs/clock.svg" mode="">
 							</image>
 						</view>
 						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
@@ -85,7 +85,7 @@
 			<view class="cards_out">
 				<view class="cards" :style="{width:user_cards.length*35+'px'}">
 					<view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
-						<image :src="'https://www.mynameisczy.asia/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+						<image :src="'https://www.mynameisczy.cn/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
 					</view>
 				</view>
 			</view>
@@ -100,7 +100,7 @@
 					<view class="my_count">牌:{{item.count}}</view>
 					<view style="margin-left:10px;width:50px;height:50px;">
 						<!-- {{rule.master?'地主':'农民'}} -->
-						<image :src="'https://www.mynameisczy.asia/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
+						<image :src="'https://www.mynameisczy.cn/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
 					</view>
 				</view>
 				</template>
@@ -261,7 +261,7 @@
 					title:'正在重连',
 					icon:'error'
 				})
-				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.asia:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
 				})
 			})
 			// 如果发现没有登录，那么退出登录
@@ -516,7 +516,7 @@
 			this.user_cards.push(...cards.cards)
 			// 音乐
 			this.audio=uni.createInnerAudioContext()
-			this.audio.src="https://www.mynameisczy.asia/audio/poker.mp3"
+			this.audio.src="https://www.mynameisczy.cn/audio/poker.mp3"
 			this.audio.autoplay=true
 			this.audio.loop=true
 			this.audio.obeyMuteSwitch=true

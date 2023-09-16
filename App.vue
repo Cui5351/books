@@ -43,7 +43,7 @@
 							// }
 						if(store.getters.login_state)
 							uni.request({
-								url:'https://www.mynameisczy.asia:5000/user_data_auto_update',
+								url:'https://www.mynameisczy.cn:5000/user_data_auto_update',
 								method:'POST',
 								data:{openid:store.state.openid},
 								success(res) {
@@ -90,6 +90,7 @@
 									let {author_answer,data_provide_answer}=res.data.value
 									if(author_answer!=store.state.author_answer||data_provide_answer!=store.state.data_provide_answer){
 										store.state.author_answer=author_answer
+										store.state.data_provide_answer=data_provide_answer
 										uni.showToast({
 											title:'收到了新消息'
 										})
@@ -113,7 +114,7 @@
 						});
 			// 发送request请求
 						uni.request({
-							url:'https://www.mynameisczy.asia:5000/small_program_state',
+							url:'https://www.mynameisczy.cn:5000/small_program_state',
 							method:'POST',
 							data:{
 								small_program_name:'book_small_program'
@@ -143,7 +144,7 @@
 			// uni.loadFontFace({
 			// 	global:true,
 			//   family: 'Bitstream Vera Serif Bold',
-			//   source: 'url("https://www.mynameisczy.asia/font/AaWangCaiZhaoPaiTi-2.ttf")',
+			//   source: 'url("https://www.mynameisczy.cn/font/AaWangCaiZhaoPaiTi-2.ttf")',
 			//   success() {
 			// 	  console.log('success')
 			//   },fail(e) {

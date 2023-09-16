@@ -41,7 +41,7 @@
 				})
 				load_state.state=1
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/getBookInfo_category',
+					url:'https://www.mynameisczy.cn:5351/getBookInfo_category',
 					method:'POST',
 					data:{
 						count:count.value,

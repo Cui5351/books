@@ -65,7 +65,7 @@
 				退出账号
 			</view>
 			<view :style="{height:height_each+'px',marginTop:0+'px',color:'gray'}" class="flex_bottom">
-				v3.0.0
+				v3.0.1
 			</view>
 			<view style="height:200px;">
 				

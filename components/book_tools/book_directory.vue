@@ -62,7 +62,7 @@ export default {
 			}
 				
 				uni.request({
-						url:"https://www.mynameisczy.asia:5351/getBookDirectory",
+						url:"https://www.mynameisczy.cn:5351/getBookDirectory",
 						method:"POST",
 						data:{
 							book_name:props.book_name,

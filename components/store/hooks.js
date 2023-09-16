@@ -27,7 +27,7 @@ async function request_book_info(book){
 					uni.hideLoading()
 				}).catch(e=>{
 					uni.request({
-						url:'https://www.mynameisczy.asia:5351/getBookPassage',
+						url:'https://www.mynameisczy.cn:5351/getBookPassage',
 						method:'POST',
 						data:{
 							book_name:book.book_name,

@@ -1,7 +1,7 @@
 <template>
 		<view class="head">
 		<navigation></navigation>
-		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" src="https://www.mynameisczy.asia/rabbit/my_navigation.jpg"></image>
+		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" src="https://www.mynameisczy.cn/rabbit/my_navigation.jpg"></image>
 		<view class="userPortrait" :style="{height:head_height*1.4+'px',marginTop:head_height+'px'}">
 			<view @click="login" class="portraitEdit" style="position: relative;z-index:9999999999991;">
 				<view class="portrait" :style="{width:portraitW+'px',height:portraitW+'px'}">
@@ -49,7 +49,7 @@
 				})
 				if(this.user_info.openid&&this.login_state){
 					uni.request({
-						url:'https://www.mynameisczy.asia:5000/getAnswer',
+						url:'https://www.mynameisczy.cn:5000/getAnswer',
 						method:'POST',
 						data:{
 							openid:this.user_info.openid
@@ -109,7 +109,7 @@
 							provider:'weixin',
 							success(e) {
 								uni.request({
-									url:'https://www.mynameisczy.asia:5000/getOpenid',
+									url:'https://www.mynameisczy.cn:5000/getOpenid',
 									method:'POST',
 									data:{
 										code:e.code
@@ -125,7 +125,7 @@
 										let data_provide_answer=''
 										
 									uni.request({
-										url:'https://www.mynameisczy.asia:5000/login_user',
+										url:'https://www.mynameisczy.cn:5000/login_user',
 										method:'POST',
 										data:{
 											nickName,gender,avatarUrl,openid

@@ -67,7 +67,7 @@
 				fail(e) {
 					// 请求拿到目录
 					uni.request({
-						url:"https://www.mynameisczy.asia:5351/getBookDirectory",
+						url:"https://www.mynameisczy.cn:5351/getBookDirectory",
 						method:"POST",
 						data:{
 							book_name:uni.current_this.book_name,
@@ -109,7 +109,7 @@
 				mask:true
 				})
 				uni.request({
-						url:"https://www.mynameisczy.asia:5351/getBookDirectory",
+						url:"https://www.mynameisczy.cn:5351/getBookDirectory",
 						method:"POST",
 						data:{
 							book_name:props.book_name,

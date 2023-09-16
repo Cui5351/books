@@ -85,7 +85,7 @@
 				mask:true
 				})
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/getRandomBook',
+					url:'https://www.mynameisczy.cn:5351/getRandomBook',
 					method:'POST',
 					data:{
 						count:count
@@ -117,7 +117,7 @@
 					search_record.shift()
 				search_text.t=text
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/SearchBookInfo',
+					url:'https://www.mynameisczy.cn:5351/SearchBookInfo',
 					method:"POST",
 					data:{
 						book_name:text,
@@ -138,6 +138,80 @@
 						let c=uni.current_this4.store_infos.length
 						for(let i=0;i<c;i++)
 							uni.current_this4.store_infos.pop()
+						value.data.value.forEach(item=>{
+							item.arr2=[]
+							let n=item.author.split('')
+							let n2=text.split('')
+							// 匹配
+							// 先进行单个匹配，
+								// 若匹配成功，再查看匹配条件字符串的长度，
+									// 再进行下一组匹配
+										// 匹配成功
+							// 返回添加《继续》
+										// 匹配失败，结束
+								for(let i=0;i<n.length;i++){
+									let flag=true
+									let count=i
+									if(n[i]==n2[0]){
+										let flag2=false
+										for(let j=0;j<n2.length;j++){
+											if(n[count]!=n2[j])
+												flag2=true
+											count++
+										}
+										if(!flag2)
+											flag=false
+									}
+										// 查看匹配长度
+										// 查看下一组
+									if(flag){
+										// 有不一样的,跳过
+										item.arr2.push({flag:false,txt:n[i]})
+									}else{
+										// 匹配成功，添加
+										item.arr2.push({flag:true,txt:n.join('').substring(i,count)})
+										// 跳到匹配那里
+										i=--count
+									}
+								}
+						})
+						value.data.value.forEach(item=>{
+							item.arr=[]
+							let n=item.book_name.split('')
+							let n2=text.split('')
+							// 匹配
+							// 先进行单个匹配，
+								// 若匹配成功，再查看匹配条件字符串的长度，
+									// 再进行下一组匹配
+										// 匹配成功
+							// 返回添加《继续》
+										// 匹配失败，结束
+								for(let i=0;i<n.length;i++){
+									let flag=true
+									let count=i
+									if(n[i]==n2[0]){
+										let flag2=false
+										for(let j=0;j<n2.length;j++){
+											if(n[count]!=n2[j])
+												flag2=true
+											count++
+										}
+										if(!flag2)
+											flag=false
+									}
+										// 查看匹配长度
+										// 查看下一组
+									if(flag){
+										// 有不一样的,跳过
+										item.arr.push({flag:false,txt:n[i]})
+									}else{
+										// 匹配成功，添加
+										item.arr.push({flag:true,txt:n.join('').substring(i,count)})
+										// 跳到匹配那里
+										i=--count
+									}
+								}
+						})
 						uni.current_this4.store_infos.push(...value.data.value)
 						uni.current_this4.search_state=false
 						uni.current_this4.skip+=uni.current_this4.count
@@ -170,7 +244,7 @@
 					search_record.shift()
 				search_text.t=text
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/SearchBookInfo',
+					url:'https://www.mynameisczy.cn:5351/SearchBookInfo',
 					method:"POST",
 					data:{
 						book_name:text,
@@ -195,6 +269,81 @@
 								}
 							})
 							return item
+						})
+						value.data.value.forEach(item=>{
+							item.arr2=[]
+							let n=item.author.split('')
+							let n2=text.split('')
+							// 匹配
+							// 先进行单个匹配，
+								// 若匹配成功，再查看匹配条件字符串的长度，
+									// 再进行下一组匹配
+										// 匹配成功
+							// 返回添加《继续》
+										// 匹配失败，结束
+								for(let i=0;i<n.length;i++){
+									let flag=true
+									let count=i
+									if(n[i]==n2[0]){
+										let flag2=false
+										for(let j=0;j<n2.length;j++){
+											if(n[count]!=n2[j])
+												flag2=true
+											count++
+										}
+										if(!flag2)
+											flag=false
+									}
+										// 查看匹配长度
+										// 查看下一组
+									if(flag){
+										// 有不一样的,跳过
+										item.arr2.push({flag:false,txt:n[i]})
+									}else{
+										// 匹配成功，添加
+										item.arr2.push({flag:true,txt:n.join('').substring(i,count)})
+										// 跳到匹配那里
+										i=--count
+									}
+								}
+						})
+						
+						value.data.value.forEach(item=>{
+							item.arr=[]
+							let n=item.book_name.split('')
+							let n2=text.split('')
+							// 匹配
+							// 先进行单个匹配，
+								// 若匹配成功，再查看匹配条件字符串的长度，
+									// 再进行下一组匹配
+										// 匹配成功
+							// 返回添加《继续》
+										// 匹配失败，结束
+								for(let i=0;i<n.length;i++){
+									let flag=true
+									let count=i
+									if(n[i]==n2[0]){
+										let flag2=false
+										for(let j=0;j<n2.length;j++){
+											if(n[count]!=n2[j])
+												flag2=true
+											count++
+										}
+										if(!flag2)
+											flag=false
+									}
+										// 查看匹配长度
+										// 查看下一组
+									if(flag){
+										// 有不一样的,跳过
+										item.arr.push({flag:false,txt:n[i]})
+									}else{
+										// 匹配成功，添加
+										item.arr.push({flag:true,txt:n.join('').substring(i,count)})
+										// 跳到匹配那里
+										i=--count
+									}
+								}
 						})
 						uni.current_this4.store_infos.push(...value.data.value)
 						uni.current_this4.search_state=false
@@ -242,31 +391,20 @@
 		height:100%;
 	}
 	.history{
-		display: flex;
-		flex-direction: column;
+		// display: flex;
+		// flex-direction: column;
 	}
 	.search_record{
-		padding-top:10px;
+		width:100%;
 		display: flex;
-		flex-grow: 1;
-		flex-direction: row;
-		column-count:4;
+		column-count: 3;
 		flex-wrap: wrap;
-		justify-content: space-around;
-		overflow: auto;
 		&>view{
-			&:active{
-				background-color: rgba(0,0,0,.1);
-			}
-			margin:0 8px;
-			padding:10px;
-			max-height: 30px;
-			box-sizing: border-box;
-			min-height: 30px;
-			border:1px solid rgb(234,234,234);
-			justify-content: center;
-			align-items: center;
-			display: flex;
+			padding:5px 10px;
+			background:rgba(0,0,0,0.05);
+			color: gray;
+			margin:5px 5px;
+			border-radius:15px;
 		}
 	}
 	.container2{

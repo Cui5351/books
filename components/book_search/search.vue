@@ -41,7 +41,7 @@
 					}
 				}
 					uni.request({
-						url:'https://www.mynameisczy.asia:5351/getRandomBook',
+						url:'https://www.mynameisczy.cn:5351/getRandomBook',
 						method:'POST',
 						data:{
 							count:1

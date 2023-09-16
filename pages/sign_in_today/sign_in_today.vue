@@ -17,8 +17,8 @@
 					<view v-for="(item,index) in week">
 						<view class="">{{item.day}}</view>
 						<view style="min-height:80%;width: 70%;">
-							<image v-if="item.state==1" src="https://www.mynameisczy.asia/svgs/sign_selected_icon.svg" style="width: 100%;height:100%;"></image>
-							<image v-else src="https://www.mynameisczy.asia/svgs/sign_in_icon.svg" style="width: 100%;height:100%;"></image>
+							<image v-if="item.state==1" src="https://www.mynameisczy.cn/svgs/sign_selected_icon.svg" style="width: 100%;height:100%;"></image>
+							<image v-else src="https://www.mynameisczy.cn/svgs/sign_in_icon.svg" style="width: 100%;height:100%;"></image>
 						</view>
 					</view>
 				</view>
@@ -69,7 +69,7 @@
 				uni.navigateBack()
 			}
 			uni.request({
-				url:'https://www.mynameisczy.asia:5000/get_sign_in_day',
+				url:'https://www.mynameisczy.cn:5000/get_sign_in_day',
 				method:'POST',
 				data:{
 					openid:this.openid
@@ -160,9 +160,9 @@
 			let sign=ref(false)
 			let sign_icon=computed(()=>{
 				if(sign.value==true)
-					return 'https://www.mynameisczy.asia/svgs/sign_in_selected.svg'
+					return 'https://www.mynameisczy.cn/svgs/sign_in_selected.svg'
 				else
-					return 'https://www.mynameisczy.asia/svgs/sign_in.svg'
+					return 'https://www.mynameisczy.cn/svgs/sign_in.svg'
 			})
 			
 			let head_height_child=ref(uni.getMenuButtonBoundingClientRect().height*2.5)
@@ -170,7 +170,7 @@
 				if(sign.value==true)
 					return
 				uni.request({
-					url:'https://www.mynameisczy.asia:5000/sign_in_day',
+					url:'https://www.mynameisczy.cn:5000/sign_in_day',
 					method:'POST',
 					data:{
 						openid:openid._value

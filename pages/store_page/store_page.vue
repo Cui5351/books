@@ -51,7 +51,7 @@
 		},
 		onLoad(){
 			// 连接
-			uni.connectSocket({url:'wss://www.mynameisczy.asia:5000/store_info',fail(e) {
+			uni.connectSocket({url:'wss://www.mynameisczy.cn:5000/store_info',fail(e) {
 			},success(e) {
 				
 			}})
@@ -88,7 +88,7 @@
 				mask:true
 			})
 			uni.request({
-				url:'https://www.mynameisczy.asia:5000/get_shops',
+				url:'https://www.mynameisczy.cn:5000/get_shops',
 				method:'GET',
 				success(res) {
 					if(res.data.state==0)
@@ -96,7 +96,7 @@
 					uni.current_this16.shops.push(...res.data.value)
 						// 获取用户的购物车信息
 						uni.request({
-							url:'https://www.mynameisczy.asia:5000/get_user_shop',
+							url:'https://www.mynameisczy.cn:5000/get_user_shop',
 							method:'POST',
 							data:{
 								openid:uni.current_this16.store.getters.user_openid
@@ -172,7 +172,7 @@
 							})
 							// 发送请求
 							uni.request({
-								url:'https://www.mynameisczy.asia:5000/before_pay',
+								url:'https://www.mynameisczy.cn:5000/before_pay',
 								method:'POST',
 								data:{
 									openid:store.getters.user_openid,

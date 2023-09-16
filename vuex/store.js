@@ -37,7 +37,7 @@ const state={
 const mutations={
 	FAV_BOOK(state,e){
 		uni.request({
-			url:'https://www.mynameisczy.asia:5351/setBookshelf',
+			url:'https://www.mynameisczy.cn:5351/setBookshelf',
 			method:'POST',
 			data:{
 				openid:state.openid,
@@ -75,7 +75,7 @@ const mutations={
 	},
 	GETBOOKSHELF(state){
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/getBookshelf',
+					url:'https://www.mynameisczy.cn:5351/getBookshelf',
 					method:'POST',
 					data:{openid:state.openid},
 					success(e) {

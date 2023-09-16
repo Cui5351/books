@@ -7,7 +7,7 @@
 		<scroll-view scroll-y="true" class="vessel" :style="{marginTop:head_height_child+'px',height:(container_height-head_height_child-20)+'px'}">
 			<view class="wallpaper_container" v-for="(item,index) in images" :key="index" :style="{height:wallpaper_height+'px'}">
 				<view class="wallpaper">
-					<image :src="'https://www.mynameisczy.asia/wallpaper/image'+item.image_path+'.jpg'"  mode='aspectFill'></image>
+					<image :src="'https://www.mynameisczy.cn/wallpaper/image'+item.image_path+'.jpg'"  mode='aspectFill'></image>
 				</view>
 				<view class="wallpaper_info">
 					<view>
@@ -70,7 +70,7 @@
 			function save_image(item){
 				if(item.state)
 					return
-				let url=`https://www.mynameisczy.asia/wallpaper/image${item.image_path}.jpg`
+				let url=`https://www.mynameisczy.cn/wallpaper/image${item.image_path}.jpg`
 				// let fs=uni.getFileSystemManager()
 				// console.log(fs,'fs');
 				// uni.request({

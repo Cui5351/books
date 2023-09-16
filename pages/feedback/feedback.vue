@@ -77,7 +77,7 @@
 					return
 				}
 						uni.request({
-							url:'https://www.mynameisczy.asia:5351/updateFeedback',
+							url:'https://www.mynameisczy.cn:5351/updateFeedback',
 							method:'POST',
 							data:{
 								nickName:store.getters.user_name,

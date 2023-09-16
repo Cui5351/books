@@ -2,7 +2,7 @@
 	<!-- head高度：100rpx -->
 		<navigation-header  :book_wh="goods_category/4" :head_height='header_height*0.4' :head_height_child='head_height_child' :state='header_state'></navigation-header>
 		<view @click.stop="goto1" class="gotoback" :style="{left:left_distance+'%'}">
-			<image src="https://www.mynameisczy.asia/rabbit/arrow_top.svg" style="width:30px;height: 50px;"></image>
+			<image src="https://www.mynameisczy.cn/rabbit/arrow_top.svg" style="width:30px;height: 50px;"></image>
 		</view>
 		<uni-popup ref="popup" background-color="#fff">
 			<view class="popup-content" >
@@ -23,7 +23,7 @@
 			<!-- <view class="advertisement" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}"> -->
 <uni-notice-bar show-icon scrollable style="width: 100%;"
 		
-				text="新 年 到 了 ! 小 程 序 3.0 也 正 式 上 线 啦 ! 在 这 里 祝 大 家 新 年 快 乐 , 心 想 事 成~" />
+				text="长 风 破 浪 会 有 时 , 直 挂 云 帆 济 沧 海 , 祝 大 家 学 习 进 步 , 上 岸 成 功 !" />
 			<!-- </view> -->
 		</view>
 		<view class="fixed" :style="{minHeight:fixed*1.2+'rpx',maxHeight:fixed*1.2+'rpx'}">
@@ -38,7 +38,7 @@
 		<view class="bill" v-if='to_hid!==1'>
 			<view v-for="(item,index) in to_hid!=1?10:0" :key="index" style="justify-content: center;height:80px;display: flex;margin-top: 10px;background-color: white;" @click="show_dog_info(item)">
 				<view style="width:70px;height:70px;">
-					<image :src="'https://www.mynameisczy.asia/dog_collection/'+'dog'+item+'.jpeg'" style="width: 100%;height: 100%;"></image>
+					<image :src="'https://www.mynameisczy.cn/dog_collection/'+'dog'+item+'.jpeg'" style="width: 100%;height: 100%;"></image>
 				</view>
 				<view style="display: flex;flex-grow: 1;justify-content: center;align-items: center;">查看狗子{{item}}的介绍</view>
 			</view>
@@ -46,7 +46,7 @@
 		<view class="bill" :style="{height:bill_height+'rpx'}" v-if='to_hid==1'>
 			<view class="store_infos" :style="{height:goods_category/4+50+'px'}" v-for="(item,index) in store_infos" :key="index"  >
 				<view  @click.stop="toggle(item)" :style="{maxWidth:goods_category/4+'px',minWidth:goods_category/4+'px',maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
-					<image @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
+					<image @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.cn/image/'+item.book_name+'.jpg'" :style="{maxWidth:goods_category/5+'px',minWidth:goods_category/5+'px',maxHeight:goods_category/4+'px',minHeight:goods_category/4+'px'}"></image>
 				</view>
 				<view class="title" :style="{maxHeight:goods_category/3.5+'px',minHeight:goods_category/3.5+'px'}">
 					<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
@@ -114,7 +114,7 @@
 		mounted() {
 			uni.current_this2=this
 			uni.request({
-				url:'https://www.mynameisczy.asia:5000/small_program_state',
+				url:'https://www.mynameisczy.cn:5000/small_program_state',
 				method:'POST',
 				data:{
 					small_program_name:'book_small_program'
@@ -144,12 +144,12 @@
 			})			
 			uni.request({
 				method:'POST',
-				url:'https://www.mynameisczy.asia:5351/getCategory',
+				url:'https://www.mynameisczy.cn:5351/getCategory',
 				success(value) {
 					let arr=value.data.value.map(item=>item.book_type)
 					uni.current_this2.list_btn.push(...arr)
 				},fail() {
-					uni.current_this2.list_btn.push(...['语文','数学','英语','计算机基础','c语言','计算机网络基础'])
+					// uni.current_this2.list_btn.push(...['语文','数学','英语','计算机基础','c语言','计算机网络基础'])
 				}
 			})
 			// list_btn.push()
@@ -262,7 +262,7 @@
 			this.refresh_info="正在加载过程中"
 			this.refresh_state_info='spinner-cycle'
 			uni.request({
-				url:'https://www.mynameisczy.asia:5351/getBookInfo',
+				url:'https://www.mynameisczy.cn:5351/getBookInfo',
 				method:'POST',
 				data:{
 					skip:skip.value,
@@ -337,7 +337,7 @@
 					})
 				}).catch(e=>{
 					uni.request({
-						url:'https://www.mynameisczy.asia:5351/getBookPassage',
+						url:'https://www.mynameisczy.cn:5351/getBookPassage',
 						method:'POST',
 						data:{
 							book_name:book.book_name,
@@ -450,7 +450,7 @@
 				uni.current_this2.toggle({book_introduce:'这是狗子'+item+'号'+arr[Math.round(Math.random()*5)]})
 			}
 			function image_load_err(item){
-				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+				item.src='https://www.mynameisczy.cn/image/image_load_error.jpeg'
 			}
 			return {...toRefs(store.state),image_load_err,toggle_wallpaper_page,show_dog_info,to_hid,load_state,left_distance,old,scroll_top,content,category_list,getBookList,no_develop,bookshelf,fav_book,request_book_info,refresh_info,refresh_state,refresh_state_info,title,header_state,bill_height,skip,scroll_fun2,header_height,goods_category,container,fixed,head_height_child,info,request_data,list_btn,info,store_infos}
 		}

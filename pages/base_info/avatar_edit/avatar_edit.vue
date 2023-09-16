@@ -2,7 +2,7 @@
 	<navigation show_back='true'>修改头像</navigation>
 	<inner-page>
 		<view class="">
-			<qf-image-cropper :width="500" :height="500" :radius="30" areaScale='0.8' maxScale='1.5' @crop="handleCrop" ></qf-image-cropper>
+			<qf-image-cropper :width="500" :height="500" :radius="30" areaScale='0.5' maxScale='1.5' @crop="handleCrop" ></qf-image-cropper>
 		</view>
 	</inner-page>
 </template>
@@ -31,7 +31,7 @@ import {useStore} from 'vuex'
 								title:'修改中'
 							})
 							let image_path=e.tempFilePath
-							let url='https://www.mynameisczy.asia:5000/upload_avatar'
+							let url='https://www.mynameisczy.cn:5000/upload_avatar'
 							uni.uploadFile({
 								url:url,
 								filePath:image_path,

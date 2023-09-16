@@ -6,7 +6,7 @@
 		<view  class="bill" v-for="(item,index) in store_infos" :key="index">
 		<view class="store_infos" @click.stop="toggle(item)" :style="{height:book_wh*1.1+'px',minHeight:book_wh*1.1+'px',maxHeight:book_wh*1.1+'px'}" >
 			<view :style="{maxWidth:book_wh+'px',minWidth:book_wh+'px',minHeight:book_wh*1.2+'px',maxHeight:book_wh*1.2+'px'}">
-				<image  @error="image_load_err(item)" :src="item.avatar?item.avatar:'https://www.mynameisczy.asia/author/'+item.name+'.jpg'" :style="{maxWidth:book_wh*0.8+'px',minWidth:book_wh*0.8+'px',minHeight:book_wh*1+'px',maxHeight:book_wh*1+'px'}"></image>
+				<image  @error="image_load_err(item)" :src="item.avatar?item.avatar:'https://www.mynameisczy.cn/author/'+item.name+'.jpg'" :style="{maxWidth:book_wh*0.8+'px',minWidth:book_wh*0.8+'px',minHeight:book_wh*1+'px',maxHeight:book_wh*1+'px'}"></image>
 			</view>
 			<view class="title">
 				{{item.name}}
@@ -49,7 +49,7 @@
 				})
 				uni.request({
 					method:"POST",
-					url:'https://www.mynameisczy.asia:5351/get_author_info',
+					url:'https://www.mynameisczy.cn:5351/get_author_info',
 					data:{count:10,skip:skip.value},
 					success(res) {
 						if(res.data.state==1){
@@ -67,7 +67,7 @@
 				if(err_image.indexOf(item.name)<0){
 					err_image.push(item.name)
 				}
-				item.avatar='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+				item.avatar='https://www.mynameisczy.cn/image/image_load_error.jpeg'
 			}
 			function toggle(item){
 				uni.navigateTo({

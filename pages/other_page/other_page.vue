@@ -3,7 +3,7 @@
 		<navigation show_back='1'>
 			工具
 		</navigation>
-		<scroll-view scroll-y="true" :style="{marginTop:head_height_child+'px'}">
+		<scroll-view scroll-y="true" :style="{marginTop:head_height_child+'px',height:head_height_child*8+'px'}">
 			<view class="tool" v-for="(item,index) in tools" :index='index' @click="toggle_page(item.tools_link)" >
 				<view class="avatar">
 					<image :src="item.src" ></image>
@@ -36,11 +36,11 @@
 			})
 			uni.this7=this
 			uni.request({
-				url:'https://www.mynameisczy.asia:5351/getTools',
+				url:'https://www.mynameisczy.cn:5351/getTools',
 				method:'get',
 				success(e) {
 					e.data.value.forEach((item,index)=>{
-						item.src=`https://www.mynameisczy.asia/dog_collection/dog${index+1}.jpeg`
+						item.src=`https://www.mynameisczy.cn/dog_collection/dog${index+1}.jpeg`
 						uni.this7.tools.push(item)
 					})
 					uni.hideLoading()

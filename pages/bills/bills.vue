@@ -40,7 +40,7 @@
 			
 			function search(t){
 				uni.request({
-					url:'https://www.mynameisczy.asia:5351/SearchBookInfo',
+					url:'https://www.mynameisczy.cn:5351/SearchBookInfo',
 					method:"POST",
 					data:{
 						book_name:t

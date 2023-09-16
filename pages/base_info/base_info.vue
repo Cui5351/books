@@ -111,7 +111,7 @@
 							mask:true
 						})
 						uni.request({
-							url:'https://www.mynameisczy.asia:5000/set_user_property',
+							url:'https://www.mynameisczy.cn:5000/set_user_property',
 							method:'POST',
 							data:{
 								openid:userInfo.openid,

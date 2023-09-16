@@ -30,30 +30,19 @@
 		background-color: white;
 		padding:5px 20px 10px 20px;
 		box-sizing: border-box;
-		&>view{
-			flex-grow: 1;
-		}
 		&>.search_record{
-			padding-top:10px;
+			width:100%;
 			display: flex;
-			flex-direction: row;
-			column-count:4;
+			column-count: 3;
 			flex-wrap: wrap;
-			justify-content: space-around;
-			overflow: auto;
 			&>view{
-				&:active{
-					background-color: rgba(0,0,0,.1);
-				}
-				margin:0 8px;
-				padding:10px;
-				max-height: 30px;
-				box-sizing: border-box;
-				min-height: 30px;
-				border:1px solid rgb(234,234,234);
-				justify-content: center;
-				align-items: center;
-				display: flex;
+				padding:5px 10px;
+				background:rgba(0,0,0,0.05);
+				height:23px;
+				line-height: 23px;
+				color: gray;
+				margin:5px 5px;
+				border-radius:15px;
 			}
 		}
 	}

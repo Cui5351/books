@@ -9,7 +9,7 @@
 		scroll-y="true" :scroll-top="scrollTop" @scroll="scroll" class="container" @click="hidden_header_bar">
 		<!-- <text v-for="(item,index) in book_storage_array" :key="index">{{item.content}}</text> -->
 		<!-- <text>{{book_storage_array}}</text> -->
-		<!-- <image src="https://www.mynameisczy.asia/rabbit/book_back.png" style="height:100%;width: 100%;position: absolute;z-index: -1;" mode=""></image> -->
+		<!-- <image src="https://www.mynameisczy.cn/rabbit/book_back.png" style="height:100%;width: 100%;position: absolute;z-index: -1;" mode=""></image> -->
 		<view class="passage_name"
 			:style="{marginTop:head_height_child+'px',marginBottom:head_height_child+'px',lineHeight:50+'px',fontSize:35+'px'}">
 			{{current_book.passage_name}}
@@ -46,7 +46,7 @@
 		mounted() {
 			uni.current_this7 = this
 			uni.request({
-				url: 'https://www.mynameisczy.asia:5351/addBookScore',
+				url: 'https://www.mynameisczy.cn:5351/addBookScore',
 				data: {
 					book_name: this.book_name
 				},
@@ -186,7 +186,7 @@
 				}
 				// 没有找到就进行网络请求
 				uni.request({
-					url: 'https://www.mynameisczy.asia:5351/getBookInfo_one',
+					url: 'https://www.mynameisczy.cn:5351/getBookInfo_one',
 					method: 'POST',
 					data: {
 						book_name: this.book_name,

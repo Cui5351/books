@@ -21,7 +21,7 @@
 				<view class="books">
 					<view class="book" v-for="(item,index) in books" :key="index" @click="request_book_info(item)">
 						<view class="img">
-							<image @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" ></image>
+							<image @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.cn/image/'+item.book_name+'.jpg'" ></image>
 						</view>
 						<view class="book_name">
 								{{item.book_name}}
@@ -47,7 +47,7 @@
 			// 根据作者名，拿到对应的书籍
 			
 			uni.request({
-				url:"https://www.mynameisczy.asia:5351/SearchAuthorBooks",
+				url:"https://www.mynameisczy.cn:5351/SearchAuthorBooks",
 				method:'POST',
 				data:{
 					author:this.author.name
@@ -90,7 +90,7 @@
 					})
 				}).catch(e=>{
 					uni.request({
-						url:'https://www.mynameisczy.asia:5351/getBookPassage',
+						url:'https://www.mynameisczy.cn:5351/getBookPassage',
 						method:'POST',
 						data:{
 							book_name:book.book_name,
@@ -123,7 +123,7 @@
 				})
 			}
 			function image_load_err(item){
-				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+				item.src='https://www.mynameisczy.cn/image/image_load_error.jpeg'
 			}
 			return {author,container_margin,info,store,request_book_info,image_load_err,books}
 		},

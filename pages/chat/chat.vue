@@ -1,7 +1,7 @@
 <template>
 	<navigation show_back='true'>书友会({{chat_count}})</navigation>
 	<inner_page>
-		<!-- <image src="https://www.mynameisczy.asia/rabbit/back.jpg" style="position: absolute;top:0;height: 100%;width: 100%;opacity:0.8;" mode=""></image> -->
+		<!-- <image src="https://www.mynameisczy.cn/rabbit/back.jpg" style="position: absolute;top:0;height: 100%;width: 100%;opacity:0.8;" mode=""></image> -->
 		<view class="sendMessage" :style="{left:state?'0%':'100%'}">
 			<image  @click="show_" src="@/static/icons/arrow_top.svg"></image>
 			<view class="text_btn">
@@ -99,7 +99,7 @@
 		},
 		onLoad() {
 			// 连接socket
-			uni.connectSocket({url:'wss://www.mynameisczy.asia:5000/user_chat',
+			uni.connectSocket({url:'wss://www.mynameisczy.cn:5000/user_chat',
 				header: {
 					'content-type': 'application/json'
 				}
@@ -298,7 +298,7 @@
 					return
 				}
 				uni.request({
-					url:'https://www.mynameisczy.asia:5000/chat_state',
+					url:'https://www.mynameisczy.cn:5000/chat_state',
 					method:'POST',
 					data:{
 						openid:store.getters.user_openid

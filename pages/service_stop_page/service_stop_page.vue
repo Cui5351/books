@@ -5,7 +5,7 @@
 			<view class="vessel">
 				<view class="portrait_container">
 					<view class="portrait_vessel">
-						<image src="https://www.mynameisczy.asia/image/small_program_portrait.jpg"></image>
+						<image src="https://www.mynameisczy.cn/image/small_program_portrait.jpg"></image>
 					</view>
 				</view>
 				<view class="content">
