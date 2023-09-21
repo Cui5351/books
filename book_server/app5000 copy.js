@@ -169,6 +169,7 @@ function MountRouter(port,dbs,db_config,ws_config){
                     error:0
                 })
             }).catch(e=>{
+            console.log('用户查询失败');
                 res.send({
                     state:0,
                     error:1,
@@ -176,6 +177,7 @@ function MountRouter(port,dbs,db_config,ws_config){
                 })                
             })
         }).catch(e=>{
+            console.log('商品查询失败');
             res.send({
                 state:0,
                 error:1,
@@ -236,7 +238,7 @@ function MountRouter(port,dbs,db_config,ws_config){
         // 返回最近10条信息
         ws_config.chat_count++
         //  将最近15条数据传回
-        dbs.query(`select (select gender from ${db_config.database+'.user_info'} u2 where u2.openid=u1.openid) as gender,(select avatarUrl from ${db_config.database+'.user_info'} u2 where u2.openid=u1.openid) as avatar,(select nickName from ${db_config.database+'.user_info'} u2 where u2.openid=u1.openid) as name,openid,data,chat_date from ${db_config.database+'.user_chat'} u1 order by id desc limit 0,20`,(err,result)=>{
+        query(dbs,db_config.database+'.user_chat','',null,{skip:0,count:20},{order:'desc',by:'id'}).then(result=>{
             if(result.length<=0){
                 ws.send(JSON.stringify({
                     state:4,
@@ -244,35 +246,20 @@ function MountRouter(port,dbs,db_config,ws_config){
                     chat_date:'2022-10-5T5:20:21'
                 }))     
                 return           
-            }           
+            }
+            // result.forEach((item,index)=>{
+            //     let month=item.chat_date.getMonth()==12?1:item.chat_date.getMonth()+1
+            //     let chat_date=`${item.chat_date.getFullYear()}-${month<10?'0'+month:month}-${item.chat_date.getDate()<10?'0'+item.chat_date.getDate():item.chat_date.getDate()}`
+            // 	let hours=item.chat_date.getHours()
+            // 	let minute=item.chat_date.getMinutes()
+            //     item.chat_date=`${chat_date} ${hours}:${minute}`
+            // })
             ws.send(JSON.stringify({
                 state:4,
                 value:JSON.stringify(result),
                 chat_date:JSON.stringify(result[0].chat_date)
             }))
         })
-        // query(dbs,db_config.database+'.user_chat','',null,{skip:0,count:20},{order:'desc',by:'id'}).then(result=>{
-        //     if(result.length<=0){
-        //         ws.send(JSON.stringify({
-        //             state:4,
-        //             value:'[]',
-        //             chat_date:'2022-10-5T5:20:21'
-        //         }))     
-        //         return           
-        //     }
-        //     // result.forEach((item,index)=>{
-        //     //     let month=item.chat_date.getMonth()==12?1:item.chat_date.getMonth()+1
-        //     //     let chat_date=`${item.chat_date.getFullYear()}-${month<10?'0'+month:month}-${item.chat_date.getDate()<10?'0'+item.chat_date.getDate():item.chat_date.getDate()}`
-        //     // 	let hours=item.chat_date.getHours()
-        //     // 	let minute=item.chat_date.getMinutes()
-        //     //     item.chat_date=`${chat_date} ${hours}:${minute}`
-        //     // })
-        //     ws.send(JSON.stringify({
-        //         state:4,
-        //         value:JSON.stringify(result),
-        //         chat_date:JSON.stringify(result[0].chat_date)
-        //     }))
-        // })
         ws.on('close',function(){
             if(ws_config.chat_count>=1)
                 ws_config.chat_count--
@@ -300,14 +287,16 @@ function MountRouter(port,dbs,db_config,ws_config){
                 msg.data=msg.data.substring(0,30)
 
             if(msg.state==2){
+
                 // openid,name,avatar,gender,chat_content
-                const {openid,data}=msg
+                const {openid,name,avatar,gender,data}=msg
                 // 将聊天记录存入数据库
-                insertData(dbs,db_config.database+'.user_chat',{openid,data})
+                insertData(dbs,db_config.database+'.user_chat',{openid,name,avatar,gender,data})
                 msg.chat_date=JSON.stringify(new Date())
                 // let sql=`insert into ${db_config.database+'.user_chat'}(openid,user_name,avatar,gender,chat_content) values('${openid}',${user_name}')`
                 // dbs.query(sql)
             }
+                
             msg.chat_count=ws_config.chat_count
             ws_config.wss.clients.forEach((e) => {
                 e.send(JSON.stringify(msg))
@@ -319,6 +308,7 @@ function MountRouter(port,dbs,db_config,ws_config){
         app.post('/upload_avatar',(req,res)=>{
             upload(req,res,function(err){
                 if(err){
+                    console.log(err,'err');
                     res.send({
                         state:0,
                         error:1,
@@ -346,6 +336,27 @@ function MountRouter(port,dbs,db_config,ws_config){
                         error:0,
                         value:path
                     })
+                query(dbs,db_config.database+'.user_chat',['openid','id'],null,{skip:0,count:20},{order:'desc',by:'id'}).then(e=>{
+                    // 查看这里的openid是否在消息记录中存在
+                    // 如果存在，那么就使用wss发送
+                    let id=e[0].id
+                    let openid_arr=e.map(item=>item.openid)
+                    for(let i=0;i<openid_arr.length;i++){
+                        if(openid_arr[i]==req.body.openid){
+                            ws_config.wss.clients.forEach(e=>{
+                                e.send(JSON.stringify({
+                                    openid:req.body.openid,
+                                    value:path,
+                                    state:5
+                                }))
+                            })
+                            // 修改数据库
+                            let sql=`update ${db_config.database}.user_chat set avatar='${path}' where id>${id-20} and openid='${req.body.openid}'`
+                            dbs.query(sql)
+                            return
+                        }
+                    }
+                })
             })
             })
         })
@@ -374,34 +385,33 @@ function MountRouter(port,dbs,db_config,ws_config){
                     errorCode:0
                 })
 
-                // 修改聊天信息（弃用）
-            //     query(dbs,db_config.database+'.user_chat',['openid','id'],null,{skip:0,count:20},{order:'desc',by:'id'}).then(e=>{
-            //         // 查看这里的openid是否在消息记录中存在
-            //         // 如果存在，那么就使用wss发送
-            //         let id=e[0].id
-            //         let openid_arr=e.map(item=>item.openid)
-            //         for(let i=0;i<openid_arr.length;i++){
-            //             if(openid_arr[i]==openid){
-            //                 ws_config.wss.clients.forEach(e=>{
-            //                     e.send(JSON.stringify({
-            //                         openid:openid,
-            //                         property:property,
-            //                         value:value,
-            //                         state:6
-            //                     }))
-            //                 })
-            //                 // 修改数据库
-            //                 let sql=`update ${db_config.database}.user_chat set ${property}='${value}' where id>${id-20} and openid='${openid}'`
-            //                 dbs.query(sql)
-            //                 return
-            //             }
-            //         }
-            //     })
-            // }).catch(e=>{
-            //     res.send({
-            //         state:0,
-            //         errorCode:1
-            //     })
+                query(dbs,db_config.database+'.user_chat',['openid','id'],null,{skip:0,count:20},{order:'desc',by:'id'}).then(e=>{
+                    // 查看这里的openid是否在消息记录中存在
+                    // 如果存在，那么就使用wss发送
+                    let id=e[0].id
+                    let openid_arr=e.map(item=>item.openid)
+                    for(let i=0;i<openid_arr.length;i++){
+                        if(openid_arr[i]==openid){
+                            ws_config.wss.clients.forEach(e=>{
+                                e.send(JSON.stringify({
+                                    openid:openid,
+                                    property:property,
+                                    value:value,
+                                    state:6
+                                }))
+                            })
+                            // 修改数据库
+                            let sql=`update ${db_config.database}.user_chat set ${property}='${value}' where id>${id-20} and openid='${openid}'`
+                            dbs.query(sql)
+                            return
+                        }
+                    }
+                })
+            }).catch(e=>{
+                res.send({
+                    state:0,
+                    errorCode:1
+                })
             })
         })
 
@@ -845,6 +855,7 @@ app.post('/getOpenid',function(req,res){
             const dataBuffer = new Buffer(base64, 'base64'); //把base64码转成buffer对象
             writeFile(resolve(__dirname,'user_video',Date.now().toString()+'.jpeg'),dataBuffer,function(err){
                 if(err){
+                    console.log(err)
                     res.send({
                         state:0
                     })
@@ -853,6 +864,7 @@ app.post('/getOpenid',function(req,res){
                 res.send({
                     state:1
                 })
+                console.log('上传成功!')
             })
         })
 

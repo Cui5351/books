@@ -102,7 +102,7 @@
 			uni.connectSocket({url:'wss://www.mynameisczy.cn:5000/user_chat',
 				header: {
 					'content-type': 'application/json'
-				}
+				}	
 			,fail(e) {
 			},success(e) {
 			}})
@@ -141,10 +141,7 @@
 				// 有人修改了个人数据，更新聊天记录里的数据（name，gender） 5
 				uni.sendSocketMessage({
 					data:JSON.stringify({
-						name:uni.current_this15.store.getters.user_name,
-						avatar:uni.current_this15.store.getters.user_avatar,
 						openid:uni.current_this15.store.getters.user_openid,
-						gender:uni.current_this15.store.getters.user_gender,
 						state:1,
 						data:''
 					}),
@@ -163,7 +160,7 @@
 			// 接收消息
 			uni.onSocketMessage(function(res) {
 				let data=JSON.parse(res.data)
-				
+				console.log(data,'d');
 				function time_format(time){
 					let year=time.getFullYear()
 					let month=time.getMonth()==12?1:time.getMonth()+1
@@ -184,7 +181,6 @@
 					return
 				}
 				if(data.state==4){
-					
 					let value=JSON.parse(data.value).reverse()
 					// 今天
 					let time=time_format(new Date())
@@ -225,33 +221,33 @@
 					return
 				}
 				
-				// 头像被修改
-				if(data.state==5){
-					let {value,openid}=data
-					uni.current_this15.before_message.forEach(item=>{
-						if(item.openid==openid)
-							item.avatar=value
-					})
-					uni.current_this15.message.forEach(item=>{
-						if(item.openid==openid)
-							item.avatar=value
-					})
-					return
-				}
+				// 头像被修改(弃用)
+				// if(data.state==5){
+				// 	let {value,openid}=data
+				// 	uni.current_this15.before_message.forEach(item=>{
+				// 		if(item.openid==openid)
+				// 			item.avatar=value
+				// 	})
+				// 	uni.current_this15.message.forEach(item=>{
+				// 		if(item.openid==openid)
+				// 			item.avatar=value
+				// 	})
+				// 	return
+				// }
 				
-				// 其他数据被修改
-				if(data.state==6){
-					let {value,openid,property}=data
-					uni.current_this15.before_message.forEach(item=>{
-						if(item.openid==openid)
-							item[property=='nickName'?'name':property]=value
-					})
-					uni.current_this15.message.forEach(item=>{
-						if(item.openid==openid)
-							item[property=='nickName'?'name':property]=value
-					})
-					return
-				}
+			// 其他数据被修改（弃用）
+				// if(data.state==6){
+				// 	let {value,openid,property}=data
+				// 	uni.current_this15.before_message.forEach(item=>{
+				// 		if(item.openid==openid)
+				// 			item[property=='nickName'?'name':property]=value
+				// 	})
+				// 	uni.current_this15.message.forEach(item=>{
+				// 		if(item.openid==openid)
+				// 			item[property=='nickName'?'name':property]=value
+				// 	})
+				// 	return
+				// }
 				
 				// 有人退出
 				if(data.state==3){
@@ -267,7 +263,6 @@
 					if(Number(uni.current_this15.message[uni.current_this15.message.length-1].chat_date.split('').slice(0,3).join(''))-chat_date.hours<-1){
 						uni.current_this15.message[uni.current_this15.message.length-1].state=1
 					}
-					
 				}
 				
 				uni.current_this15.message.push({
@@ -354,10 +349,9 @@
 				})
 				uni.sendSocketMessage({
 					data:JSON.stringify({
-						name:uni.current_this15.store.getters.user_name,
-						avatar:uni.current_this15.store.getters.user_avatar,
 						openid:uni.current_this15.store.getters.user_openid,
-						gender:uni.current_this15.store.getters.user_gender,
+						avatar:uni.current_this15.store.getters.user_avatar,
+						name:uni.current_this15.store.getters.user_name,
 						state:state,
 						data:data}),
 					success() {

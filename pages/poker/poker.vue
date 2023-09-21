@@ -46,6 +46,26 @@
 				</view> -->
 			</view>
 		</view>
+		<view class="sendMes" @click="sendMes">
+			<image src="../../static/icons/message.svg" mode=""></image>
+		</view>
+		<scroll-view class="chat_" scroll-y="true" :scroll-top="scrollTop" scroll-with-animation='true'>
+			<view class="chat">
+				<view v-for="(item,index) in mes" :key="index" :class="item.openid==store.getters.user_openid?'right':'left'">
+					<view class="an">
+						<view class="chat_avatar">
+							<img :src="item.avatar" alt="">
+						</view>
+						<view class="chat_name">
+							{{item.name}}
+						</view>
+					</view>
+					<view class="chat_content">
+						{{item.content}}
+					</view>
+				</view>
+			</view>
+		</scroll-view>
 		</view>
 	</page>
 </template>
@@ -85,6 +105,7 @@
 			}
 		},
 		async onLoad(res) {
+			uni.current_this18=this
 			uni.onSocketOpen(function(){
 				let timer=setInterval(function(){
 				if(res.hasOwnProperty('room_id')&&uni.current_this18.position>=0){
@@ -116,7 +137,6 @@
 				menus: ["shareAppMessage", "shareTimeline"]
 			})
 			
-			uni.current_this18=this
 			// 连接socket
 			let timer2=setInterval(function(){
 				if(uni.current_this18.store.getters.user_openid.length<=0){
@@ -132,24 +152,35 @@
 				}
 				clearInterval(timer2)
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
-				})
+				success() {
+					uni.current_this18.socket_state=true
+				}})
 			},200)
 			
-			uni.onSocketClose(function(){
+			uni.onSocketClose(function(e){
+				console.log(e);
+				uni.current_this18.socket_state=false
 				uni.showToast({
 					title:'离开了',
 					icon:'error'
 				})
-				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
-				})				
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
+				success() {
+					uni.current_this18.socket_state=true
+				}})
 			})
 			
-			uni.onSocketError(function(){
+			uni.onSocketError(function(e){
+				console.log(e);
+				uni.current_this18.socket_state=false
 				uni.showToast({
 					title:'正在重连',
 					icon:'error'
 				})
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
+				success() {
+					uni.current_this18.socket_state=true
+				}
 				})
 			})
 			
@@ -265,6 +296,10 @@
 						uni.current_this18.p_time.flag=0
 						// 结束匹配
 					},1500)
+				}else if(data.state==100){
+					uni.current_this18.mes.push(data.mes)
+					uni.current_this18.scrollTop+=200
+					uni.hideLoading()
 				}
 			})
 			uni.showLoading({
@@ -284,11 +319,13 @@
 			let room_state=ref(true)
 			let position=ref(-1)
 			let room_id=ref(-1)
+			let mes=reactive([])
 			let p_time=reactive({
 				time:0,
 				flag:0,
 				timer:0
 			})
+			let socket_state=ref(false)
 			let user_state=ref(true)
 			let solo_state=ref(true)
 			let count=ref(1)
@@ -368,6 +405,56 @@
 				})
 			})
 		}
+		function sendMes(){
+			if(uni.current_this18.room_id==-1||uni.current_this18.room_id.length<=0){
+				uni.showToast({
+					title:'需要先创建房间',
+					icon:'none'
+				})
+				return
+			}
+			console.log(uni.current_this18.socket_state,'uni.current_this18.socket_state');
+			if(!uni.current_this18.socket_state){
+				uni.showToast({
+					title:'请检查网络连接',
+					icon:'error'
+				})
+				return
+			}
+			uni.showModal({
+				title:'发送的内容',
+				editable:true,
+				placeholderText:'输入要发送的信息',
+				success(e) {
+					if(e.cancel)
+						return	
+					if(e.content<=0){
+						uni.showToast({
+							title:'发送内容必须大于等于1',
+							icon:'none'
+						})
+						return
+					}
+					uni.showLoading({
+						title:'发送中',
+						mask:true
+					})
+					console.log(uni.current_this18.room_id);
+					uni.sendSocketMessage({
+						data:JSON.stringify({
+							state:10,
+							room_id:uni.current_this18.room_id,
+							info:{
+								content:e.content,
+								name:store.getters.user_name,
+								avatar:store.getters.user_avatar,
+								openid:store.getters.user_openid
+							}
+						})
+					})
+				}
+			})
+		}
 		function start_game(){
 			for(let i=0;i<users.length;i++){
 				if(users[i].ready==false&&users[i].hasOwnProperty('openid')){
@@ -402,7 +489,8 @@
 			}
 			return fun()
 		}
-			return{position,await_position,p_time,count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,timer,invation,room_state,user_state}
+		let scrollTop=ref(0)
+			return{mes,sendMes,scrollTop,position,await_position,socket_state,p_time,count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,timer,invation,room_state,user_state}
 		}
 	}
 </script>
@@ -414,12 +502,70 @@
 		height:100%;
 		width: 100%;
 	}
+	.sendMes{
+		position: absolute;
+		bottom: 0;
+		transform: translate(-100%,-250px);
+		left:100%;
+		width:50px;
+		height:50px;
+		&>image{
+			height:100%;
+			width:100%;
+		}
+	}
+	.chat_{
+		height:250px;
+		position: relative;
+		top:100%;
+		transform: translateY(-100%);
+		border-radius:10px 10px 0 0;
+		background-color: rgba(255,255,255,.6);
+	}
+	.chat{
+		width:100%;
+		padding:10px 20px 100px 20px;
+		box-sizing: border-box;
+		&>.left{
+			margin-top:10px;
+			display: flex;
+		}
+		&>.right{
+			margin-top:10px;
+			display: flex;
+			flex-direction: row-reverse;
+		}
+		.an{
+			display: flex;
+			flex-direction: column;
+		}
+		.chat_content{
+			margin:0 10px;
+			word-wrap: break-word;
+			padding:10px;
+			box-sizing: border-box;
+			background-color:seagreen;
+			color: white;
+			flex-wrap: wrap;
+			border-radius:15px;
+			width:70%;
+		}
+		.chat_avatar{
+			height:40px;
+			width: 40px;
+			&>image{
+				height:100%;
+				width:100%;
+				border-radius: 50%;
+			}
+		}
+	}
 .invitation{
 	position: absolute;
 	display: flex;
 	flex-direction: column;
 	top:50%;
-	transform: translateY(-50%);
+	transform: translateY(-80%);
 	height:300px;
 	border-radius: 70px;
 	background-color: rgba(255,255,255,.6);
