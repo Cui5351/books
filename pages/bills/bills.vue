@@ -1,6 +1,9 @@
 <template>
 		<navigation>
-			我的收藏
+			<view style="position: absolute;z-index:9;color: white;">
+				我的收藏
+			</view>
+			<image style="position: absolute;width: 100%;height: 100%;top:0;left: 0;" mode="aspectFill"  src="https://mynameisczy.cn/play_loop/完美露营地.svg"></image>
 		</navigation>
 	<view class="container" :style="{marginTop:container_margin+10+'px'}">
 		<scroll-view  v-if="store_infos.length" scroll-y="true" :style="{height:screenHeight-(container_margin+30)+'px'}">
@@ -45,6 +48,7 @@
 					data:{
 						book_name:t
 					},success(value) {
+						console.log(value);
 						let arr=[]
 						value.data.value.forEach((item,index)=>{
 							if(item.book_name==t){

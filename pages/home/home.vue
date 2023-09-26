@@ -16,8 +16,8 @@
 		</view>
 		<view class="goods_category" :style="{minHeight:goods_category+'rpx',maxHeight:goods_category+'rpx'}">
 			<swiper class="list" autoplay indicator-dots circular interval="2000" previous-margin="40px" next-margin="40px">
-				<swiper-item v-for="a in 8" :key='a' @click.stop="toggle_wallpaper_page" style="max-height: 100%;min-height:100%;display: flex;justify-content: center;align-items: center">
-					<image :src="'http://mynameisczy.asia/play_loop/'+a+'.jpg'" mode='aspectFill'  lazy-load="true"></image>
+				<swiper-item v-for="a in 6" :key='a' @click.stop="toggle_wallpaper_page" style="max-height: 100%;min-height:100%;display: flex;justify-content: center;align-items: center">
+					<image :src="'http://mynameisczy.cn/play_loop/draw'+a+'.svg'" mode='aspectFill'  lazy-load="true"></image>
 				</swiper-item>
 			</swiper>
 			<!-- <view class="advertisement" :style="{minHeight:fixed+'rpx',maxHeight:fixed+'rpx'}"> -->

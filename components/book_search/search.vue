@@ -72,7 +72,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border:1px solid @border;
+		border:1px solid rgb(223,160,95);
 		border-radius:40rpx;
 		// border-bottom-right-radius:10px;
 		&>view,button{
@@ -103,7 +103,10 @@
 			padding:0;
 			width:25%;
 			height:100%;
-			background-color: @btn_color;
+			// background-color: @btn_color;
+			color: rgb(223,160,95);
+			background-color: rgb(191,84,57);
+			
 			border-radius:40rpx;
 			display: flex;
 			justify-content: center;

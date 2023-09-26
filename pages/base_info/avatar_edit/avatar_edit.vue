@@ -40,6 +40,7 @@ import {useStore} from 'vuex'
 									openid:uni.current_this13.userInfo.openid
 								},
 								success(e) {
+									console.log(e,'e');
 									// 返回
 									uni.navigateBack()
 									uni.hideLoading()

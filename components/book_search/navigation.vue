@@ -8,8 +8,8 @@
 		</view>
 		<view class="content" v-if="head_toggle" :style="{height:head_height*1.2+'px'}">
 			<view>
-				<!-- <image style="position: absolute;width: 100%;height: 100%;opacity: 0.9;top:0;left: 0;z-index:1;" mode="bottom right" src="https://img95.699pic.com/photo/40007/8651.jpg_wh300.jpg"></image> -->
-				<uni-icons size="25" type="location-filled" style='position: relative;z-index: 2;'></uni-icons><text style="font-size: 18px;position: relative;z-index: 2;">梦之源暮</text>
+				<image style="position: absolute;width: 100%;height: 100%;opacity: 0.9;top:0;left: 0;z-index:1;" mode="aspectFill" src="https://mynameisczy.cn/play_loop/top_pic.png"></image>
+				<text style="font-size: 18px;position: relative;z-index: 2;font-weight: bold;">梦之源暮</text>
 			</view>
 		</view>
 		
@@ -39,7 +39,12 @@
 .head{
 	position: fixed;
 	top:0;
-	background-color: rgb(255,95,103);;
+	// background-color: rgb(53,212,199);
+	background-color: rgba(87,64,78,.7);
+	// background-color: rgb(223,160,95);
+	color: white;
+	
+	// background-color: rgb(255,95,103);;
 	z-index:9999;
 	left:0;
 	width:100%;

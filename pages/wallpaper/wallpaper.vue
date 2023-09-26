@@ -70,6 +70,7 @@
 			function save_image(item){
 				if(item.state)
 					return
+				console.log(item);
 				let url=`https://www.mynameisczy.cn/wallpaper/image${item.image_path}.jpg`
 				// let fs=uni.getFileSystemManager()
 				// console.log(fs,'fs');

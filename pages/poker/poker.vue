@@ -2,7 +2,7 @@
 	<navigation show_back='true'>斗地主</navigation>
 	<page>
 		<view class="container">
-		<image src="https://www.mynameisczy.cn/rabbit/back.jpg" style="position: absolute;top:0;height: 100%;width: 100%;opacity:0.8;" mode=""></image>
+		<image src="https://www.mynameisczy.cn/play_loop/日出.svg" style="position: absolute;top:0;height: 100%;width: 100%;" mode="aspectFill"></image>
 		<view class="invitation">
 			<view class="title">
 				<view class="tit" v-if='!p_time.flag'>
@@ -548,7 +548,8 @@
 			color: white;
 			flex-wrap: wrap;
 			border-radius:15px;
-			width:70%;
+			// width:70%;
+			max-width:70%;
 		}
 		.chat_avatar{
 			height:40px;

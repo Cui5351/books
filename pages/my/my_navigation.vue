@@ -1,7 +1,9 @@
 <template>
 		<view class="head">
 		<navigation></navigation>
-		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" src="https://www.mynameisczy.cn/rabbit/my_navigation.jpg"></image>
+		<!-- <image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" src="https://www.mynameisczy.cn/rabbit/my_navigation.jpg"></image> -->
+		<!-- <image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" src="./露营篝火.svg"></image> -->
+		<image style="position: absolute;width: 100%;height: 100%;opacity: 0.8;top:0;left: 0;z-index:10000;" mode="aspectFill"  src="https://mynameisczy.cn/play_loop/森林露营.svg"></image>
 		<view class="userPortrait" :style="{height:head_height*1.4+'px',marginTop:head_height+'px'}">
 			<view @click="login" class="portraitEdit" style="position: relative;z-index:9999999999991;">
 				<view class="portrait" :style="{width:portraitW+'px',height:portraitW+'px'}">

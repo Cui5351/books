@@ -182,6 +182,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/create_works/create_works",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
     "tabBar" : {
         "list" : [
@@ -197,6 +206,12 @@
                 "iconPath" : "./static/icons/bills.png",
                 "selectedIconPath" : "./static/icons/bills_active.jpg"
             },
+			{
+			    "pagePath" : "pages/create_works/create_works",
+			    "text" : "创作",
+			    "iconPath" : "./static/icons/kiwifruit.png",
+			    "selectedIconPath" : "./static/icons/kiwifruit_active.jpg"
+			},
             {
                 "pagePath" : "pages/my/my",
                 "text" : "我的",
