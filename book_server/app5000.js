@@ -3,11 +3,12 @@ const cors=require('cors')
 const {readFile, readFileSync,writeFile}=require('fs')
 const {query} =require('../db_config/query')
 const {connectionMysql,insertData, update}=require('../db_config/dbs')
-const { resolve } = require('path')
+const { resolve,extname } = require('path')
 const https=require('https')
 const { default: axios } = require('axios')
 const expressWS=require('express-ws')
 const multer=require('multer')
+const { randomUUID } = require('crypto')
 
 // 创建app
 const app=express()
@@ -15,17 +16,32 @@ const app=express()
 const storage=multer.diskStorage({
     //设置保存路径
     destination: function (req, file, cb) {
-        cb(null, '/www/wwwroot/server/books/books/user_avatar')
+        cb(null, '/www/wwwroot/server/user_avatar')
         //注意这里的文件路径,不是相对路径，直接填写从项目根路径开始写就行了
 },
 //设置保存的name
 filename: function (req, file, cb) {    
     // 1拿到图片的类型
-    let type=file.mimetype.match(/(jpg|jpeg|png)/g)
-    cb(null, `${file.fieldname}${Date.now()}.${type}`)
+    let type=file.mimetype.toLowerCase().match(/(jpg|jpeg|png|gif)/g)
+    cb(null, `${file.fieldname}${randomUUID()}.${type}`)
+}
+})
+
+const storage2=multer.diskStorage({
+    //设置保存路径
+    destination: function (req, file, cb) {
+        cb(null, '/www/wwwroot/server/files')
+        //注意这里的文件路径,不是相对路径，直接填写从项目根路径开始写就行了
+},
+//设置保存的name
+filename: function (req, file, cb) {    
+    // 1拿到图片的类型
+    let type=extname(file.originalname)
+    cb(null, `${file.fieldname}${Date.now()}${type}`)
 }
 })
 const upload=multer({storage:storage}).single('avatar')
+const upload2=multer({storage:storage2}).single('files')
 
 // 解析post请求数据
 app.use(express.urlencoded({ extended: true }))
@@ -36,16 +52,16 @@ const options = {
 key: readFileSync(resolve(__dirname,'..', 'cert','a.key')),
 cert: readFileSync(resolve(__dirname,'..', 'cert','a.pem'))
 }
-// app.use((req,res,next)=>{
-//     const referer=req.get('referer')
-//     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.books.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
-//         console.log(referer,'referer')
-//         res.status(403).send('权限不够')
-//     }else{
-//         console.log('next')
-//         next()
-//     }
-// })
+app.use((req,res,next)=>{
+    const referer=req.get('referer')
+    if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.cn/'|referer=='https://mynameisczy.cn/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+        console.log(referer,'referer')
+        res.status(403).send('权限不够')
+    }else{
+        console.log('next')
+        next()
+    }
+})
 entry()
 
 function entry(){
@@ -308,6 +324,7 @@ function MountRouter(port,dbs,db_config,ws_config){
                 // let sql=`insert into ${db_config.database+'.user_chat'}(openid,user_name,avatar,gender,chat_content) values('${openid}',${user_name}')`
                 // dbs.query(sql)
             }
+                
             msg.chat_count=ws_config.chat_count
             ws_config.wss.clients.forEach((e) => {
                 e.send(JSON.stringify(msg))
@@ -315,6 +332,27 @@ function MountRouter(port,dbs,db_config,ws_config){
 
         })
     })    
+            // 小程序上传文件接口
+            app.post('/upload_file',(req,res)=>{
+                upload2(req,res,function(err){
+                    if(err){
+                        res.send({
+                            state:0,
+                            error:1,
+                            errMes:err
+                        })
+                        return
+                    }
+                // 缺少参数
+                    let path=`https://www.mynameisczy.cn/files/${req.file.filename}`
+                    // 保存成功
+                        res.send({
+                            state:1,
+                            error:0,
+                            value:path
+                        })
+                })
+            })
         // 小程序上传文件接口
         app.post('/upload_avatar',(req,res)=>{
             upload(req,res,function(err){
@@ -900,7 +938,16 @@ app.post('/getOpenid',function(req,res){
     })
 
     app.post('/getBookInfo',function(req,res){
-        query(dbs,db_config.database+'.books_info',['book_name','author','book_introduce']).then(value=>{
+        if(!req.body.hasOwnProperty('skip')){
+            res.send({
+                state:0,
+                error:1,
+                errMes:'缺少参数'
+            })
+            return
+        }
+        const {skip}=req.body
+        query(dbs,db_config.database+'.books_info',['book_name','author','book_introduce'],undefined,{skip:skip,count:20}).then(value=>{
             res.send({
                 state:1,
                 error:0,
@@ -1076,14 +1123,14 @@ app.post('/getOpenid',function(req,res){
                 // 1：密码错误
             const {name,password}=req.body
             // 查询并返回
-            query(dbs,'books.user_info','',{openid:password}).then(v=>{
+            query(dbs,'books.user_info','',{nickName:name}).then(v=>{
                 // 存在
                 if(v.length){
                     // 查询密码是否正确
                 query(dbs,'books.user_info','',{nickName:name,openid:password}).then(v=>{
                     if(v.length){
                         // 正确correct
-                        res.send({ 
+                        res.send({
                             state:1,
                             errorCode:0,
                             data:v[0]

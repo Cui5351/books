@@ -2,9 +2,9 @@
 	<view class="container" :style="{height:window_height*0.8+'px'}">
 		<view style="text-align: center;font-size:25px;font-weight: bold;max-height:90px;margin-bottom:20px;">{{book_name}}</view>
 		<view class="select">
-			<view :class="background_color.color?'btn':'btn2'" @click="change_dire(true)">{{current_directory.directory}}</view>
+			<view :class="background_color.color?'btn3':'btn4'" @click="change_dire(true)">{{current_directory.directory}}</view>
 			<view></view>
-			<view :class="background_color.color?'btn':'btn2'" @click="change_dire(false)">{{current_directory.passage}}{{current_directory.passage!='请先选择'?'章':''}}</view>
+			<view :class="background_color.color?'btn3':'btn4'" @click="change_dire(false)">{{current_directory.passage}}{{current_directory.passage!='请先选择'?'章':''}}</view>
 		</view>
 		<scroll-view class="passages" scroll-y="true" v-if="toggle">
 			<!-- 每次显示100章 -->

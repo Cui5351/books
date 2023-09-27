@@ -9,7 +9,7 @@
 		</uni-popup>
 		<view class="store_infos" :style="{height:book_wh*1.1+'px',minHeight:book_wh*1.1+'px',maxHeight:book_wh*1.1+'px'}" >
 			<view :style="{maxWidth:book_wh+'px',minWidth:book_wh+'px',minHeight:book_wh*1.2+'px',maxHeight:book_wh*1.2+'px'}">
-				<image  @click.stop="toggle(item)" @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.asia/image/'+item.book_name+'.jpg'" :style="{maxWidth:book_wh*0.8+'px',minWidth:book_wh*0.8+'px',minHeight:book_wh*1+'px',maxHeight:book_wh*1+'px'}"></image>
+				<image  @click.stop="toggle(item)" @error="image_load_err(item)" :src="item.src?item.src:'https://www.mynameisczy.cn/image/'+item.book_name+'.jpg'" :style="{maxWidth:book_wh*0.8+'px',minWidth:book_wh*0.8+'px',minHeight:book_wh*1+'px',maxHeight:book_wh*1+'px'}"></image>
 			</view>
 			<view class="title">
 				<view style="font-weight:bold;font-size:17px;display: flex;justify-content: space-between;">
@@ -100,7 +100,7 @@
 				if(err_image.indexOf(item.book_name)<0){
 					err_image.push(item.book_name)
 				}
-				item.src='https://www.mynameisczy.asia/image/image_load_error.jpeg'
+				item.src='https://www.mynameisczy.cn/image/image_load_error.jpeg'
 			}
 			return {image_load_err,fn,request_book_info,fav_book,content,info,container_margin}
 		}

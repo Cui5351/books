@@ -13,9 +13,10 @@
 					积分:{{score}}
 					</view>
 				</view>
-				<view class="show_day">
-					<view v-for="(item,index) in week">
-						<view class="">{{item.day}}</view>
+				<view class="show_day" style="position: relative;">
+					<image style="position: absolute;border-radius:10px;width: 100%;height: 100%;opacity: 0.9;top:0;left: 0;" mode="aspectFill"  src="https://mynameisczy.cn/play_loop/书中奇遇阅读.svg"></image>
+					<view v-for="(item,index) in week" style="position: relative;z-index:2;">
+						<view style="color: white;">{{item.day}}</view>
 						<view style="min-height:80%;width: 70%;">
 							<image v-if="item.state==1" src="https://www.mynameisczy.cn/svgs/sign_selected_icon.svg" style="width: 100%;height:100%;"></image>
 							<image v-else src="https://www.mynameisczy.cn/svgs/sign_in_icon.svg" style="width: 100%;height:100%;"></image>
@@ -228,7 +229,7 @@ height:100%;
 }
 .sgin_in{
 	display: flex;
-	margin-top:130px;
+	margin-top:100px;
 	flex-direction: column;
 }
 .sign_icon{
@@ -238,7 +239,7 @@ height:100%;
 .show_day{
 	padding:10px 0 20px 0;
 	box-sizing: border-box;
-	height:300px;
+	height:370px;
 	border-radius: 10px;
 	box-shadow:0px 2px 10px 5px rgba(0,0,0,.1);
 	background-color:rgba(255,0,0,.5);

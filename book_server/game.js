@@ -872,6 +872,7 @@ function MountRouter(dbs,db_config,ws_config){
                     return
                 }
                 room_id=ind
+                console.log(room_id,'room_id');
                 // send message
                 const {content,openid,avatar,name}=msg.info
                 ws_config.teams[room_id].t.forEach(item=>{

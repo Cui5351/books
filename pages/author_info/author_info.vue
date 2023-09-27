@@ -53,7 +53,10 @@
 					data:{count:10,skip:skip.value},
 					success(res) {
 						if(res.data.state==1){
-							store_infos.push(...res.data.value)
+							store_infos.push(...res.data.value.map(e=>{
+								e.avatar=e.avatar.replace('asia','cn')
+								return e
+							}))
 							skip.value+=10
 						}
 					},
