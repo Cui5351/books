@@ -12,6 +12,10 @@
         "database":"books",
         "host":"127.0.0.1",
         "user":"books",
+<<<<<<< HEAD
         "password":"CTTXahWKCPz6EYCp"
+=======
+        "password":"Mn6rjtEFcKneRAeW"
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
     }
 }                                                                                                                                                                                                                                                           

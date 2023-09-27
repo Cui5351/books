@@ -20,6 +20,7 @@ const options = {
   key: readFileSync(resolve(__dirname,'..', 'cert','a.key')),
   cert: readFileSync(resolve(__dirname,'..', 'cert','a.pem'))
 }
+<<<<<<< HEAD
 app.use((req,res,next)=>{
     const referer=req.get('referer')
     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.cn/'||referer=='https://mynameisczy.cn/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
@@ -28,6 +29,16 @@ app.use((req,res,next)=>{
         next()
     }
 })
+=======
+// app.use((req,res,next)=>{
+//     const referer=req.get('referer')
+//     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
+//         res.status(403).send('权限不够')
+//     }else{
+//         next()
+//     }
+// })
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
 entry()
 
 function entry(){
@@ -289,7 +300,11 @@ function MountRouter(dbs,db_config){
             // 对数据库进行操作
 
             // 1先查询books_info里的book_name是否包含book_name
+<<<<<<< HEAD
                 query(dbs,db_config.database+".books_info",'book_name',{book_name:book_name},null).then(result=>{
+=======
+                query(dbs,"books.books_info",'book_name',{book_name:book_name},null).then(result=>{
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
                     // 1.2不包含：添加数据：1{给books_info中book_name添加book_name数据} 2{给books_content里添加{book_name和passage_value和passage_name和content}数据}
                 if(!result.length){
                     // 不包含(返回上传指令)
@@ -457,7 +472,11 @@ function MountRouter(dbs,db_config){
 
 
             // 查询上传的数据在数据库中是否存在
+<<<<<<< HEAD
             query(dbs,db_config.database+'books_info','book_name',{book_name:book_name},null,null).then(value=>{
+=======
+            query(dbs,'books.books_info','book_name',{book_name:book_name},null,null).then(value=>{
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
                 // 查询是否已经含有
                 if(value.length>=1){
                     res.send({
@@ -468,7 +487,11 @@ function MountRouter(dbs,db_config){
                     return;
                 }else{
                     // 书不存在(可以上传)
+<<<<<<< HEAD
                     insertData(dbs,db_config.database+'books_info',JSON.stringify({
+=======
+                    insertData(dbs,'books.books_info',JSON.stringify({
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
                         book_name,author,score,book_type,book_introduce,book_state
                     })).then(()=>{
                         res.send({
@@ -509,12 +532,20 @@ function MountRouter(dbs,db_config){
             }
             const {count}=req.body
             // 先拿到books_info里的所有书的值
+<<<<<<< HEAD
             query(dbs,db_config.database+'.books_info','count(*)').then(value=>{
+=======
+            query(dbs,'books.books_info','count(*)').then(value=>{
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
                 let c=value[0]['count(*)']
                 if(c<=count){
                     // 1发送网络请求(得到书的内容)
                         // 将所有数据全部返回
+<<<<<<< HEAD
                         query(dbs,db_config.database+'.books_info','book_name').then(value=>{
+=======
+                        query(dbs,'books.books_info','book_name').then(value=>{
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
                             res.send({
                                 state:1,
                                 error:0,
@@ -524,7 +555,11 @@ function MountRouter(dbs,db_config){
                     return 
                 }else{
                     // 2这里随机获取几个数值(数值的个数=count)
+<<<<<<< HEAD
                     query(dbs,db_config.database+'.books_info','book_name').then(value=>{
+=======
+                    query(dbs,'books.books_info','book_name').then(value=>{
+>>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
                     let arr=[-2]
                     let random
                     while(arr.length<=count){
