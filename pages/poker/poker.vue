@@ -80,7 +80,7 @@
 			navigation,page
 		},
 		async onShareAppMessage(res) {
-			if(this.room_id<0&&this.position>=0){
+			if(this.room_id.length<=0&&this.position>=0){
 				// 创建房间
 				uni.sendSocketMessage({
 					data:JSON.stringify({
@@ -89,7 +89,7 @@
 					})
 				})
 				return
-			}else if(this.room_id>=0&&this.position>=0){
+			}else if(this.room_id.length>0&&this.position>=0){
 				// 直接邀请
 				return {
 					title: `敢不敢和我来场较量`, //分享的名称
@@ -116,7 +116,7 @@
 						data:JSON.stringify({
 							state:7,	
 							position:uni.current_this18.position,
-							room_id:Number(res.room_id)
+							room_id:res.room_id
 						})
 					})
 					clearInterval(timer)
@@ -158,7 +158,6 @@
 			},200)
 			
 			uni.onSocketClose(function(e){
-				console.log(e);
 				uni.current_this18.socket_state=false
 				uni.showToast({
 					title:'离开了',
@@ -171,7 +170,6 @@
 			})
 			
 			uni.onSocketError(function(e){
-				console.log(e);
 				uni.current_this18.socket_state=false
 				uni.showToast({
 					title:'正在重连',
@@ -259,7 +257,7 @@
 						uni.current_this18.solo_state=true
 						uni.current_this18.room_state=true
 						uni.current_this18.user_state=true
-						uni.current_this18.room_id=-1
+						uni.current_this18.room_id=''
 					}
 				}else if(data.state==3){
 					// 有人取消准备
@@ -318,7 +316,7 @@
 		setup() {
 			let room_state=ref(true)
 			let position=ref(-1)
-			let room_id=ref(-1)
+			let room_id=ref('')
 			let mes=reactive([])
 			let p_time=reactive({
 				time:0,
@@ -413,7 +411,6 @@
 				})
 				return
 			}
-			console.log(uni.current_this18.socket_state,'uni.current_this18.socket_state');
 			if(!uni.current_this18.socket_state){
 				uni.showToast({
 					title:'请检查网络连接',
@@ -439,7 +436,6 @@
 						title:'发送中',
 						mask:true
 					})
-					console.log(uni.current_this18.room_id);
 					uni.sendSocketMessage({
 						data:JSON.stringify({
 							state:10,

@@ -105,7 +105,8 @@
 						uni.current_this10.sign=true
 					}
 					uni.hideLoading()
-				},fail() {
+				},fail(e) {
+					console.log(e,'e');
 					uni.showToast({
 						icon:'error',
 						title:'请重新登录'
@@ -176,6 +177,7 @@
 					data:{
 						openid:openid._value
 					},success(res) {
+						console.log(res,'res');
 						if(res.data.error==3){
 							uni.showToast({
 								title:'请重新登录'

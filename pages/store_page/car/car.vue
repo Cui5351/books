@@ -15,7 +15,7 @@
 					</view>
 				</view>
 				<view class="none" v-show="user_car.length<=0">
-					暂无商品
+					<image src="https://www.mynameisczy.cn/play_loop/购物车无内容.svg" style="position: absolute;top:0;height: 100%;width: 100%;" mode="scaleToFilll"></image>
 				</view>
 			</scroll-view>
 		</view>

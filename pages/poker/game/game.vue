@@ -5,21 +5,22 @@
 		<image  @load="load_" v-for="(item,index) in cards" :key="index" :src="'https://www.mynameisczy.cn/cards_svg/'+item"></image>
 	</view>
 		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
-			<view class='head'>
+			<image src="https://www.mynameisczy.cn/play_loop/甜蜜.svg" style="position: absolute;top:0;background:mediumslateblue;height: 100%;width: 100%;" mode="scaleToFill"></image>
+			<view class='head' style="position: relative;z-index: 2;">
 					<view @click="back" class="back">退出</view>
 					<view class="master_card">
 						<view v-for="(item,index) in master_cards" :key="index">
 							<image :src="'https://www.mynameisczy.cn/cards_svg/'+item" style="width:100%;height:100%;" mode=""></image>
 						</view>
 					</view>
-				<view>12</view>
+				<view style="background-color: rgb(255,66,54);font-weight: bold;">其他</view>
 			</view>
-			<view class="others">
+			<view class="others"  style="position: relative;z-index: 2;">
 				<template  v-for="(item,index) in users" :key="index" >
 				<view  v-if='item.openid!==rule.openid'>
 					<view class="user">
 						<view class="avatar">
-							<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'red':'white')}" :src='item.avatar' mode=""></image>
+							<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'rgb(255,66,54)':'white')}" :src='item.avatar' mode=""></image>
 						</view>
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
@@ -62,11 +63,11 @@
 								</view>
 						</view>
 						<view class="">
-						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
+						<view class="btn_1" style="margin-top:-20px;position:rel	ative;z-index: 200;"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							{{master_count<=0?'叫地主':'抢地主'}}
 						</view>
-						<view class="btn" style="margin-top:-20px;position:relative;z-index: 200;"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
-						<view class="btn" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
+						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
+						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
 						</view>
 						<view v-if="interval.openid==rule.openid&&interval.count>0" style="position: relative;font-size:30px;height:70px;width:70px;margin-top:-70px;">
@@ -76,7 +77,7 @@
 							<image :style="{height:'100%',width:'100%',animation:interval.count<=10?'clock 2s linear infinite':''}" src="https://www.mynameisczy.cn/svgs/clock.svg" mode="">
 							</image>
 						</view>
-						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
+						<view class="btn_1" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing" @click="out_cards_btn">
 							出牌
 						</view>
 						</view>
@@ -94,13 +95,13 @@
 				<template  v-for="(item,index) in users" :key="index" >
 				<view class="user2" v-if='item.openid==rule.openid'>
 					<view class="avatar">
-						<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'red':'white')}" :src='item.avatar' mode=""></image>
+						<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'rgb(255,66,54)':'white')}" :src='item.avatar' mode=""></image>
 					</view>
 					<view class="my_name">{{item.name}}</view>
-					<view class="my_count">牌:{{item.count}}</view>
+					<view class="my_count"  style="position: relative;z-index: 2;">牌:{{item.count}}</view>
 					<view style="margin-left:10px;width:50px;height:50px;">
 						<!-- {{rule.master?'地主':'农民'}} -->
-						<image :src="'https://www.mynameisczy.cn/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
+						<image :src="'https://www.mynameisczy.cn/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;position: relative;z-index: 2;" mode=""></image>
 					</view>
 				</view>
 				</template>
@@ -113,7 +114,7 @@
 						{{score}}
 					</view>
 					</view>
-					<view class="chat2">聊天</view>
+					<view class="chat2"  style="position: relative;z-index: 2;">聊天</view>
 				</view>
 			</view>
 		</view>
@@ -483,7 +484,7 @@
 			let cards=JSON.parse(res.cards)
 			
 			
-			this.rule.room_id=Number(res.room_id)
+			this.rule.room_id=res.room_id
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
 			
 			Object.keys(this.rule).forEach(item=>{
@@ -699,8 +700,8 @@
         // transform: rotateZ(90deg) translateY(-100%);
 		&>view{
 			flex-grow: 1;
-			background-color:blanchedalmond;
-			border-bottom:5px solid white;
+			// background-color:blanchedalmond;
+			// border-bottom:5px solid white;
 			box-sizing: border-box;
 		}
 		.myself{
@@ -719,7 +720,7 @@
 					height:60%;
 				}
 				.chat2{
-					background-color: yellowgreen;
+					background-color: rgb(255,66,54);
 					padding:10px;
 					box-sizing: border-box;
 					display: flex;
@@ -732,7 +733,8 @@
 					width:30px;
 					text-align: center;
 					line-height: 30px;
-					background-color: skyblue;
+					background-color: rgb(255,66,54);
+					font-weight: bold;
 					border-radius: 50%;
 					position: relative;
 					z-index: 2;
@@ -742,8 +744,10 @@
 					border-top-right-radius: 10px;
 					border-bottom-right-radius: 10px;
 					width:80px;
-					text-align: center;
-					background-color: rgba(0,0,0,.1);
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					background-color: rgba(255,255,255,.5);
 				}
 			}
 			&>.user2{
@@ -768,7 +772,8 @@
 					}
 				}
 				.my_name{
-					background-color: rgba(0,0,0,.1);
+					// background-color: rgba(0,0,0,.1);
+					background-color: rgba(255,255,255,.5);
 					height:60%;
 					border-top-right-radius: 15px;
 					display: flex;
@@ -780,7 +785,8 @@
 					white-space: nowrap;
 					text-overflow: ellipsis;
 					max-width:150px;
-					color: white;
+					// color: white;
+					color: rgb(38,27,44);
 					box-sizing: border-box;
 					transform: translateX(-30%);
 				}
@@ -919,16 +925,16 @@
 			justify-content: space-around;
 			.back{
 				font-weight: bold;
-				background-color: @border;
+				background-color: rgb(255,66,54);
 				&:active{
-					background-color:navajowhite;
+					background-color:white;
 				}
 			}
 			&>.master_card{
 				width:150px;
 				display: flex;
 				justify-content: space-around;
-					background-color: rgba(0,0,0,.1);
+				background-color: rgba(0,0,0,.1);
 				&>view{
 					height:100%;
 					min-width:30px;
@@ -964,6 +970,7 @@
 		}
 		.name{
 			min-height:20px;
+			color: rgb(38,27,44);
 		}
 		.avatar{
 			max-height:70px;

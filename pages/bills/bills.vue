@@ -9,7 +9,9 @@
 		<scroll-view  v-if="store_infos.length" scroll-y="true" :style="{height:screenHeight-(container_margin+30)+'px'}">
 			<book_list :store_infos="store_infos" :store='store'></book_list>
 		</scroll-view>
-		<h1 v-if="!store_infos.length" style="text-align: center;color:gray;font-size: 18px;">暂无</h1>
+		<view style="position: relative;"  v-if="!store_infos.length">
+			<image src="https://www.mynameisczy.cn/play_loop/暂无内容.svg" style="position: absolute;top:0;height: 100%;width: 100%;" mode="scaleToFilll"></image>
+		</view>
 	</view>
 </template>
 

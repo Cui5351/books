@@ -19,12 +19,8 @@ cert: readFileSync(resolve(__dirname,'..', 'cert','a.pem'))
 }
 // app.use((req,res,next)=>{
 //     const referer=req.get('referer')
-<<<<<<< HEAD
 //     console.log(referer,'referer')
 //     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/16/page-frame.html'||referer=='https://www.mynameisczy.cn/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
-=======
-//     if(!referer||!(referer=='https://servicewechat.com/wxf5e611bcd30eb83d/0/page-frame.html'||referer=='https://www.mynameisczy.asia/'||referer=='https://servicewechat.com/wxf5e611bcd30eb83d/devtools/page-frame.html')){
->>>>>>> 7df435ecc2a6e1abd818109255dc48f4e63e6f92
 //         res.status(403).send('权限不够')
 //     }else{
 //         console.log('next')
@@ -38,16 +34,11 @@ function entry(){
     readFile('./base_config.json',async function(err,data){   
         if(err) return 
         data=JSON.parse(data.toString())
-        const {server_config,db_config}=data
+        const {db_config}=data
 
 // 这是机制问题，当没有操作数据的时候，就断开连接了 在网站stackoverflow看到了解决方案 强制连接,让数据库每1hours查询一次        
         
-        await connectionMysql(db_config).then(value=>{
-            let n=0
-            setInterval(()=>{
-                value.query('select 1')
-                n++
-            },3600000)            
+        // await connectionMysql(db_config).then(()=>{
             let server=https.createServer(options,app).listen('7086',function(){
             })
             let ws_config={
@@ -55,15 +46,14 @@ function entry(){
                 persons:[], // 游戏人数
                 teams:[] // 队伍
             }
-            MountRouter(value,db_config,ws_config)  
+            MountRouter(ws_config)  
         // 使用express-ws
-        })
+        // })
     })
 }
 
-function MountRouter(dbs,db_config,ws_config){
+function MountRouter(ws_config){
     app.ws('/poker',function(ws,req){
-        console.log(req,'连接成功');
         // 每个人已进入都是单独一个数组房间
         // req.query.game_state='pending'
         req.query.ws=ws
@@ -88,7 +78,6 @@ function MountRouter(dbs,db_config,ws_config){
             state:1,
             position:position
         }))
-        console.log(position,'p');
         ws.on('message',async function(msg){
             msg=JSON.parse(msg)
 
@@ -138,7 +127,6 @@ function MountRouter(dbs,db_config,ws_config){
                         }
                     })
                 }
-                console.log(ind,flag);
                 if(ind!=-1&&flag==1){
                     // 房间存在,向所有人发
                     ws_config.teams[ind].t.forEach(item=>{
@@ -265,14 +253,13 @@ function MountRouter(dbs,db_config,ws_config){
             }
     else if(msg.state==4){ // 开始游戏
                 // 如果都不叫地主：将重新调用4
-                const {state,ind}=matchRoomId(ws_config.team,msg.room_id)
+                const {state,ind}=matchRoomId(ws_config.teams,msg.room_id)
                 // 房间不存在
                 if(!state){
                     console.log('房间不存在');
                     return
                 }
                 let obj=create()
-
                 // 设置一个首先能抢地主的人
                 let master=Math.round(Math.random()*2)
 
@@ -308,7 +295,7 @@ function MountRouter(dbs,db_config,ws_config){
                 // 创建裁判
                 ws_config.teams[ind].t.push({
                     order:master,
-                    room_id:ws_config.team[ind].room_id,
+                    room_id:ws_config.teams[ind].room_id,
                     master_openid:'',
                     users:obj.user_cards,
                     master_card:obj.others,
@@ -630,6 +617,7 @@ function MountRouter(dbs,db_config,ws_config){
 
                 if(ws_config.teams[room_id].t[3].current_player_openid!=openid){
                     // 有人抢先，（还没轮到该角色出牌）
+                    console.log('有人抢先出');
                     return
                 }
                 // 检测牌是否存在
@@ -796,12 +784,11 @@ function MountRouter(dbs,db_config,ws_config){
                             }, 3000);
                             return
                         }
-                        console.log(ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].slice(ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length-2,ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length),'732');
                         // 每次返回最新的两条数据
                         item.ws.send(JSON.stringify({
                             state:10,
                             new_round:false,
-                            cards:ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id][3].rounds.length-1].slice(ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length-2,ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length),
+                            cards:ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].slice(ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length-2,ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length),
                             current_player_openid:'',
                             score:ws_config.teams[room_id].t[3].score
                         }))
@@ -882,7 +869,6 @@ function MountRouter(dbs,db_config,ws_config){
                     return
                 }
                 room_id=ind
-                console.log(room_id,'room_id');
                 // send message
                 const {content,openid,avatar,name}=msg.info
                 ws_config.teams[room_id].t.forEach(item=>{
@@ -897,7 +883,6 @@ function MountRouter(dbs,db_config,ws_config){
                         }
                     }))
                 })
-                
             }
 
             // 检测牌是否存在
@@ -1082,11 +1067,11 @@ function MountRouter(dbs,db_config,ws_config){
             // 将所有人是否能出牌重置为true(每回合开始前调用)
             function set_users_out_card_state_all_true(room_id){
                 return new Promise(res=>{
-                for(let i=0;i<3;i++){
-                    ws_config.teams[room_id].t[3].users[i].out_card_state=true
-                }
-                res()
-            })
+                    for(let i=0;i<3;i++){
+                        ws_config.teams[room_id].t[3].users[i].out_card_state=true
+                    }
+                    res()
+                })
             }
 
                 function set_next_out_card_user(room_id){
@@ -1113,7 +1098,6 @@ function MountRouter(dbs,db_config,ws_config){
         })
 
         ws.on('close',function(){
-            console.log('有人离开',ws_config.persons[position].user_name);
             // 从persons里删除
             let openid=ws_config.persons[position].openid
             ws_config.persons.splice(position,1,'空')
@@ -1148,7 +1132,9 @@ function MountRouter(dbs,db_config,ws_config){
                             }))
                         })
                         // 移除裁判
-                        if(item.t.length>0&&item.t[item.length].hasOwnProperty('current_player_openid')){
+                        console.log(item.t,'item.t');
+                        console.log(item.t[item.length-1],'item.t[item.length-1]');
+                        if((item.t.length>0&&item.t[item.length-1].hasOwnProperty('current_player_openid'))){
                             // 裁判存在，移除裁判
                             item.t[item.length].stop_interval_flag()
                             item.t.splice(item.t.length,1)
