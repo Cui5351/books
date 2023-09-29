@@ -114,7 +114,7 @@
 					})
 					uni.sendSocketMessage({
 						data:JSON.stringify({
-							state:7,	
+							state:7,
 							position:uni.current_this18.position,
 							room_id:res.room_id
 						})
@@ -123,12 +123,6 @@
 				}
 				if(!res.hasOwnProperty('room_id'))
 					clearInterval(timer)
-				// else{
-					// uni.showToast({
-						// title:'加入失败',
-						// icon:'none'
-					// })
-				// }
 				},1000)
 			})
 			
@@ -227,6 +221,7 @@
 					uni.current_this18.users.unshift(...data.current_persons)
 					if(data.hasOwnProperty('room_id'))
 						uni.current_this18.room_id=data.room_id
+						console.log(uni.current_this18.room_id,'room_id');
 					if(data.hasOwnProperty('lost')){
 						if(data.lost){
 							uni.showToast({
@@ -464,6 +459,7 @@
 			uni.showToast({
 				title:'开始游戏'
 			})
+		console.log(uni.current_this18.room_id,'room_id');
 			// 开始游戏
 			uni.sendSocketMessage({
 				data:JSON.stringify({

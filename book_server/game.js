@@ -871,7 +871,9 @@ function MountRouter(ws_config){
                 room_id=ind
                 // send message
                 const {content,openid,avatar,name}=msg.info
-                ws_config.teams[room_id].t.forEach(item=>{
+                ws_config.teams[room_id].t.forEach((item,index)=>{
+                    if(index>=3)
+                        return
                     item.ws.send(JSON.stringify({
                         state:100,
                         openid:openid,
@@ -881,6 +883,25 @@ function MountRouter(ws_config){
                             name,
                             content
                         }
+                    }))
+                })
+            }else if(msg.state==11){
+                const {state,ind}=matchRoomId(ws_config.teams,msg.room_id)
+                // 房间不存在
+                if(!state){
+                    console.log('房间不存在');
+                    return
+                }
+                room_id=ind
+                // send message
+                const {content,openid}=msg
+                ws_config.teams[room_id].t.forEach((item,index)=>{
+                    if(index>=3)
+                        return
+                    item.ws.send(JSON.stringify({
+                        state:16,
+                        openid:openid,
+                        content:content
                     }))
                 })
             }

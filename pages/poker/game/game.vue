@@ -5,7 +5,10 @@
 		<image  @load="load_" v-for="(item,index) in cards" :key="index" :src="'https://www.mynameisczy.cn/cards_svg/'+item"></image>
 	</view>
 		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
-			<image src="https://www.mynameisczy.cn/play_loop/甜蜜.svg" style="position: absolute;top:0;background:mediumslateblue;height: 100%;width: 100%;" mode="scaleToFill"></image>
+			<!-- ;background:mediumslateblue -->
+			<view style="background:mediumslateblue;height:100%;width:100%;position: absolute;">
+				<image src="https://www.mynameisczy.cn/play_loop/甜蜜.svg" style="position: absolute;top:50%;left:50%;transform:translate(-50%,-50%);height: 200px;width: 250px;"></image>
+			</view>
 			<view class='head' style="position: relative;z-index: 2;">
 					<view @click="back" class="back">退出</view>
 					<view class="master_card">
@@ -19,6 +22,7 @@
 				<template  v-for="(item,index) in users" :key="index" >
 				<view  v-if='item.openid!==rule.openid'>
 					<view class="user">
+						<view class="chat_audio" :style="{transform:item.order?'translateX(-120%)':'translateX(120%)'}" v-show="audio2_manager.openid==item.openid" >{{audio_srcs[audio2_manager.item].title}}</view>
 						<view class="avatar">
 							<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'rgb(255,66,54)':'white')}" :src='item.avatar' mode=""></image>
 						</view>
@@ -95,6 +99,7 @@
 				<template  v-for="(item,index) in users" :key="index" >
 				<view class="user2" v-if='item.openid==rule.openid'>
 					<view class="avatar">
+					<view class="chat_audio" style="transform: translate(25%,-200%);" v-show="audio2_manager.openid==item.openid" >{{audio_srcs[audio2_manager.item].title}}</view>
 						<image :style="{height:'100%',width:'100%',border:'5px solid '+(item.openid==rule.current_player_openid?'rgb(255,66,54)':'white')}" :src='item.avatar' mode=""></image>
 					</view>
 					<view class="my_name">{{item.name}}</view>
@@ -114,7 +119,14 @@
 						{{score}}
 					</view>
 					</view>
-					<view class="chat2"  style="position: relative;z-index: 2;">聊天</view>
+					<view class="chat2"  style="position: relative;z-index: 2;">
+							<view class="cha" @click="chat_st=!chat_st">
+								聊天
+							</view>
+							<view class="option" :style="{height:chat_st?'125px':'0px'}">
+								<view  v-for="(item,index) in audio_srcs" :key="index" @click="play_audio(index)">{{item.title}}</view>
+							</view>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -479,6 +491,24 @@
 					uni.current_this19.interval.count=data.count
 					if(data.current_player_openid!=uni.current_this19.interval.openid)
 						uni.current_this19.interval.openid=data.current_player_openid
+				}else if(data.state==16){
+					console.log(data,'data');
+					if(uni.current_this19.audio2_manager.audio_controller)
+						return
+					uni.current_this19.audio2_manager.audio_controller=true
+					// 音乐
+					uni.current_this19.audio2=uni.createInnerAudioContext()
+					uni.current_this19.audio2_manager.item=data.content
+					uni.current_this19.audio2_manager.openid=data.openid
+					uni.current_this19.audio2.src=uni.current_this19.audio_srcs[data.content].src
+					uni.current_this19.audio2.obeyMuteSwitch=true
+					uni.current_this19.audio2.play()
+					uni.current_this19.audio2.onEnded(e=>{
+						uni.current_this19.audio2_manager.openid=''
+						uni.current_this19.audio2_manager.audio_controller=false
+					})
+					uni.current_this19.audio2.onError(err=>{
+					})
 				}
 			})
 			let cards=JSON.parse(res.cards)
@@ -557,6 +587,9 @@
 			let users=reactive([])
 			let score=ref(10)
 			let audio=reactive(null)
+			let audio_srcs=reactive([{title:'催促',src:'https://www.mynameisczy.cn/audio/hurry.mp3'},{title:'信心',src:'https://www.mynameisczy.cn/audio/confidence.mp3'},{title:"求饶",src:'https://www.mynameisczy.cn/audio/dont_kill_me.mp3'},{title:'我来',src:'https://www.mynameisczy.cn/audio/letmetry.mp3'}])
+			let audio2=reactive(null)
+			let chat_st=ref(false)
 			let master_cards=reactive([])
 			let new_round=ref(true)
 			let get_master_state=ref(true)
@@ -632,6 +665,25 @@
 						return item.card.card
 					})
 				})
+				})
+		}
+		let audio2_manager=reactive({
+			audio_controller:false,
+			item:0,
+			openid:''
+		});
+		function play_audio(index){
+			if(audio2_manager.audio_controller)
+				return
+				console.log('send');
+			chat_st.value=false
+			uni.sendSocketMessage({
+				data:JSON.stringify({
+					state:11,
+					room_id:rule.room_id,
+					openid:rule.openid,
+					content:index
+				})
 			})
 		}
 			function back(){
@@ -668,7 +720,7 @@
 			load_state.value--
 		}
 			// 地主产生后，将所有pre.master=false
-			return {interval,cards,score,get_master_state,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
+			return {audio2_manager,audio_srcs,audio2,interval,play_audio,chat_st,cards,score,get_master_state,load_,load_state,no_card,master_count,new_round,user_out_cards,out_cards_btn,back,master_cards,out_cards,user_cards,audio,rule,get_master,store,users,cancel_master,head_height_child,container_height,container_width}
 		}
 	}
 </script>
@@ -689,6 +741,57 @@
 </style>
 <style scoped lang="less">
 @import url('/general.less');
+.chat_audio{
+position: absolute;transform: translateX(-120%);background-color: white;border-radius: 5px;padding:5px 10px;
+}
+.chat2{
+	// display: flex;
+	padding:0;
+	// flex-direction: column-reverse;
+	max-height:30px;
+	min-height:30px;
+	height:30px;
+	&>view{
+		text-align: center;
+	}
+	// display:flex;
+	// flex-direction: column-reverse;	
+}
+.chat2>.cha{
+	width:100%;
+	max-height:30px;
+	line-height:30px;
+	min-height:30px;
+	height:30px;
+}
+.option{
+	// position: relative;
+	position: absolute;
+	transform: translate(-10%,-100%);
+	width:60px;
+	border-radius: 10px;
+	border-bottom-right-radius: 20px;
+	border-bottom-left-radius: 20px;
+	background-color: rgba(0,0,0,.4);
+	transition: .5s ease;
+	overflow: hidden;
+	height:0px;
+	&>view:first-child{
+		border-top: none;
+	}
+	&>view{
+		width:100%;
+		color: white;
+		max-height:30px;
+		border-top:1px solid rgba(255,255,255,.1);
+		line-height:30px;
+		min-height:30px;
+		height:30px;
+		&:active{
+			background-color:rgba(255,255,255,.1);
+		}
+	}
+}
       /*竖屏样式*/
       .container {
 		  position: absolute;
@@ -701,6 +804,7 @@
 		&>view{
 			flex-grow: 1;
 			// background-color:blanchedalmond;
+			// background:mediumslateblue;
 			// border-bottom:5px solid white;
 			box-sizing: border-box;
 		}
@@ -721,11 +825,7 @@
 				}
 				.chat2{
 					background-color: rgb(255,66,54);
-					padding:10px;
-					box-sizing: border-box;
-					display: flex;
-					justify-content: center;
-					align-items: center;
+					width:45px;
 					border-radius:10px;
 				}
 				.bei1{
