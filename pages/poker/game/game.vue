@@ -123,7 +123,7 @@
 							<view class="cha" @click="chat_st=!chat_st">
 								聊天
 							</view>
-							<view class="option" :style="{height:chat_st?'125px':'0px'}">
+							<view class="option" :style="{height:chat_st?'155px':'0px'}">
 								<view  v-for="(item,index) in audio_srcs" :key="index" @click="play_audio(index)">{{item.title}}</view>
 							</view>
 					</view>
@@ -481,18 +481,40 @@
 					})
 					uni.current_this19.rule.current_player_openid=data.current_player_openid
 				}else if(data.state==14){
-							uni.showToast({
-								title:`${uni.current_this19.rule.master_id==data.winner_openid?'地主':'农民'}胜利`
+					uni.showToast({
+							title:`${uni.current_this19.rule.master_id==data.winner_openid?'地主':'农民'}胜利`
+						})
+						for(let i=0;i<uni.current_this19.users.length;i++){
+							while(uni.current_this19.users[i].out_cards.length>0){
+								uni.current_this19.users[i].out_cards.pop()
+							}
+						}	
+						data.other_cards.forEach(item=>{
+							item.cards.sort((a,b)=>{
+								            let reg=/(\d)/g
+						                    return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
 							})
+						})
+						// 将数据推入
+						uni.current_this19.users.forEach(item=>{
+								if(item.openid==uni.current_this19.rule.openid){
+										return
+								}
+							data.other_cards.forEach(item2=>{
+								if(item2.openid==item.openid){
+									item.state=''
+									item.out_cards.push(...item2.cards)
+								}
+							})
+						})
 					setTimeout(()=>{
 						uni.navigateBack()
-					},2000)
+					},4000)
 				}else if(data.state==15){
 					uni.current_this19.interval.count=data.count
 					if(data.current_player_openid!=uni.current_this19.interval.openid)
 						uni.current_this19.interval.openid=data.current_player_openid
 				}else if(data.state==16){
-					console.log(data,'data');
 					if(uni.current_this19.audio2_manager.audio_controller)
 						return
 					uni.current_this19.audio2_manager.audio_controller=true
@@ -508,6 +530,9 @@
 						uni.current_this19.audio2_manager.audio_controller=false
 					})
 					uni.current_this19.audio2.onError(err=>{
+						uni.current_this19.audio2_manager.openid=''
+						uni.current_this19.audio2_manager.audio_controller=false
+						console.log(err,'err reset');
 					})
 				}
 			})
@@ -540,7 +565,9 @@
 					flag:0
 				}
 			})
-			cards.cards=cards.cards.sort((a,b)=>{
+			// 排序函数（返回为真>0，降序<=0，否升序）
+			// 会改变原数组
+			cards.cards.sort((a,b)=>{
 						                        let reg=/(\d)/g
 						                        return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
 						                      })
@@ -587,7 +614,7 @@
 			let users=reactive([])
 			let score=ref(10)
 			let audio=reactive(null)
-			let audio_srcs=reactive([{title:'催促',src:'https://www.mynameisczy.cn/audio/hurry.mp3'},{title:'信心',src:'https://www.mynameisczy.cn/audio/confidence.mp3'},{title:"求饶",src:'https://www.mynameisczy.cn/audio/dont_kill_me.mp3'},{title:'我来',src:'https://www.mynameisczy.cn/audio/letmetry.mp3'}])
+			let audio_srcs=reactive([{title:'催促',src:'https://www.mynameisczy.cn/audio/hurry_poker.mp3'},{title:'鼓励',src:'https://www.mynameisczy.cn/audio/encourage.mp3'},{title:'信心',src:'https://www.mynameisczy.cn/audio/confidence.mp3'},{title:"求饶",src:'https://www.mynameisczy.cn/audio/dont_kill_me.mp3'},{title:'我来',src:'https://www.mynameisczy.cn/audio/letmetry.mp3'}])
 			let audio2=reactive(null)
 			let chat_st=ref(false)
 			let master_cards=reactive([])
@@ -675,7 +702,6 @@
 		function play_audio(index){
 			if(audio2_manager.audio_controller)
 				return
-				console.log('send');
 			chat_st.value=false
 			uni.sendSocketMessage({
 				data:JSON.stringify({
@@ -711,8 +737,12 @@
 			})
 		}	
 		function load_(){
+			uni.showLoading({
+				title:'资源加载中'
+			})
 			if(load_state.value-1<=0){
 				setTimeout(()=>{
+					uni.hideLoading()
 					load_state.value--
 				},500)
 				return
