@@ -80,6 +80,7 @@
 			navigation,page
 		},
 		async onShareAppMessage(res) {
+			console.log(this.room_id.length,this.position,'osam');
 			if(this.room_id.length<=0&&this.position>=0){
 				// 创建房间
 				uni.sendSocketMessage({
@@ -90,6 +91,7 @@
 				})
 				return
 			}else if(this.room_id.length>0&&this.position>=0){
+				console.log(this.room_id,'room');
 				// 直接邀请
 				return {
 					title: `敢不敢和我来场较量`, //分享的名称
@@ -108,10 +110,11 @@
 			uni.current_this18=this
 			uni.onSocketOpen(function(){
 				let timer=setInterval(function(){
+				console.log(res.hasOwnProperty('room_id'),uni.current_this18.position>=0,'test2');
 				if(res.hasOwnProperty('room_id')&&uni.current_this18.position>=0){
-					uni.showToast({
-						title:'进入房间'
-					})
+					// uni.showToast({
+						// title:'进入房间'
+					// })
 					uni.sendSocketMessage({
 						data:JSON.stringify({
 							state:7,
@@ -147,32 +150,68 @@
 				clearInterval(timer2)
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
 				success() {
+					console.log('连接成功');
 					uni.current_this18.socket_state=true
 				}})
 			},200)
 			
 			uni.onSocketClose(function(e){
+				console.log(e,'close');
 				uni.current_this18.socket_state=false
-				uni.showToast({
-					title:'离开了',
-					icon:'error'
+				uni.showLoading({
+					title:'正在尝试重连'
 				})
+				let l=uni.current_this18.users.length
+				for(let i=0;i<l;i++){
+					uni.current_this18.users.pop()
+				}
+				uni.current_this18.users.push([{
+					avatar:uni.current_this18.store.getters.user_avatar,
+					name:uni.current_this18.store.getters.user_name,
+					openid:uni.current_this18.store.getters.user_openid,
+					ready:true
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				}])
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
 				success() {
 					uni.current_this18.socket_state=true
+					uni.hideLoading()
 				}})
 			})
 			
 			uni.onSocketError(function(e){
+				console.log(e,'e');																																										
 				uni.current_this18.socket_state=false
-				uni.showToast({
-					title:'正在重连',
-					icon:'error'
+				uni.showLoading({
+					title:'正在尝试重连'
 				})
-				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
-				success() {
-					uni.current_this18.socket_state=true
+				// 踢掉所有人
+				let l=uni.current_this18.users.length
+				for(let i=0;i<l;i++){
+					uni.current_this18.users.pop()
 				}
+				uni.current_this18.users.push([{
+					avatar:store.getters.user_avatar,
+					name:store.getters.user_name,
+					openid:store.getters.user_openid,
+					ready:true
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				}])
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
+					success() {
+						uni.hideLoading()
+						uni.current_this18.socket_state=true
+					}
 				})
 			})
 			
@@ -211,6 +250,7 @@
 				}
 				else if(data.state==2){
 					if(data.hasOwnProperty('create_room')){
+						// console.log('r');
 						uni.showToast({
 							title:'创建房间成功'
 						})
@@ -219,9 +259,10 @@
 					uni.current_this18.users.shift()
 					uni.current_this18.users.shift()
 					uni.current_this18.users.unshift(...data.current_persons)
-					if(data.hasOwnProperty('room_id'))
+					if(data.hasOwnProperty('room_id')){
 						uni.current_this18.room_id=data.room_id
-						console.log(uni.current_this18.room_id,'room_id');
+						console.log(uni.current_this18.room_id,'data.room_id');
+					}
 					if(data.hasOwnProperty('lost')){
 						if(data.lost){
 							uni.showToast({
@@ -459,7 +500,6 @@
 			uni.showToast({
 				title:'开始游戏'
 			})
-		console.log(uni.current_this18.room_id,'room_id');
 			// 开始游戏
 			uni.sendSocketMessage({
 				data:JSON.stringify({

@@ -177,6 +177,7 @@
 						}])
 				}
 				else if(data.state==2){
+					console.log(uni.current_this18.room_id,'data.room_id');
 					if(data.hasOwnProperty('create_room')){
 						uni.showToast({
 							title:'创建房间成功'
@@ -218,9 +219,10 @@
 						uni.current_this18.solo_state=true
 						uni.current_this18.room_state=true
 						uni.current_this18.user_state=true
-						uni.current_this18.room_id=-1
+						uni.current_this18.room_id=''
 					}
 				}else if(data.state==3){
+					// 有人取消准备
 					data.current_persons_ready.forEach(item=>{
 						uni.current_this18.users.forEach(item2=>{
 							if(item.openid==item2.openid){
@@ -254,6 +256,10 @@
 						uni.current_this18.p_time.flag=0
 						// 结束匹配
 					},1500)
+				}else if(data.state==100){
+					uni.current_this18.mes.push(data.mes)
+					uni.current_this18.scrollTop+=200
+					uni.hideLoading()
 				}
 			})
 		},
@@ -262,19 +268,62 @@
 			this.container_width=uni.global.width
 			
 			uni.current_this19=this
-			uni.onSocketClose(function(){
-				uni.showToast({
-					title:'退出',
-					icon:'error'
-				})
+			uni.onSocketClose(function(e){
 				uni.navigateBack()
-			})
-			uni.onSocketError(function(){
-				uni.showToast({
-					title:'正在重连',
-					icon:'error'
+				uni.current_this18.socket_state=false
+				uni.showLoading({
+					title:'正在尝试重连'
 				})
-				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this19.store.getters.user_openid}&&user_name=${uni.current_this19.store.getters.user_name}&&user_avatar=${uni.current_this19.store.getters.user_avatar}`),
+				let l=uni.current_this18.users.length
+				for(let i=0;i<l;i++){
+					uni.current_this18.users.pop()
+				}
+				uni.current_this18.users.push([{
+					avatar:uni.current_this18.store.getters.user_avatar,
+					name:uni.current_this18.store.getters.user_name,
+					openid:uni.current_this18.store.getters.user_openid,
+					ready:true
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				}])
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
+				success() {
+					uni.current_this18.socket_state=true
+					uni.hideLoading()
+				}})
+			})
+			uni.onSocketError(function(e){
+				uni.navigateBack()
+				uni.current_this18.socket_state=false
+				uni.showLoading({
+					title:'正在尝试重连'
+				})
+				// 踢掉所有人
+				let l=uni.current_this18.users.length
+				for(let i=0;i<l;i++){
+					uni.current_this18.users.pop()
+				}
+				uni.current_this18.users.push([{
+					avatar:store.getters.user_avatar,
+					name:store.getters.user_name,
+					openid:store.getters.user_openid,
+					ready:true
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				},{
+					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+					name:'邀请好友'
+				}])
+				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
+					success() {
+						uni.hideLoading()
+						uni.current_this18.socket_state=true
+					}
 				})
 			})
 			// 如果发现没有登录，那么退出登录
@@ -384,6 +433,10 @@
 						}
 					})
 					uni.current_this19.score=data.score
+					data.master_card.sort((a,b)=>{
+										let reg=/(\d)/g
+										return Number(b.match(reg).join(''))-Number(a.match(reg).join(''))
+									  })
 					uni.current_this19.master_cards.push(...data.master_card)
 					uni.current_this19.rule.master_id=data.master_openid
 					if(uni.current_this19.rule.openid==data.master_openid){
@@ -568,9 +621,9 @@
 			// 排序函数（返回为真>0，降序<=0，否升序）
 			// 会改变原数组
 			cards.cards.sort((a,b)=>{
-						                        let reg=/(\d)/g
-						                        return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
-						                      })
+								let reg=/(\d)/g
+								return Number(b.card.match(reg).join(''))-Number(a.card.match(reg).join(''))
+							  })
 			this.user_cards.push(...cards.cards)
 			// 音乐
 			this.audio=uni.createInnerAudioContext()
@@ -738,7 +791,7 @@
 		}	
 		function load_(){
 			uni.showLoading({
-				title:'资源加载中'
+				title:'资源加载中: '+load_state.value+"'s"
 			})
 			if(load_state.value-1<=0){
 				setTimeout(()=>{

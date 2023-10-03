@@ -1,6 +1,15 @@
 
 const mysql=require('mysql')
 const {query}=require('./query')
+/**
+ * 
+ * @param {string} host 主机名 
+ * @param {string} user 用户名
+ * @param {string} password 密码
+ * @param {string} database 数据库
+ * @param {string} port 端口号
+ * @returns 
+ */
 async function connectionMysql(value){
 const {host,user,password,database,port}=value
  const p=await new Promise((resolve,reject)=>{

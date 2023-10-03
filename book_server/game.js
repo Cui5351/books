@@ -566,9 +566,8 @@ function MountRouter(ws_config){
                     console.log('房间不存在');
                     return
                 }
-                room_id=ind
                 // 查看房间是否存在
-                if(ws_config.teams[room_id].t==undefined){
+                if(ws_config.teams[ind].t==undefined){
                     // 房间不存在，
                     ws_config.persons[position].ws.send(JSON.stringify({
                         state:13
@@ -577,26 +576,25 @@ function MountRouter(ws_config){
                 }
 
                 //  检查房间是否满人
-                if(ws_config.teams[room_id].t.length>=3){
+                if(ws_config.teams[ind].t.length>=3){
                     // 返回满人12
                     ws_config.persons[position].ws.send(JSON.stringify({
                         state:12
                     }))
                     return
                 }
-                
                 ws_config.persons[position].teams=1
                 ws_config.persons[position].privilege=false
                 ws_config.persons[position].ready=true
 
                 // 加入房间
-                ws_config.teams[room_id].t.push(ws_config.persons[position])
+                ws_config.teams[ind].t.push(ws_config.persons[position])
                 // 通知所有人
-                ws_config.teams[room_id].t.forEach(item=>{
+                ws_config.teams[ind].t.forEach(item=>{
                     item.ws.send(JSON.stringify({
                         state:2,
                         room_id:room_id,
-                        current_persons:ws_config.teams[room_id].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
+                        current_persons:ws_config.teams[ind].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                     }))
                 })
             }else if(msg.state==8){
@@ -683,12 +681,13 @@ function MountRouter(ws_config){
                                             // 每次返回最新的两条数据
                                             item.ws.send(JSON.stringify({
                                                 state:14,
-                                                winner_openid:openid
+                                                winner_openid:openid,
+                                                other_cards:ws_config.teams[room_id].t[3].users
                                             }))
                                         })
                                         ws_config.teams[room_id].t.pop()
                                         // 删除裁判
-                                    }, 3000);   
+                                    }, 1000);   
                                 return
                             }
                             item.ws.send(JSON.stringify({
@@ -777,11 +776,12 @@ function MountRouter(ws_config){
                                     // 每次返回最新的两条数据
                                     item.ws.send(JSON.stringify({
                                         state:14,
-                                        winner_openid:openid
+                                        winner_openid:openid,
+                                        other_cards:ws_config.teams[room_id].t[3].users
                                     }))
                                 })
                                 ws_config.teams[room_id].t.pop()
-                            }, 3000);
+                            }, 1000);
                             return
                         }
                         // 每次返回最新的两条数据
@@ -1153,9 +1153,7 @@ function MountRouter(ws_config){
                             }))
                         })
                         // 移除裁判
-                        console.log(item.t,'item.t');
-                        console.log(item.t[item.length-1],'item.t[item.length-1]');
-                        if((item.t.length>0&&item.t[item.length-1].hasOwnProperty('current_player_openid'))){
+                        if((item.t.length>1&&item.t[item.length-1].hasOwnProperty('current_player_openid'))){
                             // 裁判存在，移除裁判
                             item.t[item.length].stop_interval_flag()
                             item.t.splice(item.t.length,1)
@@ -1206,7 +1204,8 @@ function create(){
         master:false,
         total_count:0,
         out_card_state:false,
-        cancel_master:false
+        cancel_master:false,
+        openid:''
     }
     let b={
         count:17,
@@ -1215,7 +1214,8 @@ function create(){
         master:false,
         total_count:0,
         out_card_state:false,
-        cancel_master:false
+        cancel_master:false,
+        openid:''
     }
     let c={
         count:17,
@@ -1224,7 +1224,8 @@ function create(){
         master:false,
         total_count:0,
         out_card_state:false,
-        cancel_master:false
+        cancel_master:false,
+        openid:''
     }
     let rand=0
     // 随机数分配三人
