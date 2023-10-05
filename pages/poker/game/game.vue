@@ -793,7 +793,7 @@
 			uni.showLoading({
 				title:'资源加载中: '+load_state.value+"'s"
 			})
-			if(load_state.value-1<=0){
+			if((load_state.value-1)<=0){
 				setTimeout(()=>{
 					uni.hideLoading()
 					load_state.value--
