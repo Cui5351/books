@@ -177,7 +177,6 @@
 						}])
 				}
 				else if(data.state==2){
-					console.log(uni.current_this18.room_id,'data.room_id');
 					if(data.hasOwnProperty('create_room')){
 						uni.showToast({
 							title:'创建房间成功'
@@ -189,6 +188,7 @@
 					uni.current_this18.users.unshift(...data.current_persons)
 					if(data.hasOwnProperty('room_id'))
 						uni.current_this18.room_id=data.room_id
+						uni.current_this18.mode.current=data.type
 					if(data.hasOwnProperty('lost')){
 						if(data.lost){
 							uni.showToast({
@@ -260,6 +260,8 @@
 					uni.current_this18.mes.push(data.mes)
 					uni.current_this18.scrollTop+=200
 					uni.hideLoading()
+				}else if(data.state==17){
+					uni.current_this18.mode.current=data.type
 				}
 			})
 		},
@@ -292,8 +294,8 @@
 				}])
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
 				success() {
-					uni.current_this18.socket_state=true
 					uni.hideLoading()
+					uni.current_this18.socket_state=true
 				}})
 			})
 			uni.onSocketError(function(e){
@@ -308,9 +310,9 @@
 					uni.current_this18.users.pop()
 				}
 				uni.current_this18.users.push([{
-					avatar:store.getters.user_avatar,
-					name:store.getters.user_name,
-					openid:store.getters.user_openid,
+					avatar:uni.current_this18.store.getters.user_avatar,
+					name:uni.current_this18.store.getters.user_name,
+					openid:uni.current_this18.store.getters.user_openid,
 					ready:true
 				},{
 					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
@@ -425,7 +427,7 @@
 						item.state=''
 						if(item.openid==data.master_openid){
 							item.master=true
-							item.count+=3
+							item.count+=data.master_card.length
 							uni.showToast({
 								title:`地主是${item.name}`,
 								icon:'none'
@@ -585,7 +587,6 @@
 					uni.current_this19.audio2.onError(err=>{
 						uni.current_this19.audio2_manager.openid=''
 						uni.current_this19.audio2_manager.audio_controller=false
-						console.log(err,'err reset');
 					})
 				}
 			})

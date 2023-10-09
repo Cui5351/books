@@ -3,7 +3,35 @@
 	<page>
 		<view class="container">
 		<image src="https://www.mynameisczy.cn/play_loop/日出.svg" style="position: absolute;top:0;height: 100%;width: 100%;" mode="aspectFill"></image>
+<!-- 		<view class="mode">
+			<view class="mo" @click="mode.switch=!mode.switch">
+				模式
+			</view>
+			<view class="list" :style="{height:mode.switch?'70px':'0px'}">
+				<view>
+					<image src="https://www.mynameisczy.cn/svgs/cap.svg" mode="aspectFill"></image>
+				</view>
+				<view>
+					<image src="https://www.mynameisczy.cn/svgs/chicken.svg" mode="aspectFill"></image>
+				</view>
+			</view>
+		</view> -->
 		<view class="invitation">
+		<view class="scroll_mode">
+			<view v-if='!room_state||room_id.length<=0' style="position: absolute;height:100%;width:100%;z-index:99999"></view>
+			<swiper @change="toggle_mode" circular :current-item-id="mode.current">
+				<swiper-item item-id="ddz">
+					<view class="swiper-item">
+						<image src="https://www.mynameisczy.cn/svgs/cap.svg" style="height: 100px;width: 100px;"></image>
+					</view>
+				</swiper-item>
+				<swiper-item item-id="kj">
+					<view class="swiper-item" >
+						<image src="https://www.mynameisczy.cn/svgs/chicken.svg" style="transform: scale(.6);height: 100px;width: 100px;"></image>
+					</view>
+				</swiper-item>
+			</swiper>
+		</view>
 			<view class="title">
 				<view class="tit" v-if='!p_time.flag'>
 					我的队伍
@@ -61,7 +89,9 @@
 						</view>
 					</view>
 					<view class="chat_content">
-						{{item.content}}
+						<view class="">
+							{{item.content}}
+						</view>
 					</view>
 				</view>
 			</view>
@@ -80,7 +110,6 @@
 			navigation,page
 		},
 		async onShareAppMessage(res) {
-			console.log(this.room_id.length,this.position,'osam');
 			if(this.room_id.length<=0&&this.position>=0){
 				// 创建房间
 				uni.sendSocketMessage({
@@ -91,7 +120,6 @@
 				})
 				return
 			}else if(this.room_id.length>0&&this.position>=0){
-				console.log(this.room_id,'room');
 				// 直接邀请
 				return {
 					title: `敢不敢和我来场较量`, //分享的名称
@@ -110,7 +138,6 @@
 			uni.current_this18=this
 			uni.onSocketOpen(function(){
 				let timer=setInterval(function(){
-				console.log(res.hasOwnProperty('room_id'),uni.current_this18.position>=0,'test2');
 				if(res.hasOwnProperty('room_id')&&uni.current_this18.position>=0){
 					// uni.showToast({
 						// title:'进入房间'
@@ -150,13 +177,12 @@
 				clearInterval(timer2)
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
 				success() {
-					console.log('连接成功');
+					uni.hideLoading()
 					uni.current_this18.socket_state=true
 				}})
 			},200)
 			
 			uni.onSocketClose(function(e){
-				console.log(e,'close');
 				uni.current_this18.socket_state=false
 				uni.showLoading({
 					title:'正在尝试重连'
@@ -185,7 +211,6 @@
 			})
 			
 			uni.onSocketError(function(e){
-				console.log(e,'e');																																										
 				uni.current_this18.socket_state=false
 				uni.showLoading({
 					title:'正在尝试重连'
@@ -196,9 +221,9 @@
 					uni.current_this18.users.pop()
 				}
 				uni.current_this18.users.push([{
-					avatar:store.getters.user_avatar,
-					name:store.getters.user_name,
-					openid:store.getters.user_openid,
+					avatar:uni.current_this18.store.getters.user_avatar,
+					name:uni.current_this18.store.getters.user_name,
+					openid:uni.current_this18.store.getters.user_openid,
 					ready:true
 				},{
 					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
@@ -261,7 +286,7 @@
 					uni.current_this18.users.unshift(...data.current_persons)
 					if(data.hasOwnProperty('room_id')){
 						uni.current_this18.room_id=data.room_id
-						console.log(uni.current_this18.room_id,'data.room_id');
+						uni.current_this18.mode.current=data.type
 					}
 					if(data.hasOwnProperty('lost')){
 						if(data.lost){
@@ -334,6 +359,8 @@
 					uni.current_this18.mes.push(data.mes)
 					uni.current_this18.scrollTop+=200
 					uni.hideLoading()
+				}else if(data.state==17){
+					uni.current_this18.mode.current=data.type
 				}
 			})
 			uni.showLoading({
@@ -522,7 +549,24 @@
 			return fun()
 		}
 		let scrollTop=ref(0)
-			return{mes,sendMes,scrollTop,position,await_position,socket_state,p_time,count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,timer,invation,room_state,user_state}
+		let mode=reactive({
+			switch:false,
+			current:'ddz'
+		})
+		function toggle_mode(e){
+			if(room_state.value){
+				mode.current=e.detail.currentItemId
+				console.log('send',mode.current);
+				uni.sendSocketMessage({
+					data:JSON.stringify({
+						state:12,
+						type:mode.current,
+						room_id:room_id.value
+					})
+				})
+			}
+		}
+			return{mes,mode,sendMes,toggle_mode,scrollTop,position,await_position,socket_state,p_time,count,start_game,change_user_state,room_id,store,users,rand_persons,solo_state,timer,invation,room_state,user_state}
 		}
 	}
 </script>
@@ -533,6 +577,61 @@
 		// background-color: rgba(255,0,0,.3);
 		height:100%;
 		width: 100%;
+	}
+	.scroll_mode{
+		height:100px;
+		width:100%;
+		position: absolute;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		transform: translateY(-70%);
+		// border: 1px solid rgba(0,0,0,.1);
+		border-radius: 10px;
+		padding:0 5px;
+		swiper{
+			height:100px;
+			width:100px;
+		}
+		.swiper-item{
+			height:100px;
+			width:100px;
+		}
+	}
+	.mode{
+		position: absolute;
+		left:100%;
+		top:10px;
+		transform: translateX(-100%);
+		background-color: rgba(255,255,255,.5);
+		text-align: center;
+		width:70px;
+		height:30px;
+		line-height:30px;
+		.m{
+		}
+		.list{
+			background-color: rgba(0,0,0,.2);
+			color: white;
+			width:70px;
+			position: absolute;
+			overflow: hidden;
+			transition: .5s ease;
+			&>view:active{
+				background-color: rgba(0,0,0,.1);
+			}
+			&>view{
+				padding:2px 0;
+				height:30px;
+				text-align: center;
+				line-height: 30px;
+				&>image{
+					height:30px;
+					width:30px;
+				}
+			}
+			height:0px;
+		}
 	}
 	.sendMes{
 		position: absolute;
@@ -573,15 +672,21 @@
 		}
 		.chat_content{
 			margin:0 10px;
+			max-width:70%;
+		}
+		.chat_content>view{
 			word-wrap: break-word;
-			padding:10px;
+			min-width:40px;
+			padding:5px 10px;
+			line-height: 30px;
 			box-sizing: border-box;
-			background-color:seagreen;
-			color: white;
+			// background-color:seagreen;
+			background-color: white;
+			// color: white;
+			color: black;
 			flex-wrap: wrap;
 			border-radius:15px;
 			// width:70%;
-			max-width:70%;
 		}
 		.chat_avatar{
 			height:40px;
@@ -672,6 +777,9 @@
 			font-size:30px;
 		.tit{
 			color: black;
+			// display:flex;
+			// flex-direction: column;
+			// align-items: center;
 			font-weight: bold;
 			margin-right:10px;
 		}

@@ -63,6 +63,8 @@ function MountRouter(ws_config){
         req.query.playing=0
         // 是否正在队伍
         req.query.teams=0
+        // 默认游戏类型（斗地主）
+        // req.query.mode='mode1'
 
         req.query.timer=null
         let position=ws_config.persons.length
@@ -87,15 +89,17 @@ function MountRouter(ws_config){
                 ws_config.persons[position].privilege=true
                 ws_config.persons[position].ready=true
                 let room_id=randomUUID()
-                let c={message:[],room_id:room_id,t:[ws_config.persons[position]]}
+                let c={message:[],room_id:room_id,t:[ws_config.persons[position]],type:'ddz',isPlay:false}
+                
                 // 创建房间
-                ws_config.teams.push(c)
+                ws_config.teams.push(c) 
 
                 ws_config.teams[ws_config.teams.indexOf(c)].t.forEach(item=>{
                     item.ws.send(JSON.stringify({
                         state:2,
                         create_room:true,
                         room_id:room_id,
+                        type:ws_config.teams[ws_config.teams.indexOf(c)].type,
                         current_persons:ws_config.teams[ws_config.teams.indexOf(c)].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                     }))
                 })
@@ -186,6 +190,7 @@ function MountRouter(ws_config){
                             item.ws.send(JSON.stringify({
                                 room_id:ws_config.teams[i].room_id,
                                 state:2,
+                                type:ws_config.teams[i].type,
                                 current_persons:ws_config.teams[i].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                             }))
                         })
@@ -217,13 +222,14 @@ function MountRouter(ws_config){
                         arr[i].ready=true
                         i++
                     }
-                    let c={message:[],t:arr,room_id:randomUUID()}
+                    let c={message:[],t:arr,room_id:randomUUID(),type:'ddz',isPlay:false}
                     ws_config.teams.push(c)
                     // 创建队伍，通知两方
                     ws_config.teams[ws_config.teams.indexOf(c)].t.forEach(item=>{
                         item.ws.send(JSON.stringify({
                             state:2,
                             room_id:ws_config.teams[ws_config.teams.indexOf(c)].room_id,
+                            type:ws_config.teams[ws_config.teams.indexOf(c)].type,
                             current_persons:ws_config.teams[ws_config.teams.indexOf(c)].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                         }))
                     })
@@ -259,7 +265,9 @@ function MountRouter(ws_config){
                     console.log('房间不存在');
                     return
                 }
-                let obj=create()
+                ws_config.teams[ind].isPlay=true
+                let mode=new Game[Game.check(ws_config.teams[ind].type)]
+                let obj=mode.create()
                 // 设置一个首先能抢地主的人
                 let master=Math.round(Math.random()*2)
 
@@ -294,6 +302,7 @@ function MountRouter(ws_config){
 
                 // 创建裁判
                 ws_config.teams[ind].t.push({
+                    mode:mode,
                     order:master,
                     room_id:ws_config.teams[ind].room_id,
                     master_openid:'',
@@ -416,7 +425,7 @@ function MountRouter(ws_config){
                     ws_config.teams[room_id].t[3].users[inde].out_card_state=true
 
                     ws_config.teams[room_id].t[3].users[inde].cards.push(...ws_config.teams[room_id].t[3].master_card)
-                    ws_config.teams[room_id].t[3].users[inde].count+=3
+                    ws_config.teams[room_id].t[3].users[inde].count+=ws_config.teams[room_id].t[3].master_card.length
                     // 把地主牌发给地主并公布
                     ws_config.teams[room_id].t.forEach((item,index)=>{
                         if(index>=3)
@@ -498,7 +507,7 @@ function MountRouter(ws_config){
                             ws_config.teams[room_id].t[3].current_player_openid=flag.openid
                             // 把地主牌发给地主并公布
                             ws_config.teams[room_id].t[3].users[flag.index].cards.push(...ws_config.teams[room_id].t[3].master_card)
-                            ws_config.teams[room_id].t[3].users[flag.index].count+=3
+                            ws_config.teams[room_id].t[3].users[flag.index].count+=ws_config.teams[room_id].t[3].master_card.length
                             ws_config.teams[room_id].t.forEach((item3,index)=>{
                                 if(index>=3)
                                     return
@@ -539,6 +548,7 @@ function MountRouter(ws_config){
                         }))
                     })
                     ws_config.teams[room_id].t[3].stop_interval_flag()
+                    ws_config.teams[room_id].isPlay=false
                     ws_config.teams[room_id].t.pop()
                     return
                 }
@@ -594,6 +604,7 @@ function MountRouter(ws_config){
                     item.ws.send(JSON.stringify({
                         state:2,
                         room_id:room_id,
+                        type:ws_config.teams[ind].type,
                         current_persons:ws_config.teams[ind].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                     }))
                 })
@@ -627,7 +638,7 @@ function MountRouter(ws_config){
                 }
 
                 // 检测出牌是否符合规则
-                let result2=await check_card_regular(cards)
+                let result2=await ws_config.teams[room_id].t[3].mode.check_card_regular(cards)
 
                 if(!result2){
                     // 出的牌不符合规则
@@ -686,6 +697,7 @@ function MountRouter(ws_config){
                                             }))
                                         })
                                         ws_config.teams[room_id].t.pop()
+                                        ws_config.teams[room_id].isPlay=false
                                         // 删除裁判
                                     }, 1000);   
                                 return
@@ -707,13 +719,13 @@ function MountRouter(ws_config){
                     return
                 }
 
-                // 检测出的牌是否合理
-                let result=await check_card_regular(ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1][ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length-1].cards)
+                // 检测出的牌是否合理(拿上次的跟这次的进行对比)
+                let result=await ws_config.teams[room_id].t[3].mode.check_card_regular(ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1][ws_config.teams[room_id].t[3].rounds[ws_config.teams[room_id].t[3].rounds.length-1].length-1].cards)
                 
                 // 有grade的都是炸弹
-                if((result.type==result2.type&&result.card<result2.card&&result.length==result2.length)||result.grade<result2.grade){
+                if(ws_config.teams[room_id].t[3].mode.check_card_regular2(result,result2)){
                     // 翻倍
-                    if(result2.type=='4炸'||result2.type=='王炸'||result2.type=='飞机')
+                    if(ws_config.teams[room_id].t[3].mode.times(result2))
                         ws_config.teams[room_id].t[3].score*=2
                 }else{
                     // 出的牌不合理
@@ -781,6 +793,7 @@ function MountRouter(ws_config){
                                     }))
                                 })
                                 ws_config.teams[room_id].t.pop()
+                            ws_config.teams[room_id].isPlay=false
                             }, 1000);
                             return
                         }
@@ -904,215 +917,112 @@ function MountRouter(ws_config){
                         content:content
                     }))
                 })
-            }
-
-            // 检测牌是否存在
-            function test_cards_exists(room_id,cards,openid){
-                return new Promise(res=>{
-                    for(let i=0;i<ws_config.teams[room_id].t[3].users.length;i++){
-                        if(ws_config.teams[room_id].t[3].users[i].openid==openid){
-                            for(let j=0;j<cards.length;j++){
-                                    if(ws_config.teams[room_id].t[3].users[i].cards.indexOf(cards[j])<0){
-                                        res(false)
-                                    }
-                            }
-                            res(true)
-                        }
-                    }
-                })
-            }
-            // 匹配规则
-            function check_card_regular(cards){
-                return new Promise(res=>{
-                    // 把数字匹配出来
-                    let reg=/(\d)/g
-                    cards=cards.map(a=>{
-                        return Number(a.match(reg).join(''))
-                    }).sort((a,b)=>a-b)
-        
-                    let plane=false
-                    // 规则
-                    // 1单
-                    if(cards.length==1){
-                        res({type:'单',card:cards[0],length:1,grade:0})
-                    }
-                    // 2双
-                    else if(cards.length==2&&cards.indexOf(16)<0){
-                        if(cards[0]!=cards[1]){
-                            res(false)
-                        }
-                        res({type:'双',card:cards[0],length:2,grade:0})
-                    }
-                    else if(cards.length==3&&cards[0]==cards[1]&&cards[1]==cards[2]){
-                        res({type:'三单',card:cards[0],length:2,grade:0})
-                    }
-                    // 3 单连
-                    else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1&&cards[2]==cards[3]-1&&cards[3]==cards[4]-1&&cards[cards.length-1]!='15'){
-                        for(let i=0;i<cards.length-1;i++){
-                            if(cards[i]!=cards[++i]-1){
-                                res(false)
-                                return
-                            }
-                        }
-                        // 进行匹配
-                        res({type:'单连',card:cards[cards.length-1],length:cards.length,grade:0})
-                    }
-                    // 4 双连
-                    else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards[2]==cards[3]&&cards[3]!=cards[4]&&cards.length%2==0&&cards[cards.length-1]!='14'){
-                        for(let i=0;i<cards.length;i=i+2){
-                            if(cards[i]!=cards[i+1]){
-                                res(false)
-                                return
-                            }
-                        }
-                        res({type:'双连',card:cards[cards.length-1],length:cards.length,grade:0})
-                    }
-                    // 5炸
-                    else if(cards.length==4&&cards[0]==cards[3]){
-                        for(let i=0;i<cards.length-1;i++){
-                            if(cards[i]!=cards[++i]){
-                                res(false)
-                            }
-                        }
-                        res({type:'4炸',card:cards[0],length:cards.length,grade:cards[0]})
-        
-                    }
-                    // 6王炸
-                    else if(cards.indexOf(16)>=0&&cards.indexOf(17)>=0){
-                        res({type:'王炸',card:cards[0],length:cards.length,grade:100})
-                    }
-                    // 7飞机
-                    else if(plane=fn(cards)){
-                        res(plane)
-                    }
-                    // 8三带一
-                    else if(cards.length==4&&cards[0]!=cards[3]){
-                        // 情况一 3334
-                        if(cards[0]==cards[1]&&cards[1]==cards[2]){
-                            res({type:'三带一',card:cards[0],length:cards.length,grade:0})
-                        }
-                        // 情况二 3444
-                        if(cards[1]==cards[2]&&cards[2]==cards[3]){
-                            res({type:'三带一',card:cards[3],length:cards.length,grade:0})
-                        }
-                        res(false)
-                    }
-                    // 0 1 2 3 4
-                    // 3 3 3 4 4
-        
-                    // 4 4 4 3 3
-        
-                    // 9三带二
-                    else if(cards.length==5&&((cards[0]!=cards[3]&&cards[3]==cards[4]&&cards[0]==cards[1]&&cards[2]==cards[3])||(cards[4]!=cards[0]&&cards[0]==cards[1]&&cards[1]==cards[2]&&cards[3]==cards[4]))){
-                        // 情况一 33344
-                        if(cards[0]==cards[1]&&cards[1]==cards[2]){
-                            res({type:'三带二',card:cards[0],length:cards.length,grade:0})
-                        }
-                        // 情况二 33444
-                        if(cards[2]==cards[3]&&cards[3]==cards[4]){
-                            res({type:'三带二',card:cards[4],length:cards.length,grade:0})
-                        }
-                        res(false)
-                        // 4带二
-                    }else if(cards.length==6&&((cards[0]==cards[1]&&cards[1]==cards[2]&&cards[2]==cards[3])||(cards[5]==cards[4]&&cards[4]==cards[3]&&cards[3]==cards[2]))){
-                        if(cards[0]==cards[1]&&cards[1]==cards[2]&&cards[2]==cards[3]){
-                            res({type:'四带二',card:cards[0],length:cards.length,grade:0})
-                        }else{
-                            res({type:'四带二',card:cards[5],length:cards.length,grade:0})
-                        }
-                    }
-                    res(false)
-                })
-            }
-            // 检测是否有两个是3个的
-            function fn(cards){
-            // 78飞机带对三
-                let arr=[]
-                for(let i=0;i<cards.length;i++){
-                    let count=0
-                    for(let j=i;j<cards.length;j++){
-                        if(cards[i]==cards[j]){
-                            count++
-                        }
-                        if(count>=3){
-                            if(arr.indexOf(cards[i])<0){
-                                arr.push(cards[i])
-                            }
-                        }
-                    }
+            }else if(msg.state==12){
+                const {state,ind}=matchRoomId(ws_config.teams,msg.room_id)
+                // 房间不存在
+                if(!state){
+                    console.log('房间不存在');
+                    return
                 }
-                if(arr.length>=2&&(arr.length*3+arr.length)==cards.length&&cards.length%2==0)
-                    return {type:'飞机',card:arr[0],length:arr.length,grade:0}
-                return false
+                // 游戏正在进行中
+                if(ws_config.teams[ind].isPlay){
+                    return
+                }
+                // 改变游戏类型
+                ws_config.teams[ind].type=msg.type
+                ws_config.teams[ind].t.forEach((item,index)=>{
+                    if(index>=3)
+                        return
+                    item.ws.send(JSON.stringify({
+                        state:17,
+                        type:ws_config.teams[ind].type
+                    }))
+                })
             }
-
-            // 扣除对应的牌
-            function decrement_cards(room_id,cards,openid){
-                let count=0
-                return new Promise(res=>{
-                    for(let i=0;i<ws_config.teams[room_id].t[3].users.length;i++){
-                        if(ws_config.teams[room_id].t[3].users[i].openid==openid){
-                            for(let j=0;j<cards.length;j++){
-                                for(let k=0;k<ws_config.teams[room_id].t[3].users[i].cards.length;k++){
-                                    if(cards[j]==ws_config.teams[room_id].t[3].users[i].cards[k]){
-                                        ws_config.teams[room_id].t[3].users[i].cards.splice(k,1)
-                                        ws_config.teams[room_id].t[3].users[i].count--
-                                        count=ws_config.teams[room_id].t[3].users[i].count
-                                    }
-                                }
+                // 扣除对应的牌
+    function decrement_cards(room_id,cards,openid){
+        let count=0
+        return new Promise(res=>{
+            for(let i=0;i<ws_config.teams[room_id].t[3].users.length;i++){
+                if(ws_config.teams[room_id].t[3].users[i].openid==openid){
+                    for(let j=0;j<cards.length;j++){
+                        for(let k=0;k<ws_config.teams[room_id].t[3].users[i].cards.length;k++){
+                            if(cards[j]==ws_config.teams[room_id].t[3].users[i].cards[k]){
+                                ws_config.teams[room_id].t[3].users[i].cards.splice(k,1)
+                                ws_config.teams[room_id].t[3].users[i].count--
+                                count=ws_config.teams[room_id].t[3].users[i].count
                             }
-                            res(count)
                         }
                     }
-                })
+                    res(count)
+                }
             }
+        })
+    }
 
-            // 检测是否有两个人不出(回合结束)
-            function test_users_out_card_state(room_id){
-                let count=0
-                let openid=''
-                return new Promise(res=>{
-                    for(let i=0;i<ws_config.teams[room_id].t[3].users.length;i++){
-                        if(ws_config.teams[room_id].t[3].users[i].out_card_state==false)
-                            count++
-                        else
-                            openid=ws_config.teams[room_id].t[3].users[i].openid
-                    }
-                    // 回合结束，返回那个可以出牌的openid
-                    if(count>=2)
-                        res(openid)
-                    res(false)
-                })
+    // 检测是否有两个人不出(回合结束)
+    function test_users_out_card_state(room_id){
+        let count=0
+        let openid=''
+        return new Promise(res=>{
+            for(let i=0;i<ws_config.teams[room_id].t[3].users.length;i++){
+                if(ws_config.teams[room_id].t[3].users[i].out_card_state==false)
+                    count++
+                else
+                    openid=ws_config.teams[room_id].t[3].users[i].openid
             }
+            // 回合结束，返回那个可以出牌的openid
+            if(count>=2)
+                res(openid)
+            res(false)
+        })
+    }
+    // 检测牌是否存在
+    function test_cards_exists(room_id,cards,openid){
+        return new Promise(res=>{
+            for(let i=0;i<ws_config.teams[room_id].t[3].users.length;i++){
+                if(ws_config.teams[room_id].t[3].users[i].openid==openid){
+                    for(let j=0;j<cards.length;j++){
+                            if(ws_config.teams[room_id].t[3].users[i].cards.indexOf(cards[j])<0){
+                                res(false)
+                            }
+                    }
+                    res(true)
+                }
+            }
+        })
+    }
 
-            // 将所有人是否能出牌重置为true(每回合开始前调用)
-            function set_users_out_card_state_all_true(room_id){
-                return new Promise(res=>{
-                    for(let i=0;i<3;i++){
-                        ws_config.teams[room_id].t[3].users[i].out_card_state=true
-                    }
-                    res()
-                })
+    // 将所有人是否能出牌重置为true(每回合开始前调用)
+    function set_users_out_card_state_all_true(room_id){
+        return new Promise(res=>{
+            for(let i=0;i<3;i++){
+                ws_config.teams[room_id].t[3].users[i].out_card_state=true
             }
+            res()
+        })
+    }
 
-                function set_next_out_card_user(room_id){
-                    return new Promise(res=>{
-                        for(let i=ws_config.teams[room_id].t[3].users.length-1;i>=0;i--){
-                            if(i>=3)
-                                break
-                            if(ws_config.teams[room_id].t[3].users[i].openid==ws_config.teams[room_id].t[3].current_player_openid){
-                                // if(((i+1)>=3?ws_config.teams[room_id][3].users[0].out_card_state:ws_config.teams[room_id][3].users[i+1].out_card_state)==false){
-                                    // 如果下一个为false，就检测下下个
-                                    // i++
-                                // }
-                                // 设置下一个出牌用户
-                                ws_config.teams[room_id].t[3].current_player_openid=(i-1)<0?ws_config.teams[room_id].t[3].users[2].openid:ws_config.teams[room_id].t[3].users[i-1].openid
-                                res()
-                                return
-                        }
-                    }
-                })
+        function set_next_out_card_user(room_id){
+            return new Promise(res=>{
+                for(let i=ws_config.teams[room_id].t[3].users.length-1;i>=0;i--){
+                    if(i>=3)
+                        break
+                    if(ws_config.teams[room_id].t[3].users[i].openid==ws_config.teams[room_id].t[3].current_player_openid){
+                        // if(((i+1)>=3?ws_config.teams[room_id][3].users[0].out_card_state:ws_config.teams[room_id][3].users[i+1].out_card_state)==false){
+                            // 如果下一个为false，就检测下下个
+                            // i++
+                        // }
+                        // 设置下一个出牌用户
+                        ws_config.teams[room_id].t[3].current_player_openid=(i-1)<0?ws_config.teams[room_id].t[3].users[2].openid:ws_config.teams[room_id].t[3].users[i-1].openid
+                        res()
+                        return
+                }
             }
+        })
+    }
+
+           
         })
         ws.on('error',function(e){
                 console.log(e,'err');
@@ -1152,11 +1062,14 @@ function MountRouter(ws_config){
                                 current_persons:ws_config.teams[index].t.map(item=>{return{name:item.user_name,openid:item.openid,avatar:item.user_avatar,privilege:item.privilege,ready:item.ready}})
                             }))
                         })
-                        // 移除裁判
-                        if((item.t.length>1&&item.t[item.length-1].hasOwnProperty('current_player_openid'))){
-                            // 裁判存在，移除裁判
-                            item.t[item.length].stop_interval_flag()
-                            item.t.splice(item.t.length,1)
+                        ws_config.teams[index].isPlay=false
+                        if(item.t.length>1){
+                            // 移除裁判
+                            if(item.t[item.t.length-1].hasOwnProperty('current_player_openid')){
+                                // 裁判存在，移除裁判
+                                item.t[item.t.length-1].stop_interval_flag()
+                                item.t.splice(item.t.length-1,1)
+                            }
                         }
                         if(item.t.length<=1){
                             // 解散
@@ -1169,9 +1082,19 @@ function MountRouter(ws_config){
         })
     })
 }
-
-function create(){
-    let cards2=[
+function matchRoomId(team,room_id){
+    let state=false
+    let index=-1
+    team.forEach((item,i)=>{
+        if(item.room_id==room_id){
+            state=true
+            index=i
+        }
+    })
+    return {state,ind:index}
+}
+class Game{
+    static cards=[
         '10black_peach.svg', '10block.svg',           '10club.svg',
         '10red_heart.svg',   '11black_peach.svg',     '11block.svg',
         '11club.svg',        '11red_heart.svg',       '12black_peach.svg',
@@ -1191,70 +1114,415 @@ function create(){
         '8club.svg',         '8red_heart.svg',        '9black_peach.svg',
         '9block.svg',        '9club.svg',             '9red_heart.svg'
     ]
-    // 首先是发牌,所谓发牌就是开局时一副牌共有 54 张,分为三份,
-        // 一人 17 张,留 3 张做底牌,在确定地主之前玩家不能看底牌。
+    static check(name){
+        let type=[{
+            t:'ddz',
+            name:'mode1'
+        },{
+            t:'kj',
+            name:'mode2'
+        }]
+        let c='ddz'
+        type.forEach(item=>{
+            if(item.t==name){
+                c=item.name
+            }
+        })
+        return c
+    }
+    static mode1=class{
+        // type='ddz'
+        create(){
+            // 首先是发牌,所谓发牌就是开局时一副牌共有 54 张,分为三份,
+                // 一人 17 张,留 3 张做底牌,在确定地主之前玩家不能看底牌。
 
 
-    // 总共3个人，54张牌，首先每人17张牌
+            // 总共3个人，54张牌，首先每人17张牌
 
-    let a={
-        count:17,
-        cards:[],
-        pre_master_count:0,
-        master:false,
-        total_count:0,
-        out_card_state:false,
-        cancel_master:false,
-        openid:''
-    }
-    let b={
-        count:17,
-        cards:[],
-        pre_master_count:0,
-        master:false,
-        total_count:0,
-        out_card_state:false,
-        cancel_master:false,
-        openid:''
-    }
-    let c={
-        count:17,
-        cards:[],
-        pre_master_count:0,
-        master:false,
-        total_count:0,
-        out_card_state:false,
-        cancel_master:false,
-        openid:''
-    }
-    let rand=0
-    // 随机数分配三人
-    while(cards2.length>3){
-        rand=Math.round(Math.random()*(cards2.length-1))
-        if(a.count){
-            a.cards.push(...cards2.splice(rand,1))
-            a.count--
-        }else if(b.count){
-            b.cards.push(...cards2.splice(rand,1))
-            b.count--
-        }else if(c.count){
-            c.cards.push(...cards2.splice(rand,1))
-            c.count--
+            let a={
+                count:17,
+                cards:[],
+                pre_master_count:0,
+                master:false,
+                total_count:0,
+                out_card_state:false,
+                cancel_master:false,
+                openid:''
+            }
+            let b={
+                count:17,
+                cards:[],
+                pre_master_count:0,
+                master:false,
+                total_count:0,
+                out_card_state:false,
+                cancel_master:false,
+                openid:''
+            }
+            let c={
+                count:17,
+                cards:[],
+                pre_master_count:0,
+                master:false,
+                total_count:0,
+                out_card_state:false,
+                cancel_master:false,
+                openid:''
+            }
+            let cards2=JSON.parse(JSON.stringify(Game.cards))
+            let rand=0
+            // 随机数分配三人
+            while(cards2.length>3){
+                rand=Math.round(Math.random()*(cards2.length-1))
+                if(a.count){
+                    a.cards.push(...cards2.splice(rand,1))
+                    a.count--
+                }else if(b.count){
+                    b.cards.push(...cards2.splice(rand,1))
+                    b.count--
+                }else if(c.count){
+                    c.cards.push(...cards2.splice(rand,1))
+                    c.count--
+                }
+            }
+            a.count=a.cards.length
+            b.count=b.cards.length
+            c.count=c.cards.length
+            return {user_cards:[a,b,c],others:cards2}
         }
-    }
-    a.count=a.cards.length
-    b.count=b.cards.length
-    c.count=c.cards.length
-    return {user_cards:[a,b,c],others:cards2}
-}
-function matchRoomId(team,room_id){
-    let state=false
-    let index=-1
-    team.forEach((item,i)=>{
-        if(item.room_id==room_id){
-            state=true
-            index=i
+
+        times(result2){
+            if(result2.type=='炸'||result2.type=='王炸'||result2.type=='飞机')
+                return true
+            else
+                false
         }
-    })
-    return {state,ind:index}
+        check_card_regular2(result,result2){
+            if((result.type==result2.type&&result.card<result2.card&&result.length==result2.length)||result.grade<result2.grade){
+                return true
+            }else   
+                return false
+        }
+                    // 匹配规则
+        check_card_regular(cards){
+            // 检测是否有两个是3个的
+            function fn(cards){
+                // 78飞机带对三
+                    let arr=[]
+                    for(let i=0;i<cards.length;i++){
+                        let count=0
+                        for(let j=i;j<cards.length;j++){
+                            if(cards[i]==cards[j]){
+                                count++
+                            }
+                            if(count>=3){
+                                if(arr.indexOf(cards[i])<0){
+                                    arr.push(cards[i])
+                                }
+                            }
+                        }
+                    }
+                    if((arr.length*3==cards.length)||(arr.length>=2&&(arr.length*3+arr.length)==cards.length&&cards.length%2==0))
+                        return {type:'飞机',card:arr[0],length:arr.length,grade:0}
+                    return false
+                }
+                        return new Promise(res=>{
+                            // 把数字匹配出来
+                            let reg=/(\d)/g
+                            cards=cards.map(a=>{
+                                return Number(a.match(reg).join(''))
+                            }).sort((a,b)=>a-b)
+                
+                            let plane=false
+                            // 规则
+                            // 1单
+                            if(cards.length==1){
+                                res({type:'单',card:cards[0],length:1,grade:0})
+                            }
+                            // 2双
+                            else if(cards.length==2&&cards.indexOf(16)<0){
+                                if(cards[0]!=cards[1]){
+                                    res(false)
+                                }
+                                res({type:'双',card:cards[0],length:2,grade:0})
+                            }
+                            else if(cards.length==3&&cards[0]==cards[1]&&cards[1]==cards[2]){
+                                res({type:'三单',card:cards[0],length:2,grade:0})
+                            }
+                            // 3 单连
+                            else if(cards.length>=5&&cards[0]==(cards[1]-1)&&cards[1]==cards[2]-1&&cards[2]==cards[3]-1&&cards[3]==cards[4]-1&&cards[cards.length-1]!='15'){
+                                for(let i=0;i<cards.length-1;i++){
+                                    if(cards[i]!=cards[++i]-1){
+                                        res(false)
+                                        return
+                                    }
+                                }
+                                // 进行匹配
+                                res({type:'单连',card:cards[cards.length-1],length:cards.length,grade:0})
+                            }
+                            // 4 双连
+                            else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards[2]==cards[3]&&cards[3]!=cards[4]&&cards.length%2==0&&cards[cards.length-1]!='15'){
+                                for(let i=0;i<cards.length;i=i+2){
+                                    if(cards[i]!=cards[i+1]){
+                                        res(false)
+                                        return
+                                    }
+                                }
+                                res({type:'双连',card:cards[cards.length-1],length:cards.length,grade:0})
+                            }
+                            // 5炸
+                            else if(cards.length==4&&cards[0]==cards[3]){
+                                for(let i=0;i<cards.length-1;i++){
+                                    if(cards[i]!=cards[++i]){
+                                        res(false)
+                                    }
+                                }
+                                res({type:'炸',card:cards[0],length:cards.length,grade:cards[0]*(cards.length-3)})
+                            }
+                            // 6王炸
+                            else if(cards.indexOf(16)>=0&&cards.indexOf(17)>=0){
+                                res({type:'王炸',card:cards[0],length:cards.length,grade:100})
+                            }
+                            // 7飞机
+                            else if(plane=fn(cards)){
+                                res(plane)
+                            }
+                            // 8三带一
+                            else if(cards.length==4&&cards[0]!=cards[3]){
+                                // 情况一 3334
+                                if(cards[0]==cards[1]&&cards[1]==cards[2]){
+                                    res({type:'三带一',card:cards[0],length:cards.length,grade:0})
+                                }
+                                // 情况二 3444
+                                if(cards[1]==cards[2]&&cards[2]==cards[3]){
+                                    res({type:'三带一',card:cards[3],length:cards.length,grade:0})
+                                }
+                                res(false)
+                            }
+                            // 0 1 2 3 4
+                            // 3 3 3 4 4
+                
+                            // 4 4 4 3 3
+                
+                            // 9三带二
+                            else if(cards.length==5&&((cards[0]!=cards[3]&&cards[3]==cards[4]&&cards[0]==cards[1]&&cards[2]==cards[3])||(cards[4]!=cards[0]&&cards[0]==cards[1]&&cards[1]==cards[2]&&cards[3]==cards[4]))){
+                                // 情况一 33344
+                                if(cards[0]==cards[1]&&cards[1]==cards[2]){
+                                    res({type:'三带二',card:cards[0],length:cards.length,grade:0})
+                                }
+                                // 情况二 33444
+                                if(cards[2]==cards[3]&&cards[3]==cards[4]){
+                                    res({type:'三带二',card:cards[4],length:cards.length,grade:0})
+                                }
+                                res(false)
+                                // 4带二
+                            }else if(cards.length==6&&((cards[0]==cards[1]&&cards[1]==cards[2]&&cards[2]==cards[3])||(cards[5]==cards[4]&&cards[4]==cards[3]&&cards[3]==cards[2]))){
+                                if(cards[0]==cards[1]&&cards[1]==cards[2]&&cards[2]==cards[3]){
+                                    res({type:'四带二',card:cards[0],length:cards.length,grade:0})
+                                }else{
+                                    res({type:'四带二',card:cards[5],length:cards.length,grade:0})
+                                }
+                            }
+                            res(false)
+                        })
+                    }
+    }
+    static mode2=class{
+        // type='kj'
+        create(){
+            // 首先是发牌,所谓发牌就是开局时一副牌共有 54 张,分为三份,
+                // 一人 17 张,留 3 张做底牌,在确定地主之前玩家不能看底牌。
+
+
+            // 总共3个人，54张牌，首先每人17张牌
+
+            let a={
+                count:18,
+                cards:[],
+                pre_master_count:0,
+                master:false,
+                total_count:0,
+                out_card_state:false,
+                cancel_master:false,
+                openid:''
+            }
+            let b={
+                count:18,
+                cards:[],
+                pre_master_count:0,
+                master:false,
+                total_count:0,
+                out_card_state:false,
+                cancel_master:false,
+                openid:''
+            }
+            let c={
+                count:18,
+                cards:[],
+                pre_master_count:0,
+                master:false,
+                total_count:0,
+                out_card_state:false,
+                cancel_master:false,
+                openid:''
+            }
+            let cards2=JSON.parse(JSON.stringify(Game.cards))
+            let rand=0
+            // 随机数分配三人
+            while(cards2.length>0){
+                rand=Math.round(Math.random()*(cards2.length-1))
+                if(a.count){
+                    a.cards.push(...cards2.splice(rand,1))
+                    a.count--
+                }else if(b.count){
+                    b.cards.push(...cards2.splice(rand,1))
+                    b.count--
+                }else if(c.count){
+                    c.cards.push(...cards2.splice(rand,1))
+                    c.count--
+                }
+            }
+            a.count=a.cards.length
+            b.count=b.cards.length
+            c.count=c.cards.length
+            return {user_cards:[a,b,c],others:cards2}
+        }
+        times(result2){
+            if(result2.type=='炸'||result2.type=='王炸'||result2.type=='飞机'||result2.type=='kj')
+                return true
+            else
+                false
+        }
+        check_card_regular2(result,result2){
+            if(result.type=='二双'&&(result.type==result2.type&&result.card==result2.card-1)){
+                return true
+            }
+            if(result.type=='双连'&&(result.type==result2.type&&result.card==result2.card-1)){
+                return true
+            } 
+            if((result.type!=='二双'&&result.type!='双连'&&result.type==result2.type&&result.card<result2.card&&result.length==result2.length)||result.grade<result2.grade){
+                return true
+            }else   
+                return false
+        }
+        // 匹配规则
+        check_card_regular(cards){
+            // 检测是否有两个是3个的
+            function fn(cards){
+                // 78飞机带对三
+                    let arr=[]
+                    for(let i=0;i<cards.length;i++){
+                        let count=0
+                        for(let j=i;j<cards.length;j++){
+                            if(cards[i]==cards[j]){
+                                count++
+                            }
+                            if(count>=3){
+                                if(arr.indexOf(cards[i])<0){
+                                    arr.push(cards[i])
+                                }
+                            }
+                        }
+                    }
+                    // 找单（若每张牌数都大于1，就说明）
+                    if((arr.length*3==cards.length)&&(arr.length>=2&&cards.length%2==0))
+                        return {type:'飞机',card:arr[0],length:arr.length,grade:0}
+                    return false
+                }
+                function checkKJ(){
+                    let c=[...arguments]
+                    let reg=/[^(\d).svg]/g
+                    let power=true
+                    let grade=1
+                    c.forEach((item,index)=>{
+                        if(!index)
+                            return
+                        if(c[index-1].match(reg).join('')!=item.match(reg).join('')){
+                            power=false
+                        }
+                    })
+                    if(power){
+                        let icon=c[0].match(reg).join('')
+                        if(icon=='block')
+                            grade+=0.1
+                        else if(icon=='club')
+                            grade+=0.2
+                        else if(icon=='red_heart')
+                            grade+=0.3
+                        else if(icon=='black_peach')
+                            grade+=0.4
+                    }
+                    // 如果为真，检查权重
+                    // 'block'=2.1
+                    // 'club'=2.2
+                    // 'red_heart'=2.3
+                    // 'black_peach'=2.4
+                    return {power,grade}
+                }
+                        return new Promise(res=>{
+                            // 把数字匹配出来
+                            let reg=/(\d)/g
+                            let cards2=JSON.parse(JSON.stringify(cards))
+                            cards=cards.map(a=>{
+                                return Number(a.match(reg).join(''))
+                            }).sort((a,b)=>a-b)
+                
+                            let plane=false
+                            // 规则
+                            // 1单
+                            if(cards.length==1){
+                                res({type:'单',card:cards[0],length:1,grade:0})
+                            }
+                            // 2双
+                            else if(cards.length==2&&cards.indexOf(16)<0){
+                                if(cards[0]!=cards[1]){
+                                    res(false)
+                                }
+                                res({type:'双',card:cards[0],length:2,grade:0})
+                            }
+                            else if(cards.length==4&&(cards[0]==cards[1]&&cards[2]==cards[3]&&cards[1]!=cards[2])&&cards[3]!='15'){
+                                res({type:'二双',card:cards[3],length:4,grade:0})
+                            }
+                            // 3连
+                            else if(cards.length==3&&cards[0]==cards[1]&&cards[1]==cards[2]){
+                                res({type:'三单',card:cards[0],length:2,grade:0})
+                            }else if(cards.length==3&&cards[0]=='5'&&cards[1]=='10'&&cards[2]=='13'){
+                                let {power,grade}=checkKJ(...cards2)
+                                // 真
+                                if(power)
+                                    res({type:'kj',card:cards[0],length:2,grade:grade})
+                                else// 假
+                                    res({type:'kj',card:cards[0],length:2,grade:grade})
+                            }
+                            // 4 双连
+                            else if(cards.length>=6&&cards[0]==cards[1]&&cards[1]!=cards[2]&&cards[2]==cards[3]&&cards[3]!=cards[4]&&cards.length%2==0&&cards[cards.length-1]!='15'){
+                                for(let i=0;i<cards.length;i=i+2){
+                                    if(cards[i]!=cards[i+1]){
+                                        res(false)
+                                        return
+                                    }
+                                }
+                                res({type:'双连',card:cards[cards.length-1],length:cards.length,grade:0})
+                            }
+                            // 5炸
+                            else if(cards.length==4&&cards[0]==cards[3]){
+                                for(let i=0;i<cards.length-1;i++){
+                                    if(cards[i]!=cards[++i]){
+                                        res(false)
+                                    }
+                                }
+                            res({type:'炸',card:cards[0],length:cards.length,grade:cards[0]*(cards.length-3)})
+                            }
+                            // 6王炸
+                            else if(cards.indexOf(16)>=0&&cards.indexOf(17)>=0){
+                                res({type:'王炸',card:cards[0],length:cards.length,grade:16})
+                            }
+                            // 7飞机
+                            else if(plane=fn(cards)){
+                                res(plane)
+                            }
+                            res(false)
+                        })
+                    }
+    }
 }
