@@ -1337,7 +1337,7 @@ class Game{
             // 总共3个人，54张牌，首先每人17张牌
 
             let a={
-                count:18,
+                count:28,
                 cards:[],
                 pre_master_count:0,
                 master:false,
@@ -1347,7 +1347,7 @@ class Game{
                 openid:''
             }
             let b={
-                count:18,
+                count:28,
                 cards:[],
                 pre_master_count:0,
                 master:false,
@@ -1357,7 +1357,7 @@ class Game{
                 openid:''
             }
             let c={
-                count:18,
+                count:28,
                 cards:[],
                 pre_master_count:0,
                 master:false,
@@ -1366,10 +1366,10 @@ class Game{
                 cancel_master:false,
                 openid:''
             }
-            let cards2=JSON.parse(JSON.stringify(Game.cards))
+            let cards2=[...JSON.parse(JSON.stringify(Game.cards)),...JSON.parse(JSON.stringify(Game.cards))]
             let rand=0
             // 随机数分配三人
-            while(cards2.length>0){
+            while(cards2.length>0&&(a.count||b.count||c.count)){
                 rand=Math.round(Math.random()*(cards2.length-1))
                 if(a.count){
                     a.cards.push(...cards2.splice(rand,1))
@@ -1385,7 +1385,7 @@ class Game{
             a.count=a.cards.length
             b.count=b.cards.length
             c.count=c.cards.length
-            return {user_cards:[a,b,c],others:cards2}
+            return {user_cards:[a,b,c],others:[]}
         }
         times(result2){
             if(result2.type=='炸'||result2.type=='王炸'||result2.type=='飞机'||result2.type=='kj')
@@ -1428,6 +1428,17 @@ class Game{
                     if((arr.length*3==cards.length)&&(arr.length>=2&&cards.length%2==0))
                         return {type:'飞机',card:arr[0],length:arr.length,grade:0}
                     return false
+                }
+                function bone(arr){
+                    let count=0
+                    arr.forEach(item=>{
+                        if(arr[0]==item)
+                            count++
+                    })
+                    if(count==arr.length)
+                        return true
+                    else
+                        return false
                 }
                 function checkKJ(){
                     let c=[...arguments]
@@ -1505,12 +1516,7 @@ class Game{
                                 res({type:'双连',card:cards[cards.length-1],length:cards.length,grade:0})
                             }
                             // 5炸
-                            else if(cards.length==4&&cards[0]==cards[3]){
-                                for(let i=0;i<cards.length-1;i++){
-                                    if(cards[i]!=cards[++i]){
-                                        res(false)
-                                    }
-                                }
+                            else if(cards.length>=4&&bone(cards)){
                             res({type:'炸',card:cards[0],length:cards.length,grade:cards[0]*(cards.length-3)})
                             }
                             // 6王炸

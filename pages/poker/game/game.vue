@@ -88,8 +88,8 @@
 					</view>
 			</view>
 			<view class="cards_out">
-				<view class="cards" :style="{width:user_cards.length*35+'px'}">
-					<view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*55}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index">
+					<view class="cards" :style="{width:user_cards.length*35+'px',transform:`${(user_cards.length>=20?'translateX(120px)':'translateX(120px)')}`}">
+					<!-- <view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*(user_cards.length>=20?65:55)}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index"> -->
 						<image :src="'https://www.mynameisczy.cn/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
 					</view>
 				</view>
