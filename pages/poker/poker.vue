@@ -562,7 +562,6 @@
 		function toggle_mode(e){
 			if(room_state.value){
 				mode.current=e.detail.currentItemId
-				console.log('send',mode.current);
 				uni.sendSocketMessage({
 					data:JSON.stringify({
 						state:12,

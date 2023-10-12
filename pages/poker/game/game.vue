@@ -72,7 +72,7 @@
 								</view>
 						</view>
 						<view class="">
-						<view class="btn_1" style="margin-top:-20px;position:rel	ative;z-index: 200;"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
+						<view class="btn_1" style="margin-top:-20px;position:relative;z-index: 200;"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
 							<template v-if='rule.type=="ddz"'>
 								{{master_count<=0?'叫地主':'抢地主'}}	
 							</template>
@@ -105,12 +105,14 @@
 					</view>
 			</view>
 			<view class="cards_out">
-					<view class="cards" v-for="(item,index) in user_cards" :key="index" :style="{width:user_cards.length*35+'px',transform:`${(user_cards.length>=20?'translateX(120px)':'translateX(120px)')}`}">
-					<!-- <view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*(user_cards.length>=20?65:55)}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index"> -->
-						<image :src="'https://www.mynameisczy.cn/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
-					</view>
+					<view class="cards" :style="{transform:`${(user_cards.length>20?'translateX(32.3%)':'translateX(27%)')}`}">
+					<!-- <view class="cards" v-for="(item,index) in user_cards" @tap="out_cards(item,index)" :key="index" :style="{transform:`${(user_cards.length>=20?'translateX(120px)':'translateX(120px)')}`}"> -->
+						<!-- <view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*(user_cards.length>=20?65:55)}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index"> -->
+						<view class="card"  v-for="(item,index) in user_cards" :key="index" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*(user_cards.length>=20?65:55)}%,-${item.flag?20:0}%)`}">
+							<image :src="'https://www.mynameisczy.cn/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
+						</view>
 			</view>
-		<!-- </view> -->
+		</view>
 			<view class="myself">
 				<!-- <view class="user2" v-for="(item,index) in users" :key="index" v-if='item.openid==rule.openid'> -->
 				<template  v-for="(item,index) in users" :key="index" >
@@ -145,7 +147,7 @@
 							<view class="cha" @click="chat_st=!chat_st">
 								聊天
 							</view>
-							<view class="option" :style="{height:chat_st?'155px':'0px'}">
+							<view class="option" :style="{height:chat_st?'125px':'0px'}">
 								<view  v-for="(item,index) in audio_srcs" :key="index" @click="play_audio(index)">{{item.title}}</view>
 							</view>
 					</view>
@@ -421,7 +423,7 @@
 						uni.current_this19.solo_state=true
 						uni.current_this19.room_state=true
 						uni.current_this19.user_state=true
-						uni.current_this19.room_id=-1
+						uni.current_this19.room_id=''
 						uni.current_this18.room_state=false
 						setTimeout(()=>{
 							uni.navigateBack()
@@ -620,7 +622,7 @@
 			})
 			let cards=JSON.parse(res.cards)
 			
-			
+			console.log(this.rule);
 			this.rule.room_id=res.room_id
 			this.rule.type=res.type
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
