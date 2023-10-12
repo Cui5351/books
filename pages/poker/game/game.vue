@@ -4,7 +4,7 @@
 	<view style="height:1px;width: 1px;overflow: hidden;" v-show="false">
 		<image  @load="load_" v-for="(item,index) in cards" :key="index" :src="'https://www.mynameisczy.cn/cards_svg/'+item"></image>
 	</view>
-		<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
+	<view class="container" :style="{width:(container_height)+'px',height:container_width+'px'}">
 			<!-- ;background:mediumslateblue -->
 			<view style="background:mediumslateblue;height:100%;width:100%;position: absolute;">
 				<image src="https://www.mynameisczy.cn/play_loop/甜蜜.svg" style="position: absolute;top:50%;left:50%;transform:translate(-50%,-50%);height: 200px;width: 250px;"></image>
@@ -29,7 +29,12 @@
 						<view class="name">{{item.name}}</view>
 						<view class="count">牌:{{item.count}}</view>
 						<view class="master" style="width:50px;height:50px;">
-							<image :src="'https://www.mynameisczy.cn/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;" mode=""></image>
+							<template v-if='rule.type=="ddz"'>
+							<image :src="'https://www.mynameisczy.cn/svgs/'+(item.openid==rule.master_id?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;position: relative;z-index: 2;" mode=""></image>
+							</template>
+							<template v-else-if='rule.type=="kj"'>
+								<image class="small_svg" :src="'https://www.mynameisczy.cn/svgs/'+(item.openid==rule.master_id?'chicken':'chick')+'.svg'" style="width: 100%;height: 100%;position: relative;z-index: 2;" mode=""></image>
+							</template>
 						</view>	
 						</view>
 					<view class="person_cards" :style="{paddingLeft:(item.order==1?(200-item.out_cards.length*30)<100?100:(200-item.out_cards.length*30):10)+'px'}">
@@ -68,9 +73,21 @@
 						</view>
 						<view class="">
 						<view class="btn_1" style="margin-top:-20px;position:rel	ative;z-index: 200;"  @click="get_master" v-if='rule.current_player_openid==rule.openid&&!rule.master&&!rule.cancel_master&&!rule.game_playing'>
-							{{master_count<=0?'叫地主':'抢地主'}}
+							<template v-if='rule.type=="ddz"'>
+								{{master_count<=0?'叫地主':'抢地主'}}	
+							</template>
+							<template v-else-if='rule.type=="kj"'>
+								{{master_count<=0?'我先出':'我先'}}	
+							</template>
 						</view>
-						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">不抢</view>
+						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;"   v-if='rule.pre_master_count<=0&&rule.current_player_openid==rule.openid&&!rule.cancel_master&&!rule.game_playing' @click="cancel_master">
+							<template v-if='rule.type=="ddz"'>
+								不抢
+							</template>
+							<template v-else-if='rule.type=="kj"'>
+								不抢先
+							</template>
+							</view>
 						<view class="btn2" style="margin-top:-20px;position:relative;z-index: 200;" v-if="rule.openid==rule.current_player_openid&&rule.game_playing&&!new_round" @click="no_card">
 							不要
 						</view>
@@ -88,12 +105,12 @@
 					</view>
 			</view>
 			<view class="cards_out">
-					<view class="cards" :style="{width:user_cards.length*35+'px',transform:`${(user_cards.length>=20?'translateX(120px)':'translateX(120px)')}`}">
+					<view class="cards" v-for="(item,index) in user_cards" :key="index" :style="{width:user_cards.length*35+'px',transform:`${(user_cards.length>=20?'translateX(120px)':'translateX(120px)')}`}">
 					<!-- <view class="card" @tap="out_cards(item,index)" :style="{transform:`translate(-${index*(user_cards.length>=20?65:55)}%,-${item.flag?20:0}%)`}" v-for="(item,index) in user_cards" :key="index"> -->
 						<image :src="'https://www.mynameisczy.cn/cards_svg/'+item.card" style="width:100%;height:100%;" mode=""></image>
 					</view>
-				</view>
 			</view>
+		<!-- </view> -->
 			<view class="myself">
 				<!-- <view class="user2" v-for="(item,index) in users" :key="index" v-if='item.openid==rule.openid'> -->
 				<template  v-for="(item,index) in users" :key="index" >
@@ -106,7 +123,12 @@
 					<view class="my_count"  style="position: relative;z-index: 2;">牌:{{item.count}}</view>
 					<view style="margin-left:10px;width:50px;height:50px;">
 						<!-- {{rule.master?'地主':'农民'}} -->
+						<template v-if='rule.type=="ddz"'>
 						<image :src="'https://www.mynameisczy.cn/svgs/'+(rule.master?'cap':'nongming')+'.svg'" style="width: 100%;height: 100%;position: relative;z-index: 2;" mode=""></image>
+						</template>
+						<template v-else-if='rule.type=="kj"'>
+							<image  class="small_svg" :src="'https://www.mynameisczy.cn/svgs/'+(rule.master?'chicken':'chick')+'.svg'" style="width: 100%;height: 100%;position: relative;z-index: 2;" mode=""></image>
+						</template>
 					</view>
 				</view>
 				</template>
@@ -280,7 +302,7 @@
 				for(let i=0;i<l;i++){
 					uni.current_this18.users.pop()
 				}
-				uni.current_this18.users.push([{
+				uni.current_this18.users.push(...[{
 					avatar:uni.current_this18.store.getters.user_avatar,
 					name:uni.current_this18.store.getters.user_name,
 					openid:uni.current_this18.store.getters.user_openid,
@@ -298,7 +320,12 @@
 					uni.current_this18.socket_state=true
 				}})
 			})
+			let me=false
 			uni.onSocketError(function(e){
+				if(me){
+					return
+				}
+				me=true
 				uni.navigateBack()
 				uni.current_this18.socket_state=false
 				uni.showLoading({
@@ -309,7 +336,7 @@
 				for(let i=0;i<l;i++){
 					uni.current_this18.users.pop()
 				}
-				uni.current_this18.users.push([{
+				uni.current_this18.users.push(...[{
 					avatar:uni.current_this18.store.getters.user_avatar,
 					name:uni.current_this18.store.getters.user_name,
 					openid:uni.current_this18.store.getters.user_openid,
@@ -323,6 +350,7 @@
 				}])
 				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
 					success() {
+						me=false
 						uni.hideLoading()
 						uni.current_this18.socket_state=true
 					}
@@ -594,10 +622,11 @@
 			
 			
 			this.rule.room_id=res.room_id
+			this.rule.type=res.type
 			uni.current_this19.rule.current_player_openid=res.current_player_openid
 			
 			Object.keys(this.rule).forEach(item=>{
-				if(item=='room_id'||item=='openid'||item=='current_player_openid'||item=='game_playing'||item=='master_id')
+				if(item=='room_id'||item=='openid'||item=='current_player_openid'||item=='game_playing'||item=='master_id'||item=='type')
 					return
 				this.rule[item]=cards[item]
 			})
@@ -668,7 +697,7 @@
 			let users=reactive([])
 			let score=ref(10)
 			let audio=reactive(null)
-			let audio_srcs=reactive([{title:'催促',src:'https://www.mynameisczy.cn/audio/hurry_poker.mp3'},{title:'鼓励',src:'https://www.mynameisczy.cn/audio/encourage.mp3'},{title:'信心',src:'https://www.mynameisczy.cn/audio/confidence.mp3'},{title:"求饶",src:'https://www.mynameisczy.cn/audio/dont_kill_me.mp3'},{title:'我来',src:'https://www.mynameisczy.cn/audio/letmetry.mp3'}])
+			let audio_srcs=reactive([{title:'催促',src:'https://www.mynameisczy.cn/audio/hurry_poker.mp3'},{title:'鼓励',src:'https://www.mynameisczy.cn/audio/encourage.mp3'},{title:'信心',src:'https://www.mynameisczy.cn/audio/Confidence.mp3'},{title:'我来',src:'https://www.mynameisczy.cn/audio/letme.mp3'}])
 			let audio2=reactive(null)
 			let chat_st=ref(false)
 			let master_cards=reactive([])
@@ -685,7 +714,8 @@
 					cancel_master:false,
 					game_playing:false,
 					out_card_state:false,
-					master_id:''
+					master_id:'',
+					type:''
 			})
 			function get_master(){
 				if(get_master_state.value){
@@ -827,6 +857,9 @@
 @import url('/general.less');
 .chat_audio{
 position: absolute;transform: translateX(-120%);background-color: white;border-radius: 5px;padding:5px 10px;
+}
+.small_svg{
+	transform: scale(.7);
 }
 .chat2{
 	// display: flex;

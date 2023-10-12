@@ -183,6 +183,7 @@
 			},200)
 			
 			uni.onSocketClose(function(e){
+				console.log('close');
 				uni.current_this18.socket_state=false
 				uni.showLoading({
 					title:'正在尝试重连'
@@ -191,7 +192,7 @@
 				for(let i=0;i<l;i++){
 					uni.current_this18.users.pop()
 				}
-				uni.current_this18.users.push([{
+				uni.current_this18.users.push(...[{
 					avatar:uni.current_this18.store.getters.user_avatar,
 					name:uni.current_this18.store.getters.user_name,
 					openid:uni.current_this18.store.getters.user_openid,
@@ -209,36 +210,41 @@
 					uni.hideLoading()
 				}})
 			})
-			
+			let me=false
 			uni.onSocketError(function(e){
-				uni.current_this18.socket_state=false
-				uni.showLoading({
-					title:'正在尝试重连'
-				})
-				// 踢掉所有人
-				let l=uni.current_this18.users.length
-				for(let i=0;i<l;i++){
-					uni.current_this18.users.pop()
+				if(me){
+					return
 				}
-				uni.current_this18.users.push([{
-					avatar:uni.current_this18.store.getters.user_avatar,
-					name:uni.current_this18.store.getters.user_name,
-					openid:uni.current_this18.store.getters.user_openid,
-					ready:true
-				},{
-					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
-					name:'邀请好友'
-				},{
-					avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
-					name:'邀请好友'
-				}])
-				uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
-					success() {
-						uni.hideLoading()
-						uni.current_this18.socket_state=true
+					me=true
+					uni.current_this18.socket_state=false
+					uni.showLoading({
+						title:'正在尝试重连'
+					})
+					// 踢掉所有人
+					let l=uni.current_this18.users.length
+					for(let i=0;i<l;i++){
+						uni.current_this18.users.pop()
 					}
-				})
-			})
+					uni.current_this18.users.push(...[{
+						avatar:uni.current_this18.store.getters.user_avatar,
+						name:uni.current_this18.store.getters.user_name,
+						openid:uni.current_this18.store.getters.user_openid,
+						ready:true
+					},{
+						avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+						name:'邀请好友'
+					},{
+						avatar:"https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132",
+						name:'邀请好友'
+					}])
+					uni.connectSocket({url:encodeURI(`wss://www.mynameisczy.cn:7086/poker?openid=${uni.current_this18.store.getters.user_openid}&&user_name=${uni.current_this18.store.getters.user_name}&&user_avatar=${uni.current_this18.store.getters.user_avatar}`),
+						success() {
+							me=false
+							uni.hideLoading()
+							uni.current_this18.socket_state=true
+						}
+					})
+		})
 			
 			uni.onSocketMessage(function(res){
 				let data=JSON.parse(res.data)
@@ -343,7 +349,7 @@
 					uni.current_this18.solo_state=true
 					// 开始游戏
 					uni.navigateTo({
-						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid
+						url:'/pages/poker/game/game?cards='+JSON.stringify(data.cards)+'&room_id='+uni.current_this18.room_id+'&users='+JSON.stringify(uni.current_this18.users)+'&current_player_openid='+data.current_player_openid+'&type='+uni.current_this18.mode.current
 					})
 				}else if(data.state==5){
 					clearTimeout(uni.current_this18.p_time.timer)
